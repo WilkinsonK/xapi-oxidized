@@ -3,15 +3,33 @@
 //! broker for building requests while managing authentication and
 //! client configuration.
 
-use crate::error::Error;
+use crate::core::error::Error;
 
+use std::borrow::Borrow;
 use std::env;
 use std::fs;
 use std::io::Write;
+use std::pin::Pin;
+use std::task::{Context, Poll};
 use std::time::Duration;
 
+use futures::{Future, FutureExt};
 use surf;
 use surf::http::auth::BasicAuth;
+
+/// Defines the most common pattern shared between
+/// methods defined in the `SessionREST` trait.
+macro_rules! init_build_request {
+    ($parent: expr, $method:ident, $uri:ident) => {
+        match $parent.client() {
+            Ok(client) => {
+                $parent.request_builder = Some(client.$method($uri));
+                Ok($parent)
+            },
+            Err(e) => Err(e)
+        }
+    };
+}
 
 /// Initial search paths provided to find a .netrc
 /// configuration. Paths will be searched in order
@@ -144,17 +162,20 @@ pub trait SessionMut<'a> {
 
 /// Implements methods to use the REST calls as
 /// the inner client.
-pub trait SessionREST<'a> {
+pub trait SessionREST<'a>
+where
+    Self: Sized,
+{
     /// Create an initial DELETE request.
-    fn delete(self, uri: &'a str) -> Result<surf::RequestBuilder>;
+    fn delete(&self, uri: &'a str) -> Result<Self>;
     /// Create an initial GET request.
-    fn get(self, uri: &'a str) -> Result<surf::RequestBuilder>;
+    fn get(&self, uri: &'a str) -> Result<Self>;
     /// Create an initial PATCH request.
-    fn patch(self, uri: &'a str) -> Result<surf::RequestBuilder>;
+    fn patch(&self, uri: &'a str) -> Result<Self>;
     /// Create an initial POST request.
-    fn post(self, uri: &'a str) -> Result<surf::RequestBuilder>;
+    fn post(&self, uri: &'a str) -> Result<Self>;
     /// Create an initial PUT request.
-    fn put(self, uri: &'a str) -> Result<surf::RequestBuilder>;
+    fn put(&self, uri: &'a str) -> Result<Self>;
 }
 
 /// Session representing the REST client.
@@ -162,6 +183,9 @@ pub struct Session {
     client:   Option<surf::Client>,
     auth:     BasicAuth,
     hostname: String,
+    /// state holder for whenever a session is
+    /// in the middle of building a request.
+    request_builder: Option<surf::RequestBuilder>,
 }
 
 impl Session {
@@ -190,12 +214,31 @@ impl Session {
     }
 }
 
+impl Clone for Session {
+    fn clone(&self) -> Self {
+        Self::new(&self.hostname, self.auth.username(), self.auth.password())
+    }
+}
+
+impl Future for Session {
+    type Output = Result<surf::Response>;
+
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        self.request_builder
+            .as_mut()
+            .unwrap()
+            .poll_unpin(cx)
+            .map_err(|err| err.into())
+    }
+}
+
 impl<'a, 'b, 'c> NewSession<'a, 'b, 'c> for Session {
     fn new(hostname: &'a str, username: &'b str, password: &'c str) -> Self {
         let mut session = Self{
             client: None,
             auth: BasicAuth::new(username, password),
             hostname: hostname.to_owned(),
+            request_builder: None,
         };
         if let Err(e) = session.configure() {
             let mut stream = std::io::stderr();
@@ -238,34 +281,19 @@ impl<'a> SessionMut<'a> for Session {
 }
 
 impl<'a> SessionREST<'a> for Session {
-    fn delete(self, uri: &'a str) -> Result<surf::RequestBuilder> {
-        match self.client() {
-            Ok(client) => Ok(client.delete(uri)),
-            Err(e) => Err(e)
-        }
+    fn delete(&self, uri: &'a str) -> Result<Self> {
+        init_build_request!(self.clone(), delete, uri)
     }
-    fn get(self, uri: &'a str) -> Result<surf::RequestBuilder> {
-        match self.client() {
-            Ok(client) => Ok(client.get(uri)),
-            Err(e) => Err(e)
-        }
+    fn get(&self, uri: &'a str) -> Result<Self> {
+        init_build_request!(self.clone(), get, uri)
     }
-    fn patch(self, uri: &'a str) -> Result<surf::RequestBuilder> {
-        match self.client() {
-            Ok(client) => Ok(client.patch(uri)),
-            Err(e) => Err(e)
-        }
+    fn patch(&self, uri: &'a str) -> Result<Self> {
+        init_build_request!(self.clone(), patch, uri)
     }
-    fn post(self, uri: &'a str) -> Result<surf::RequestBuilder> {
-        match self.client() {
-            Ok(client) => Ok(client.post(uri)),
-            Err(e) => Err(e)
-        }
+    fn post(&self, uri: &'a str) -> Result<Self> {
+        init_build_request!(self.clone(), post, uri)
     }
-    fn put(self, uri: &'a str) -> Result<surf::RequestBuilder> {
-        match self.client() {
-            Ok(client) => Ok(client.put(uri)),
-            Err(e) => Err(e)
-        }
+    fn put(&self, uri: &'a str) -> Result<Self> {
+        init_build_request!(self.clone(), put, uri)
     }
 }
