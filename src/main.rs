@@ -3,6 +3,6 @@ use tokio;
 
 #[tokio::main]
 async fn main() -> Result<(), ()> {
-    let _ = oxr::Session::from_host("https://hcpi-shadow21.nrg.wustl.edu");
+    let _ = oxr::Session::from_host("");
     Ok(())
 }
