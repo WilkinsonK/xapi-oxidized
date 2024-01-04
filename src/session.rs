@@ -8,7 +8,7 @@ use std::fs;
 use std::io::Write;
 use std::time::Duration;
 
-use surf::{self, RequestBuilder};
+use surf;
 use surf::http::auth::BasicAuth;
 
 /// Initial search paths provided to find a .netrc
@@ -68,7 +68,7 @@ fn netrc_path_formatter<'a>(name: &'a str) -> impl FnMut(&str) -> String + 'a {
 fn netrc_find_machine<'a: 'b, 'b>(name: &'a str, hostname: &'b str) -> SessionResult<netrc_rs::Machine> {
     let host = surf::Url::parse(hostname);
     if !host.is_ok() {
-        return Err("could not parse host url".into());
+        return Err(host.unwrap_err().into());
     }
     let host = host.unwrap().host_str().unwrap().to_string();
 
@@ -261,7 +261,7 @@ impl<'a> SessionREST<'a> for Session {
             Err(e) => Err(e.into())
         }
     }
-    fn put(self, uri: &'a str) -> SessionResult<RequestBuilder> {
+    fn put(self, uri: &'a str) -> SessionResult<surf::RequestBuilder> {
         match self.client() {
             Ok(client) => Ok(client.put(uri)),
             Err(e) => Err(e.into())
