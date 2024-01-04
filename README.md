@@ -11,13 +11,14 @@ bindings in Rust.
 
     // Build and send a new request using `surf`
     // API.
-    let req = session
+    let mut req = session
         .get("xapi/users/username")
         .unwrap()
-        .await;
+        .await
+        .unwrap();
 
     // Attempt to parse the response body.
-    println!("from body: [{}]({})", res.body_string().await?, res.status());
+    println!("from body: [{}]({})", req.body_string().await?, req.status());
 ```
 
 ## Under the Hood
