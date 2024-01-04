@@ -3,7 +3,6 @@ Interacts with a remote XNAT via REST exposing the **XAPI** as
 bindings in Rust.
 
 ```rust
-    use std::error::Error;
     use oxidized_xnat_rest::{self as oxr, NewSession, SessionREST};
 
     // Pass a base URL as the host name in this
@@ -18,12 +17,7 @@ bindings in Rust.
         .await;
 
     // Attempt to parse the response body.
-    if let Ok(mut res) = req {
-        println!("from body: [{}]({})", res.body_string().await?, res.status());
-        Ok(())
-    } else {
-        Err(req.unwrap_err().into())
-    }
+    println!("from body: [{}]({})", res.body_string().await?, res.status());
 ```
 
 ## Under the Hood
