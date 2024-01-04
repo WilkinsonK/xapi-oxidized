@@ -333,6 +333,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2bd12c1caf447e69cd4528f47f94d203fd2582878ecb9e9465484c4148a8223"
 
 [[package]]
+name = "castaway"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2698f953def977c68f935bb0dfa959375ad4638570e969e2f1e9f433cbf1af6"
+
+[[package]]
 name = "cc"
 version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -816,7 +822,7 @@ dependencies = [
  "async-trait",
  "cfg-if",
  "http-types",
- "isahc",
+ "isahc 0.9.14",
  "log",
 ]
 
@@ -893,6 +899,33 @@ dependencies = [
  "http",
  "log",
  "once_cell",
+ "slab",
+ "sluice",
+ "tracing",
+ "tracing-futures",
+ "url",
+ "waker-fn",
+]
+
+[[package]]
+name = "isahc"
+version = "1.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "334e04b4d781f436dc315cb1e7515bd96826426345d498149e4bde36b67f8ee9"
+dependencies = [
+ "async-channel 1.9.0",
+ "castaway",
+ "crossbeam-utils",
+ "curl",
+ "curl-sys",
+ "encoding_rs",
+ "event-listener 2.5.3",
+ "futures-lite 1.13.0",
+ "http",
+ "log",
+ "mime",
+ "once_cell",
+ "polling 2.8.0",
  "slab",
  "sluice",
  "tracing",
@@ -1091,10 +1124,12 @@ dependencies = [
 name = "oxinat"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "base64 0.21.5",
  "climb",
  "futures",
  "home",
+ "isahc 1.7.2",
  "netrc-rs",
  "surf",
  "tokio",

@@ -2,8 +2,10 @@
 //! implementation to create a session that can be used as the REST
 //! broker for building requests while managing authentication and
 //! client configuration.
+
+use crate::error::Error;
+
 use std::env;
-use std::error::Error;
 use std::fs;
 use std::io::Write;
 use std::time::Duration;
@@ -29,10 +31,9 @@ const NETRC_SEARCH_PATHS: [&str; 3] = [
 /// as the default timeout.
 const REST_TIMEOUT: Duration = Duration::from_secs(15);
 
-/// Avoiding creating our own error types by
-/// trying to pass along errors we encounter from
-/// other sources.
-pub type SessionResult<T> = Result<T, Box<dyn Error>>;
+/// Wrapper around `std::result::Result` to encase
+/// our own Error type with a result.
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// Creates the formatting function which takes a
 /// .netrc search path pattern and returns a more
@@ -65,7 +66,7 @@ fn netrc_path_formatter<'a>(name: &'a str) -> impl FnMut(&str) -> String + 'a {
     }
 }
 
-fn netrc_find_machine<'a: 'b, 'b>(name: &'a str, hostname: &'b str) -> SessionResult<netrc_rs::Machine> {
+fn netrc_find_machine<'a: 'b, 'b>(name: &'a str, hostname: &'b str) -> Result<netrc_rs::Machine> {
     let host = surf::Url::parse(hostname);
     if !host.is_ok() {
         return Err(host.unwrap_err().into());
@@ -104,7 +105,7 @@ fn netrc_find_machine<'a: 'b, 'b>(name: &'a str, hostname: &'b str) -> SessionRe
             return Ok(mach.unwrap().to_owned())
         }
         }
-    Err(format!("failed to find config for {}", hostname).into())
+    Err(Error::from_string(format!("failed to find config for {}", hostname)))
 }
 
 /// Implements methods to instantiate a new
@@ -122,12 +123,12 @@ pub trait NewSession<'a, 'b, 'c> {
 /// struct.
 pub trait SessionCore {
     /// Try to get the configured client.
-    fn client(self) -> SessionResult<surf::Client>;
+    fn client(self) -> Result<surf::Client>;
     /// Configure the inner client object.
-    fn configure(&mut self) -> SessionResult<()>;
+    fn configure(&mut self) -> Result<()>;
     /// Get the URL representation of the
     /// hostname.
-    fn url(&self) -> SessionResult<surf::Url>;
+    fn url(&self) -> Result<surf::Url>;
 }
 
 /// Implements methods to modify session values in
@@ -145,15 +146,15 @@ pub trait SessionMut<'a> {
 /// the inner client.
 pub trait SessionREST<'a> {
     /// Create an initial DELETE request.
-    fn delete(self, uri: &'a str) -> SessionResult<surf::RequestBuilder>;
+    fn delete(self, uri: &'a str) -> Result<surf::RequestBuilder>;
     /// Create an initial GET request.
-    fn get(self, uri: &'a str) -> SessionResult<surf::RequestBuilder>;
+    fn get(self, uri: &'a str) -> Result<surf::RequestBuilder>;
     /// Create an initial PATCH request.
-    fn patch(self, uri: &'a str) -> SessionResult<surf::RequestBuilder>;
+    fn patch(self, uri: &'a str) -> Result<surf::RequestBuilder>;
     /// Create an initial POST request.
-    fn post(self, uri: &'a str) -> SessionResult<surf::RequestBuilder>;
+    fn post(self, uri: &'a str) -> Result<surf::RequestBuilder>;
     /// Create an initial PUT request.
-    fn put(self, uri: &'a str) -> SessionResult<surf::RequestBuilder>;
+    fn put(self, uri: &'a str) -> Result<surf::RequestBuilder>;
 }
 
 /// Session representing the REST client.
@@ -164,13 +165,13 @@ pub struct Session {
 }
 
 impl Session {
-    fn client(self) -> SessionResult<surf::Client> {
+    fn client(self) -> Result<surf::Client> {
         match self.client {
             Some(client) => Ok(client),
-            None => Err("session client not configured".into())
+            None => Err(Error::from_str("session client not configured"))
         }
     }
-    fn configure(&mut self) -> SessionResult<()> {
+    fn configure(&mut self) -> Result<()> {
         let mut config = surf::Config::new();
         config = config.set_base_url(self.url()?);
         config = config.set_timeout(Some(REST_TIMEOUT));
@@ -181,10 +182,10 @@ impl Session {
                 self.client = Some(client);
                 Ok(())
             },
-            Err(err) => Err(err.into())
+            Err(err) => Err(Error::from_other(err.into()))
         }
     }
-    fn url(&self) -> SessionResult<surf::Url> {
+    fn url(&self) -> Result<surf::Url> {
         surf::Url::parse(&self.hostname).map_err(|err| err.into())
     }
 }
@@ -237,34 +238,34 @@ impl<'a> SessionMut<'a> for Session {
 }
 
 impl<'a> SessionREST<'a> for Session {
-    fn delete(self, uri: &'a str) -> SessionResult<surf::RequestBuilder> {
+    fn delete(self, uri: &'a str) -> Result<surf::RequestBuilder> {
         match self.client() {
             Ok(client) => Ok(client.delete(uri)),
-            Err(e) => Err(e.into())
+            Err(e) => Err(e)
         }
     }
-    fn get(self, uri: &'a str) -> SessionResult<surf::RequestBuilder> {
+    fn get(self, uri: &'a str) -> Result<surf::RequestBuilder> {
         match self.client() {
             Ok(client) => Ok(client.get(uri)),
-            Err(e) => Err(e.into())
+            Err(e) => Err(e)
         }
     }
-    fn patch(self, uri: &'a str) -> SessionResult<surf::RequestBuilder> {
+    fn patch(self, uri: &'a str) -> Result<surf::RequestBuilder> {
         match self.client() {
             Ok(client) => Ok(client.patch(uri)),
-            Err(e) => Err(e.into())
+            Err(e) => Err(e)
         }
     }
-    fn post(self, uri: &'a str) -> SessionResult<surf::RequestBuilder> {
+    fn post(self, uri: &'a str) -> Result<surf::RequestBuilder> {
         match self.client() {
             Ok(client) => Ok(client.post(uri)),
-            Err(e) => Err(e.into())
+            Err(e) => Err(e)
         }
     }
-    fn put(self, uri: &'a str) -> SessionResult<surf::RequestBuilder> {
+    fn put(self, uri: &'a str) -> Result<surf::RequestBuilder> {
         match self.client() {
             Ok(client) => Ok(client.put(uri)),
-            Err(e) => Err(e.into())
+            Err(e) => Err(e)
         }
     }
 }

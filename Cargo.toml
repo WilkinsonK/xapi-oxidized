@@ -12,10 +12,12 @@ crate-type = ["lib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.79"
 base64 = "0.21.5"
 climb = "2.0.5"
 futures = "0.3.30"
 home = "0.5.9"
+isahc = "1.7.2"
 netrc-rs = "0.1.2"
 surf = "2.3.2"
 tokio = { version = "1.35.1", features = ["full"] }
