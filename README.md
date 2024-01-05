@@ -1,13 +1,13 @@
-# Oxidized XNAT REST
+# XAPI Oxidized #
 Interacts with a remote XNAT via REST exposing the **XAPI** as
 bindings in Rust.
 
 ```rust
-use oxidized_xnat_rest::{self as oxr, NewSession, SessionREST};
+use xapi_oxidized::{self as xapi, NewSession, SessionREST};
 
 // Pass a base URL as the host name in this
 // method call.
-let mut session = oxr::Session::from_host("");
+let mut session = xapi::Session::from_host("");
 // Build and send a new request using `surf`
 // API.
 let mut req = session.get()?.await?
@@ -15,13 +15,13 @@ let mut req = session.get()?.await?
 println!("from body: [{}]({})", req.body_string().await?, req.status());
 ```
 
-## Construct a Request
+## Construct a Request ##
 Requests are constructed using `surf::RequestBuilder` under-the-hood.
 On the surface, a `Session` object can interact with the builder to
 add path arguments and query parameters.
 
 ```rust
-use oxidized_xnat_rest::{self as oxr, NewSession, SessionREST, SessionQuery};
+use xapi_oxidized::{self as xapi, NewSession, SessionREST, SessionQuery};
 
 #[derive(Serialize, Deserialize)]
 struct Index {
@@ -33,7 +33,7 @@ struct Index {
 // `.netrc` file that has a definition for the
 // host and use that machine to configure the
 // session.
-let mut session = oxr::Session::from_host("https://phake-digital-library.org");
+let mut session = xapi::Session::from_host("https://phake-digital-library.org");
 
 // Path components are added to a `Vector`. Used
 // as a buffer, the components are composed to
@@ -58,9 +58,11 @@ let mut res = session.with_opt(Index{page: 72})?.await?;
 println!("from body: [{}]({})", req.body_string().await?, req.status());
 ```
 
-## Under the Hood
-OXR uses a number of dependencies. See the below as reference to the
-projects used in this one.
+## Under the Hood ##
+**xapi_oxidized** uses a number of dependencies. See the below as reference to
+the projects used in this one. While there is a collection of implicit deps,
+the listed items are only those we use explicitly.
 
-- [surf](https://github.com/http-rs/surf) HTTP backend client
+- [home](https://github.com/rust-lang/cargo/tree/master/crates/home) canonical definitions of system and rust **home** directory paths
 - [netrc-rs](https://github.com/yjhmelody/netrc-rs) .netrc file parser
+- [surf](https://github.com/http-rs/surf) HTTP backend client

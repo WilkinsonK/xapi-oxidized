@@ -1,4 +1,4 @@
-//! Defines core behaviors for a OXR `Session` struct. We use this
+//! Defines core behaviors for a xapi `Session` struct. We use this
 //! implementation to create a session that can be used as the REST
 //! broker for building requests while managing authentication and
 //! client configuration.
