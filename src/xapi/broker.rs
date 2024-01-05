@@ -1,14 +1,26 @@
 use crate::Session;
 
-/// Legacy XAPI component. Used for accessing
-/// objects from the archive.
-const ARCH_URI_PREFIX: &str = "data/archive";
 /// Legacy XAPI component. Used for accessing data
 /// from the XNAT.
 const DATA_URI_PREFIX: &str = "data";
 /// Used for making calls to operations provided
 /// by the XAPI.
 const XAPI_URI_PREFIX: &str = "xapi";
+
+/// Implements the core methods used to read
+/// a `Broker`'s attributes.
+pub trait BrokerAttributes {
+    /// Get the API data prefix.
+    fn data_prefix<'a>(self) -> &'a str;
+    /// Create a new instance of a broker.
+    fn new(sxn: Session) -> Self;
+    /// Get the API root prefix.
+    fn root_prefix<'a>(self) -> &'a str;
+    /// Get the API client session.
+    fn session<'a>(self) -> Session;
+    /// Get the API broker version.
+    fn version<'a>(self) -> &'a str;
+}
 
 /// Implements the core methods needed to manage
 /// some API version.
@@ -46,25 +58,25 @@ pub struct Broker<T: BrokerVersion> {
     version: T,
 }
 
-impl<T: BrokerVersion> Broker<T> {
+impl<T: BrokerVersion> BrokerAttributes for Broker<T> {
     /// Get the API data prefix.
-    pub fn data_prefix<'a>(self) -> &'a str {
+    fn data_prefix<'a>(self) -> &'a str {
         self.version.data_prefix()
     }
     /// Create a new instance of a broker.
-    pub fn new(sxn: Session) -> Self {
+    fn new(sxn: Session) -> Self {
         Self{session: sxn, version: T::new() }
     }
     /// Get the API root prefix.
-    pub fn root_prefix<'a>(self) -> &'a str {
+    fn root_prefix<'a>(self) -> &'a str {
         self.version.root_prefix()
     }
     /// Get the API client session.
-    pub fn session<'a>(self) -> Session {
+    fn session<'a>(self) -> Session {
         self.session
     }
     /// Get the API broker version.
-    pub fn version<'a>(self) -> &'a str {
+    fn version<'a>(self) -> &'a str {
         self.version.version()
     }
 }
