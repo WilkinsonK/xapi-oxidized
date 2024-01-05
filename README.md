@@ -23,6 +23,7 @@ add path arguments and query parameters.
 ```rust
 use oxidized_xnat_rest::{self as oxr, NewSession, SessionREST, SessionQuery};
 
+#[derive(Serialize, Deserialize)]
 struct Index {
     page: u32,
 }
