@@ -17,6 +17,26 @@ impl Status {
     pub fn code(&self) -> StatusCode { self.0 }
     /// The response description.
     pub fn desc(&self) -> &'static str { self.1 }
+    /// Shorthand for whether the status code
+    /// returned is either a host or user error.
+    pub fn is_failure(&self) -> bool {
+        self.is_host_error() || self.is_user_error()
+    }
+    /// Whether status code is an error caused by
+    /// the host.
+    pub fn is_host_error(&self) -> bool {
+        (500..600).contains(&self.code())
+    }
+    /// Whether status code returned indicates the
+    /// server accepted the request.
+    pub fn is_success(&self) -> bool {
+        (200..400).contains(&self.code())
+    }
+    /// Whether status code is an error caused by
+    /// improper use from the user.
+    pub fn is_user_error(&self) -> bool {
+        (400..500).contains(&self.code())
+    }
 }
 
 impl fmt::Display for Status {
