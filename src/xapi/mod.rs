@@ -3,5 +3,4 @@
 mod broker;
 pub use broker::{Broker, BrokerAttributes, BrokerVersion, Latest, Legacy};
 mod projects;
-mod status;
-pub use status::{Status, StatusCode, CREATED};
+

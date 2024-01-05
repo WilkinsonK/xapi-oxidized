@@ -63,6 +63,16 @@ const REST_TIMEOUT: Duration = Duration::from_secs(15);
 /// Wrapper around `std::result::Result` to encase
 /// our own Error type with a result.
 pub type Result<T> = std::result::Result<T, Error>;
+/// Argument type usable in a REST query as a path
+/// argument.
+pub struct QueryArg<A: ToString + ?Sized>(pub A);
+/// Collection of `QueryArg`s.
+pub type QueryArgs<A> = [QueryArg<A>];
+/// Option type usable in a REST query as a
+/// parameter.
+pub struct QueryOpt<O: Serialize + ?Sized>(pub O);
+/// Collection of `QueryOpt`s.
+pub type QueryOpts<O> = [QueryOpt<O>];
 
 /// Creates the formatting function which takes a
 /// .netrc search path pattern and returns a more

@@ -1,5 +1,9 @@
+//! Defines constant values that represent status codes supported by
+//! this project.
 use std::error::Error;
 use std::fmt;
+
+use surf;
 
 /// Return code from a REST API.
 pub type StatusCode = usize;
@@ -24,6 +28,12 @@ impl fmt::Display for Status {
 impl Error for Status {
     fn description(&self) -> &str {
         self.desc()
+    }
+}
+
+impl From<surf::Response> for Status {
+    fn from(value: surf::Response) -> Self {
+        Self::from(value.status() as StatusCode)
     }
 }
 
@@ -60,5 +70,5 @@ status_interop_txl! {
     NOT_AUTHORIZED => (401, "user was not granted access"),
     NOT_FOUND => (404, "resource was not found"),
     ALREADY_EXISTS => (409, "resource already exists"),
-    HOST_FAULT => (500, "host XNAT encountered an error."),
+    HOST_FAULT => (500, "host encountered an error."),
 }
