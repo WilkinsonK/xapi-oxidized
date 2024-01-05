@@ -19,5 +19,6 @@ futures = "0.3.30"
 home = "0.5.9"
 isahc = "1.7.2"
 netrc-rs = "0.1.2"
+serde = { version = "1.0.194", features = ["serde_derive", "derive"] }
 surf = "2.3.2"
 tokio = { version = "1.35.1", features = ["full"] }

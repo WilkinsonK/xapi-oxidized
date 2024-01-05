@@ -1131,6 +1131,7 @@ dependencies = [
  "home",
  "isahc 1.7.2",
  "netrc-rs",
+ "serde",
  "surf",
  "tokio",
 ]
