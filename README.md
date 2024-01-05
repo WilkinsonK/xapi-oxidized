@@ -43,13 +43,18 @@ let mut session = oxr::Session::from_host("https://phake-digital-library.org");
 // session. Using any of the methods from the
 // `SessionREST` trait will compile the path and
 // clear the buffer.
-let mut req = session
+session = session
     .with_uri("books")
     .with_arg(format!("author/{}", "stephen-king"))
     .with_arg(format!("title/{}", "thinner"))
     .get()?;
 
-let mut res = req.with_opt(Index{page: 72})?.await?;
+// Options must be applied to the internal builder
+// after it has been created.
+// Once the session has been awaited, the builder
+// will be cleared and the respose returned to the
+// user.
+let mut res = session.with_opt(Index{page: 72})?.await?;
 println!("from body: [{}]({})", req.body_string().await?, req.status());
 ```
 
