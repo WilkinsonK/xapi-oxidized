@@ -15,7 +15,7 @@ let mut req = session.get()?.await?
 println!("from body: [{}]({})", req.body_string().await?, req.status());
 ```
 
-## Construct a request
+## Construct a Request
 Requests are constructed using `surf::RequestBuilder` under-the-hood.
 On the surface, a `Session` object can interact with the builder to
 add path arguments and query parameters.
