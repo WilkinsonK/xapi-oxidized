@@ -13,20 +13,31 @@ use std::task::{Context, Poll};
 use std::time::Duration;
 
 use futures::{Future, FutureExt};
+use serde::Serialize;
 use surf;
 use surf::http::auth::BasicAuth;
 
 /// Defines the most common pattern shared between
 /// methods defined in the `SessionREST` trait.
 macro_rules! init_build_request {
-    ($parent: expr, $method:ident, $uri:ident) => {
+    ($parent: expr, $method:ident) => {
         match $parent.client() {
             Ok(client) => {
-                $parent.request_builder = Some(client.$method($uri));
+                let path = $parent.request_path.join("/");
+                $parent.request_path.clear();
+                $parent.request_builder = Some(client.$method(path));
                 Ok($parent)
             },
             Err(e) => Err(e)
         }
+    };
+}
+
+/// Using a map closure, converts a `PathBuf`
+/// result or option into another thing.
+macro_rules! map_pathbuf {
+    ($path_buf:ident, $map:expr) => {
+        $path_buf.as_ref().map($map).unwrap_or_default()
     };
 }
 
@@ -56,26 +67,15 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// .netrc search path pattern and returns a more
 /// realized path to look through.
 fn netrc_path_formatter<'a>(name: &'a str) -> impl FnMut(&str) -> String + 'a {
-    |p: &str| {
-        let home = home::home_dir();
-        let home = home
-            .as_ref()
-            .map(|h| h.to_str().unwrap())
-            .unwrap_or_default();
+    |path: &str| {
+        let buf = home::home_dir();
+        let home = map_pathbuf!(buf, |h| h.to_str().unwrap());
 
-        let this = env::current_dir();
-        let this = this
-            .as_ref()
-            .map(|th| th.to_str().unwrap())
-            .unwrap_or_default();
+        let buf = env::current_dir();
+        let this = map_pathbuf!(buf, |th| th.to_str().unwrap());
+        let last = map_pathbuf!(buf, |lt| lt.parent().unwrap().to_str().unwrap());
 
-        let last = env::current_dir();
-        let last = last
-            .as_ref()
-            .map(|lt| lt.parent().unwrap().to_str().unwrap())
-            .unwrap_or_default();
-
-        p
+        path
             .replace("{home}", home)
             .replace("{this}", this)
             .replace("{last}", last)
@@ -165,26 +165,43 @@ pub trait SessionREST<'a>
 where
     Self: Sized,
 {
+    // Not implementing 'head' as XAPI does not
+    // support this method.
     /// Create an initial DELETE request.
-    fn delete(&self, uri: &'a str) -> Result<Self>;
+    fn delete(&mut self) -> Result<Self>;
     /// Create an initial GET request.
-    fn get(&self, uri: &'a str) -> Result<Self>;
+    fn get(&mut self) -> Result<Self>;
     /// Create an initial PATCH request.
-    fn patch(&self, uri: &'a str) -> Result<Self>;
+    fn patch(&mut self) -> Result<Self>;
     /// Create an initial POST request.
-    fn post(&self, uri: &'a str) -> Result<Self>;
+    fn post(&mut self) -> Result<Self>;
     /// Create an initial PUT request.
-    fn put(&self, uri: &'a str) -> Result<Self>;
+    fn put(&mut self) -> Result<Self>;
+}
+
+/// Implements methods to apply Query parameters
+/// to a request.
+pub trait SessionQuery<'a>
+where
+    Self: Sized,
+{
+    /// Add a query argument to the request URI.
+    fn with_arg(self, uri: &'a str) -> Self;
+    /// Append a query option to the request.
+    fn with_opt<T: Serialize>(self, opt: &T) -> Result<Self>;
+    /// Add a URI component to the path.
+    fn with_uri(self, uri: &'a str) -> Self;
 }
 
 /// Session representing the REST client.
-pub struct Session {
+pub struct Session{
     client:   Option<surf::Client>,
     auth:     BasicAuth,
     hostname: String,
     /// state holder for whenever a session is
     /// in the middle of building a request.
     request_builder: Option<surf::RequestBuilder>,
+    request_path:    Vec<String>,
 }
 
 impl Session {
@@ -223,11 +240,14 @@ impl Future for Session {
     type Output = Result<surf::Response>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        self.request_builder
+        let ret = self.request_builder
             .as_mut()
             .unwrap()
             .poll_unpin(cx)
-            .map_err(|err| err.into())
+            .map_err(|err| err.into());
+        self.request_builder = None;
+
+        ret
     }
 }
 
@@ -238,6 +258,7 @@ impl<'a, 'b, 'c> NewSession<'a, 'b, 'c> for Session {
             auth: BasicAuth::new(username, password),
             hostname: hostname.to_owned(),
             request_builder: None,
+            request_path: vec![],
         };
         if let Err(e) = session.configure() {
             let mut stream = std::io::stderr();
@@ -280,19 +301,47 @@ impl<'a> SessionMut<'a> for Session {
 }
 
 impl<'a> SessionREST<'a> for Session {
-    fn delete(&self, uri: &'a str) -> Result<Self> {
-        init_build_request!(self.clone(), delete, uri)
+    fn delete(&mut self) -> Result<Self> {
+        init_build_request!(self.clone(), delete)
     }
-    fn get(&self, uri: &'a str) -> Result<Self> {
-        init_build_request!(self.clone(), get, uri)
+    fn get(&mut self) -> Result<Self> {
+        init_build_request!(self.clone(), get)
     }
-    fn patch(&self, uri: &'a str) -> Result<Self> {
-        init_build_request!(self.clone(), patch, uri)
+    fn patch(&mut self) -> Result<Self> {
+        init_build_request!(self.clone(), patch)
     }
-    fn post(&self, uri: &'a str) -> Result<Self> {
-        init_build_request!(self.clone(), post, uri)
+    fn post(&mut self) -> Result<Self> {
+        init_build_request!(self.clone(), post)
     }
-    fn put(&self, uri: &'a str) -> Result<Self> {
-        init_build_request!(self.clone(), put, uri)
+    fn put(&mut self) -> Result<Self> {
+        init_build_request!(self.clone(), put)
+    }
+}
+
+impl<'a> SessionQuery<'a> for Session {
+    fn with_arg(mut self, uri: &'a str) -> Self {
+        self.request_path.push(uri.to_string());
+        self
+    }
+    fn with_opt<T: Serialize>(mut self, opt: &T) -> Result<Self> {
+        match self.request_builder {
+            Some(builder) => {
+                // Only return `Self` if the
+                // builder can add the option
+                // successfully.
+                match builder.query(opt) {
+                    Ok(builder) => {
+                        self.request_builder = Some(builder);
+                        Ok(self)
+                    },
+                    Err(e) => Err(e.into())
+                }
+            },
+            None => Err(Error::from_str("builder not configured"))
+        }
+    }
+    fn with_uri(mut self, uri: &'a str) -> Self {
+        self.request_path.push(uri.to_string());
+        self
     }
 }
