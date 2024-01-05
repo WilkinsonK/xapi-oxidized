@@ -25,6 +25,7 @@ macro_rules! init_build_request {
             Ok(client) => {
                 let path = $parent.request_path.join("/");
                 $parent.request_path.clear();
+                $parent.request_path.push(String::new());
                 $parent.request_builder = Some(client.$method(path));
                 Ok($parent)
             },
@@ -186,10 +187,10 @@ where
     Self: Sized,
 {
     /// Add a query argument to the request URI.
-    fn with_arg(self, uri: &'a str) -> Self;
+    fn with_arg<T: ToString>(self, uri: &'a T) -> Self;
     /// Append a query option to the request.
     fn with_opt<T: Serialize>(self, opt: &T) -> Result<Self>;
-    /// Add a URI component to the path.
+    /// Set the URI root.
     fn with_uri(self, uri: &'a str) -> Self;
 }
 
@@ -205,12 +206,14 @@ pub struct Session{
 }
 
 impl Session {
+    /// The configured REST client.
     fn client(self) -> Result<surf::Client> {
         match self.client {
             Some(client) => Ok(client),
             None => Err(Error::from_str("session client not configured"))
         }
     }
+    /// Configures the session REST client.
     fn configure(&mut self) -> Result<()> {
         let mut config = surf::Config::new();
         config = config.set_base_url(self.url()?);
@@ -225,6 +228,7 @@ impl Session {
             Err(err) => Err(Error::from_other(err.into()))
         }
     }
+    /// The base URL used in request building.
     fn url(&self) -> Result<surf::Url> {
         surf::Url::parse(&self.hostname).map_err(|err| err.into())
     }
@@ -258,7 +262,7 @@ impl<'a, 'b, 'c> NewSession<'a, 'b, 'c> for Session {
             auth: BasicAuth::new(username, password),
             hostname: hostname.to_owned(),
             request_builder: None,
-            request_path: vec![],
+            request_path: vec![String::new()],
         };
         if let Err(e) = session.configure() {
             let mut stream = std::io::stderr();
@@ -319,7 +323,7 @@ impl<'a> SessionREST<'a> for Session {
 }
 
 impl<'a> SessionQuery<'a> for Session {
-    fn with_arg(mut self, uri: &'a str) -> Self {
+    fn with_arg<T: ToString>(mut self, uri: &'a T) -> Self {
         self.request_path.push(uri.to_string());
         self
     }
@@ -341,7 +345,7 @@ impl<'a> SessionQuery<'a> for Session {
         }
     }
     fn with_uri(mut self, uri: &'a str) -> Self {
-        self.request_path.push(uri.to_string());
+        self.request_path[0] = uri.to_string();
         self
     }
 }
