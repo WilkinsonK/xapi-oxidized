@@ -1,4 +1,4 @@
-Copyright 20204 Keenan W. Wilkinson
+Copyright 2024 Keenan W. Wilkinson
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
