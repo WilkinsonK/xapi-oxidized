@@ -3,4 +3,4 @@
 //! handling and session building.
 pub mod error;
 pub mod session;
-pub use session::{Session, NewSession, SessionCore, SessionMut, SessionREST};
+pub use session::{Session, NewSession, SessionCore, SessionMut, SessionREST, SessionQuery};
