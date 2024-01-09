@@ -6,7 +6,3 @@
 // library root. If an artifact is exposed as
 // **public** by the module, it will be public
 // from `xapi_oxidized`.
-pub mod core;
-pub use core::*;
-pub mod xapi;
-pub use xapi::*;
