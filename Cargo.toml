@@ -17,5 +17,7 @@ home = "0.5.9"
 isahc = "1.7.2"
 netrc-rs = "0.1.2"
 serde = { version = "1.0.194", features = ["serde_derive", "derive"] }
+serde_json = "1.0.114"
 surf = "2.3.2"
 tokio = { version = "1.35.1", features = ["full"] }
+uri-routes = "0.1.2"

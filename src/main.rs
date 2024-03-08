@@ -1,16 +1,17 @@
-use xapi_oxidized::{self as xapi, NewSession, SessionREST};
-use xapi_oxidized::error::Error;
 use tokio;
 
+use xapi_oxidized::{self as xapi, CoreResource, ApiResource, ArgRequiredBy::Child, WithResource};
+
 #[tokio::main]
-async fn main() -> Result<(), Error> {
-    // Pass a base URL as the host name in this
-    // method call.
-    let mut session = xapi::Session::from_host("");
-    // Build and send a new request using `surf`
-    // API.
-    let mut req = session.get()?.await?;
-    // Attempt to parse the response body.
-    println!("from body: [{}]({})", req.body_string().await?, req.status());
+async fn main() -> xapi::Result<()> {
+    let mut sessions: ApiResource<'_, String> = xapi::ApiResource::new("experiments");
+    let mut subjects = xapi::ApiResource::new("subjects")
+        .with_arg_required(Child)
+        .with_child(&mut sessions)?;
+    let projects = xapi::ApiResource::new("projects")
+        .with_arg_required(Child)
+        .with_child(&mut subjects);
+
+    println!("route: {projects:#?}");
     Ok(())
 }
