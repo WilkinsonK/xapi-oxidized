@@ -1,0 +1,17 @@
+[package]
+name = "oxixnat"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "oxinat"
+path = "src/lib.rs"
+doc  = false
+crate-type = ["lib"]
+
+[features]
+core = []
+
+[dependencies]
+oxinat_core = { path = "../xnat_core", features = ["derive"] }
+oxinat_derive = { path = "../xnat_derive", optional = true }
