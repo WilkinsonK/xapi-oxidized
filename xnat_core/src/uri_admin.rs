@@ -1,11 +1,8 @@
-use std::borrow::Cow;
 use std::fmt::Debug;
-use std::path::PathBuf;
 use std::rc::Rc;
 
 use oxinat_derive::UriBuilder;
 
-use crate::pathbuf_to_string;
 use crate::uri::UriBuilder;
 use crate::version::Version;
 
@@ -16,16 +13,105 @@ use crate::version::Version;
 #[match_path(path = "{parent}/schemas")]
 #[match_path(path = "{parent}/schemas/{schema}")]
 #[match_path(path = "{parent}/{namespace}/{schema}")]
-pub struct SchemaUriBuilder<'a, Parent>
+pub struct SchemaUriBuilder<Parent>
 where
     Parent: UriBuilder + Clone + Debug,
 {
     #[param]
-    schema: Option<Cow<'a, str>>,
+    schema: Option<String>,
     #[param]
-    namespace: Option<Cow<'a, str>>,
+    namespace: Option<String>,
     #[parent]
     parent: Option<Rc<Parent>>
+}
+
+/// Represents the URI path to items concerning
+/// data types. Allowing for a user to access
+/// data type information from some XNAT.
+#[derive(Debug, Default, Clone, UriBuilder)]
+#[match_path(path = "{parent}/datatypes")]
+pub struct DataTypesUriBuilder<Parent>
+where
+    Parent: UriBuilder + Clone + Debug,
+{
+    #[parent]
+    parent: Option<Rc<Parent>>,
+}
+
+/// Represents the URI path to items concerning
+/// data types installed on an XNAT system.
+#[derive(Debug, Default, Clone, UriBuilder)]
+#[match_path(path = "{parent}/elements")]
+#[match_path(path = "{parent}/elements/{data_type}")]
+pub struct ElementsUriBuilder<Parent>
+where
+    Parent: UriBuilder + Clone + Debug,
+{
+    #[param]
+    data_type: Option<String>,
+    #[parent]
+    parent: Option<Rc<Parent>>,
+}
+
+impl ElementsUriBuilder<SchemaUriBuilder<String>> {
+    /// Produce the
+    /// schemas/datatypes/all URI endpoint.
+    pub fn all(&self) -> anyhow::Result<String> {
+        self.build_join(String::from("all"))
+    }
+}
+
+/// Represents the URI path to items concerning
+/// data type element names and types for
+/// specific data.
+#[derive(Debug, Default, Clone, UriBuilder)]
+#[match_path(path = "{parent}/names")]
+#[match_path(path = "{parent}/names/{data_type}")]
+pub struct NamesUriBuilder<Parent>
+where
+    Parent: UriBuilder + Clone + Debug,
+{
+    #[param]
+    data_type: Option<String>,
+    #[parent]
+    parent: Option<Rc<Parent>>,
+}
+
+impl NamesUriBuilder<SchemaUriBuilder<String>> {
+    /// Produce the schemas/names/all URI
+    /// endpoint.
+    pub fn all(&self) -> anyhow::Result<String> {
+        self.build_join(String::from("all"))
+    }
+}
+
+impl<Parent> DataTypesUriBuilder<SchemaUriBuilder<Parent>>
+where
+    Parent: UriBuilder + Clone + Debug + Default,
+{
+    /// Continue the builder into a data type
+    /// `ElementsUriBuilder`.
+    pub fn elements(&self) -> ElementsUriBuilder<Self> {
+        ElementsUriBuilder::from_parent(self.clone().into())
+    }
+
+    /// Continue the builder into a data type
+    /// `NamesUriBuilder`.
+    pub fn names(&self) -> NamesUriBuilder<Self> {
+        NamesUriBuilder::from_parent(self.clone().into())
+    }
+}
+
+impl<Parent> SchemaUriBuilder<Parent>
+where
+    Parent: UriBuilder + Clone + Debug + Default,
+    Self: UriBuilder + Clone + Debug,
+{
+    /// Continue the builder into a
+    /// `DataTypesUriBuilder`.
+    pub fn datatypes(&self) -> DataTypesUriBuilder<Self> {
+        DataTypesUriBuilder::from_parent(self.clone().into())
+    }
 }
 
 /// Represents the URI paths available for
@@ -34,12 +120,12 @@ where
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/siteConfig")]
 #[match_path(path = "{parent}/siteConfig/{property}")]
-pub struct SiteConfigUriBuilder<'a, Parent>
+pub struct SiteConfigUriBuilder<Parent>
 where
     Parent: UriBuilder + Clone + Debug,
 {
     #[param]
-    property: Option<Cow<'a, str>>,
+    property: Option<String>,
     #[parent]
     parent: Option<Rc<Parent>>
 }
@@ -49,17 +135,17 @@ where
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/buildInfo")]
 #[match_path(path = "{parent}/buildInfo/{property}")]
-pub struct BuildInfoUriBuilder<'a, Parent>
+pub struct BuildInfoUriBuilder<Parent>
 where
     Parent: UriBuilder + Clone + Debug,
 {
     #[param]
-    property: Option<Cow<'a, str>>,
+    property: Option<String>,
     #[parent]
     parent: Option<Rc<Parent>>
 }
 
-impl BuildInfoUriBuilder<'_, SiteConfigUriBuilder<'_, String>> {
+impl BuildInfoUriBuilder<SiteConfigUriBuilder<String>> {
     /// Produce the
     /// siteConfig/buildInfo/attributes URI
     /// endpoint.
@@ -80,7 +166,7 @@ where
     parent: Option<Rc<Parent>>
 }
 
-impl UptimeUriBuilder<SiteConfigUriBuilder<'_, String>> {
+impl UptimeUriBuilder<SiteConfigUriBuilder<String>> {
     /// Produce the siteConfig/uptime/display
     /// URI endpoint.
     pub fn display(&self) -> anyhow::Result<String> {
@@ -92,17 +178,17 @@ impl UptimeUriBuilder<SiteConfigUriBuilder<'_, String>> {
 /// acquiring an XNAT's configuration properties.
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/values/{preferences}")]
-pub struct ValuesUriBuilder<'a, Parent>
+pub struct ValuesUriBuilder<Parent>
 where
     Parent: UriBuilder + Clone + Debug,
 {
     #[param]
-    preferences: Option<Cow<'a, str>>,
+    preferences: Option<String>,
     #[parent]
     parent: Option<Rc<Parent>>
 }
 
-impl<Parent> SiteConfigUriBuilder<'_, Parent>
+impl<Parent> SiteConfigUriBuilder<Parent>
 where
     Parent: UriBuilder + Clone + Debug + Default,
     Self: UriBuilder + Clone + Debug,
@@ -129,6 +215,22 @@ where
     }
 }
 
+#[derive(Debug, Default, Clone, UriBuilder)]
+#[match_path(path = "{parent}/config")]
+#[match_path(path = "{parent}/config/{tool_id}")]
+#[match_path(path = "{parent}/config/{tool_id}/{file_path}")]
+pub struct SiteConfigUriBuilderLegacy<Parent>
+where
+    Parent: UriBuilder + Clone + Debug,
+{
+    #[param]
+    file_path: Option<String>,
+    #[param]
+    tool_id: Option<String>,
+    #[parent]
+    parent: Option<Rc<Parent>>
+}
+
 /// Represents the URI paths available for
 /// endpoints meant for interacting with an XNAT
 /// internal functions for remote clients.
@@ -148,12 +250,12 @@ where
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/ini")]
 #[match_path(path = "{parent}/ini/{tool_id}")]
-pub struct IniUriBuilder<'a, Parent>
+pub struct IniUriBuilder<Parent>
 where
     Parent: UriBuilder + Clone + Debug,
 {
     #[param]
-    tool_id: Option<Cow<'a, str>>,
+    tool_id: Option<String>,
     #[parent]
     parent: Option<Rc<Parent>>
 }
@@ -163,12 +265,12 @@ where
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/props")]
 #[match_path(path = "{parent}/props/{tool_id}")]
-pub struct PropsUriBuilder<'a, Parent>
+pub struct PropsUriBuilder<Parent>
 where
     Parent: UriBuilder + Clone + Debug,
 {
     #[param]
-    tool_id: Option<Cow<'a, str>>,
+    tool_id: Option<String>,
     #[parent]
     parent: Option<Rc<Parent>>
 }
@@ -218,10 +320,8 @@ pub trait AdminUri: Version {
 pub trait AdminUriLegacy: Version {
     /// URI endpoint to access site configuration.
     #[inline]
-    fn config(&self) -> String {
-        let mut uri = PathBuf::from(self.root_uri());
-        uri.push("config");
-        pathbuf_to_string(&uri)
+    fn config(&self) -> SiteConfigUriBuilderLegacy<String> {
+        SiteConfigUriBuilderLegacy::from_parent(self.root_uri().into())
     }
 }
 
@@ -235,10 +335,10 @@ mod test {
         .with_parent("".to_string().into());
         assert_eq!(b.build().unwrap(), String::from("/schemas"));
 
-        let b = b.with_schema(&Cow::from("phoney_schema"));
+        let b = b.with_schema(&String::from("phoney_schema"));
         assert_eq!(b.build().unwrap(), String::from("/schemas/phoney_schema"));
 
-        let b = b.with_namespace(&Cow::from("phoney_namespace"));
+        let b = b.with_namespace(&String::from("phoney_namespace"));
         assert_eq!(b.build().unwrap(), String::from("/phoney_namespace/phoney_schema"))
     }
 }

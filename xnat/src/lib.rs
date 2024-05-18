@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use oxinat_core::{AdminUri, AdminUriLegacy, Version};
 
 #[cfg(feature = "core")]
@@ -14,18 +12,19 @@ pub struct V1;
 #[version(root_uri = "xapi")]
 pub struct V2;
 
+// TODO: impl std::mem::Drop for this struct.
 #[derive(Clone, Debug)]
-pub struct Xnat<'a, V: Version> {
-    hostname: Cow<'a, str>,
-    username: Option<Cow<'a, str>>,
-    password: Option<Cow<'a, str>>,
+pub struct Xnat<V: Version> {
+    hostname: String,
+    username: Option<String>,
+    password: Option<String>,
     version:  V,
 }
 
-pub struct XnatBuilder<'a, V: Version> {
-    hostname: Cow<'a, str>,
-    username: Option<Cow<'a, str>>,
-    password: Option<Cow<'a, str>>,
+pub struct XnatBuilder<V: Version> {
+    hostname: String,
+    username: Option<String>,
+    password: Option<String>,
     version:  Option<V>,
 }
 
@@ -46,7 +45,10 @@ mod test {
     #[test]
     fn test_version_v1_impls_admin_legacy() {
         let ver = V1{};
-        assert_eq!(ver.config(), String::from("data/config"))
+        let uri = ver.config().build();
+
+        assert!(uri.is_ok(), "must be able to build without errors");
+        assert_eq!(uri.unwrap(), String::from("data/config"))
     }
 
     #[test]
@@ -55,7 +57,7 @@ mod test {
         let uri = ver
             .site_config()
             .build_info()
-            .with_property(&Cow::from("some_property"))
+            .with_property(&String::from("some_property"))
             .build();
 
         assert!(uri.is_ok(), "must be able to build without errors");

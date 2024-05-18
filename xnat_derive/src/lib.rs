@@ -114,6 +114,8 @@ pub fn derive_uribuilder(input: TokenStream) -> TokenStream {
                     Self::default().with_parent(value)
                 }
             })
+        } else {
+            panic!("non-optional params not currently supported")
         }
     }
     gen.extend(quote! {
