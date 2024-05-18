@@ -13,6 +13,12 @@ pub enum UriBuildError {
 pub trait UriBuilder: Display {
     /// Build the resulting URI from this builder.
     fn build(&self) -> anyhow::Result<String>;
+    /// Build the resulting URI with an additional
+    /// component appended at the end.
+    #[inline]
+    fn build_join<UB: UriBuilder>(&self, other: UB) -> anyhow::Result<String> {
+        Ok([self.build()?, other.build()?].join("/"))
+    }
 }
 
 impl UriBuilder for String {
