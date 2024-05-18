@@ -6,7 +6,6 @@ edition = "2021"
 [lib]
 name = "oxinat_derive"
 path = "src/lib.rs"
-doc  = true
 proc-macro = true
 
 [dependencies]

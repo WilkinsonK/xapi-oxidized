@@ -7,7 +7,6 @@ edition = "2021"
 [lib]
 name = "oxinat_core"
 path = "src/lib.rs"
-doc  = true
 crate-type = ["lib"]
 
 [features]
