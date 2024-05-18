@@ -48,4 +48,17 @@ mod test {
         let ver = V1{};
         assert_eq!(ver.config(), String::from("data/config"))
     }
+
+    #[test]
+    fn test_version_v2_impls_site_config() {
+        let ver = V2{};
+        let uri = ver
+            .site_config()
+            .build_info()
+            .with_property(&Cow::from("some_property"))
+            .build();
+
+        assert!(uri.is_ok(), "must be able to build without errors");
+        assert_eq!(uri.unwrap(), "xapi/siteConfig/buildInfo/some_property")
+    }
 }
