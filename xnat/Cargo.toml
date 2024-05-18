@@ -9,8 +9,10 @@ path = "src/lib.rs"
 crate-type = ["lib"]
 
 [features]
+full = ["core", "derive"]
 core = []
+derive = []
 
 [dependencies]
 oxinat_core = { path = "../xnat_core", features = ["derive"] }
-oxinat_derive = { path = "../xnat_derive", optional = true }
+oxinat_derive = { path = "../xnat_derive" }
