@@ -104,6 +104,15 @@ pub fn derive_uribuilder(input: TokenStream) -> TokenStream {
                     self.#field_name = Some(value);
                     self
                 }
+                /// Creates a new instance of this
+                /// type, presetting the parent
+                /// to the passed value.
+                pub fn from_parent(value: #kind) -> Self
+                where
+                    Self: Default,
+                {
+                    Self::default().with_parent(value)
+                }
             })
         }
     }
