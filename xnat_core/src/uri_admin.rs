@@ -1,10 +1,31 @@
 use std::fmt::Debug;
 use std::rc::Rc;
 
-use oxinat_derive::UriBuilder;
+use oxinat_derive::{uri_builder_alias, UriBuilder};
 
 use crate::uri::UriBuilder;
 use crate::version::Version;
+
+uri_builder_alias!(AdminUriBuilder);
+// Requires no generics for parent or otherwise.
+ImplAdminUriBuilder! {
+    (String),
+}
+// Requires generics for parent.
+ImplAdminUriBuilder! {
+    (SchemaUriBuilder<Parent>, Parent),
+    (DataTypesUriBuilder<Parent>, Parent),
+    (ElementsUriBuilder<Parent>, Parent),
+    (NamesUriBuilder<Parent>, Parent),
+    (SiteConfigUriBuilder<Parent>, Parent),
+    (BuildInfoUriBuilder<Parent>, Parent),
+    (UptimeUriBuilder<Parent>, Parent),
+    (ValuesUriBuilder<Parent>, Parent),
+    (SiteConfigUriBuilderLegacy<Parent>, Parent),
+    (PreferenceUriBuilder<Parent>, Parent),
+    (IniUriBuilder<Parent>, Parent),
+    (PropsUriBuilder<Parent>, Parent)
+}
 
 /// Represents the URI paths available for
 /// endpoints meant for interacting with
@@ -15,7 +36,7 @@ use crate::version::Version;
 #[match_path(path = "{parent}/{namespace}/{schema}")]
 pub struct SchemaUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[param]
     schema: Option<String>,
@@ -32,7 +53,7 @@ where
 #[match_path(path = "{parent}/datatypes")]
 pub struct DataTypesUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[parent]
     parent: Option<Rc<Parent>>,
@@ -45,7 +66,7 @@ where
 #[match_path(path = "{parent}/elements/{data_type}")]
 pub struct ElementsUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[param]
     data_type: Option<String>,
@@ -69,7 +90,7 @@ impl ElementsUriBuilder<SchemaUriBuilder<String>> {
 #[match_path(path = "{parent}/names/{data_type}")]
 pub struct NamesUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[param]
     data_type: Option<String>,
@@ -87,7 +108,7 @@ impl NamesUriBuilder<SchemaUriBuilder<String>> {
 
 impl<Parent> DataTypesUriBuilder<SchemaUriBuilder<Parent>>
 where
-    Parent: UriBuilder + Clone + Debug + Default,
+    Parent: AdminUriBuilder + Default,
 {
     /// Continue the builder into a data type
     /// `ElementsUriBuilder`.
@@ -104,8 +125,8 @@ where
 
 impl<Parent> SchemaUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug + Default,
-    Self: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
+    Self: AdminUriBuilder + Default,
 {
     /// Continue the builder into a
     /// `DataTypesUriBuilder`.
@@ -122,7 +143,7 @@ where
 #[match_path(path = "{parent}/siteConfig/{property}")]
 pub struct SiteConfigUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[param]
     property: Option<String>,
@@ -137,7 +158,7 @@ where
 #[match_path(path = "{parent}/buildInfo/{property}")]
 pub struct BuildInfoUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[param]
     property: Option<String>,
@@ -160,7 +181,7 @@ impl BuildInfoUriBuilder<SiteConfigUriBuilder<String>> {
 #[match_path(path = "{parent}/uptime")]
 pub struct UptimeUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[parent]
     parent: Option<Rc<Parent>>
@@ -180,7 +201,7 @@ impl UptimeUriBuilder<SiteConfigUriBuilder<String>> {
 #[match_path(path = "{parent}/values/{preferences}")]
 pub struct ValuesUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[param]
     preferences: Option<String>,
@@ -190,8 +211,8 @@ where
 
 impl<Parent> SiteConfigUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug + Default,
-    Self: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder + Default,
+    Self: AdminUriBuilder,
 {
     /// Continue the builder into a
     /// `BuildInfoUriBuilder`.
@@ -221,7 +242,7 @@ where
 #[match_path(path = "{parent}/config/{tool_id}/{file_path}")]
 pub struct SiteConfigUriBuilderLegacy<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[param]
     file_path: Option<String>,
@@ -238,7 +259,7 @@ where
 #[match_path(path = "{parent}/prefs")]
 pub struct PreferenceUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[parent]
     parent: Option<Rc<Parent>>,
@@ -252,7 +273,7 @@ where
 #[match_path(path = "{parent}/ini/{tool_id}")]
 pub struct IniUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[param]
     tool_id: Option<String>,
@@ -267,7 +288,7 @@ where
 #[match_path(path = "{parent}/props/{tool_id}")]
 pub struct PropsUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder,
 {
     #[param]
     tool_id: Option<String>,
@@ -277,8 +298,8 @@ where
 
 impl<Parent> PreferenceUriBuilder<Parent>
 where
-    Parent: UriBuilder + Clone + Debug + Default,
-    Self: UriBuilder + Clone + Debug,
+    Parent: AdminUriBuilder + Default,
+    Self: AdminUriBuilder,
 {
     /// Continue the builder into a
     /// `IniUriBuilder`.
