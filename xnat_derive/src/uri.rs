@@ -60,10 +60,6 @@ pub struct ParamAttrsParsed {
 pub fn derive_uribuilder_build_matches(paths: &[MatchPatternAttrsParsed], params: &[ParamAttrsParsed]) -> TokenStream {
     let mut match_arms = quote! {};
     for pattern in paths {
-        let path = &pattern.path;
-        let mut arm_lhs = quote! {};
-        let mut arm_rhs = quote! {};
-
         // Edge case where a pattern presented
         // requires no parameters.
         if pattern.params.is_empty() {
