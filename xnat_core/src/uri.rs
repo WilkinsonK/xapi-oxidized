@@ -26,3 +26,9 @@ impl UriBuilder for String {
         Ok(self.to_owned())
     }
 }
+
+impl UriBuilder for &str {
+    fn build(&self) -> anyhow::Result<String> {
+        Ok(self.to_string())
+    }
+}
