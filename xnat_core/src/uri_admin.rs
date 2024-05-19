@@ -80,8 +80,8 @@ where
 {
     /// Produce the
     /// schemas/datatypes/all URI endpoint.
-    pub fn all(&self) -> anyhow::Result<String> {
-        self.build_join(String::from("all"))
+    pub fn build_all(&self) -> anyhow::Result<String> {
+        self.build_join("all")
     }
 }
 
@@ -107,8 +107,8 @@ where
 {
     /// Produce the schemas/names/all URI
     /// endpoint.
-    pub fn all(&self) -> anyhow::Result<String> {
-        self.build_join(String::from("all"))
+    pub fn build_all(&self) -> anyhow::Result<String> {
+        self.build_join("all")
     }
 }
 
@@ -178,8 +178,8 @@ where
     /// Produce the
     /// siteConfig/buildInfo/attributes URI
     /// endpoint.
-    pub fn attributes(&self) -> anyhow::Result<String> {
-        self.build_join(String::from("attributes"))
+    pub fn build_attributes(&self) -> anyhow::Result<String> {
+        self.build_join("attributes")
     }
 }
 
@@ -201,8 +201,8 @@ where
 {
     /// Produce the siteConfig/uptime/display
     /// URI endpoint.
-    pub fn display(&self) -> anyhow::Result<String> {
-        self.build_join(String::from("display"))
+    pub fn build_display(&self) -> anyhow::Result<String> {
+        self.build_join("display")
     }
 }
 
@@ -241,7 +241,7 @@ where
     /// endpoint.
     pub fn values(&self, pref: &str) -> anyhow::Result<String> {
         ValuesUriBuilder::from_parent(self.clone().into())
-            .with_preferences(&pref.into())
+            .with_preferences(&pref)
             .build()
     }
 }
