@@ -164,8 +164,8 @@ pub fn derive_uribuilder(input: TokenStream) -> TokenStream {
             with_methods.extend(quote! {
                 /// Generated method to set the
                 /// `#field_name` of `#ident`
-                pub fn #method_name(mut self, value: &#kind) -> Self {
-                    self.#field_name = Some(value.to_owned());
+                pub fn #method_name<V: Clone + Into<#kind>>(mut self, value: &V) -> Self {
+                    self.#field_name = Some((*value).to_owned().into());
                     self
                 }
             })
@@ -209,6 +209,7 @@ pub fn derive_uribuilder(input: TokenStream) -> TokenStream {
             }
         }
     });
+
     gen.into()
 }
 
