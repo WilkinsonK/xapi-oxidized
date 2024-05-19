@@ -74,7 +74,10 @@ where
     parent: Option<Rc<Parent>>,
 }
 
-impl ElementsUriBuilder<SchemaUriBuilder<String>> {
+impl<Parent> ElementsUriBuilder<SchemaUriBuilder<Parent>>
+where
+    Parent: AdminUriBuilder,
+{
     /// Produce the
     /// schemas/datatypes/all URI endpoint.
     pub fn all(&self) -> anyhow::Result<String> {
@@ -98,7 +101,10 @@ where
     parent: Option<Rc<Parent>>,
 }
 
-impl NamesUriBuilder<SchemaUriBuilder<String>> {
+impl<Parent> NamesUriBuilder<SchemaUriBuilder<Parent>>
+where
+    Parent: AdminUriBuilder,
+{
     /// Produce the schemas/names/all URI
     /// endpoint.
     pub fn all(&self) -> anyhow::Result<String> {
@@ -125,8 +131,7 @@ where
 
 impl<Parent> SchemaUriBuilder<Parent>
 where
-    Parent: AdminUriBuilder,
-    Self: AdminUriBuilder + Default,
+    Parent: AdminUriBuilder + Default,
 {
     /// Continue the builder into a
     /// `DataTypesUriBuilder`.
@@ -166,7 +171,10 @@ where
     parent: Option<Rc<Parent>>
 }
 
-impl BuildInfoUriBuilder<SiteConfigUriBuilder<String>> {
+impl<Parent> BuildInfoUriBuilder<SiteConfigUriBuilder<Parent>>
+where
+    Parent: AdminUriBuilder,
+{
     /// Produce the
     /// siteConfig/buildInfo/attributes URI
     /// endpoint.
@@ -187,7 +195,10 @@ where
     parent: Option<Rc<Parent>>
 }
 
-impl UptimeUriBuilder<SiteConfigUriBuilder<String>> {
+impl<Parent> UptimeUriBuilder<SiteConfigUriBuilder<Parent>>
+where
+    Parent: AdminUriBuilder,
+{
     /// Produce the siteConfig/uptime/display
     /// URI endpoint.
     pub fn display(&self) -> anyhow::Result<String> {
@@ -212,7 +223,6 @@ where
 impl<Parent> SiteConfigUriBuilder<Parent>
 where
     Parent: AdminUriBuilder + Default,
-    Self: AdminUriBuilder,
 {
     /// Continue the builder into a
     /// `BuildInfoUriBuilder`.
@@ -299,7 +309,6 @@ where
 impl<Parent> PreferenceUriBuilder<Parent>
 where
     Parent: AdminUriBuilder + Default,
-    Self: AdminUriBuilder,
 {
     /// Continue the builder into a
     /// `IniUriBuilder`.

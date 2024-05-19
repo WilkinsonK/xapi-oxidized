@@ -245,7 +245,6 @@ fn parse_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
     // Construct the full match arm from the left
     // and right hand sides.
     let gen = quote! { Self { #lhs } => Ok(#rhs), };
-    eprintln!("{gen}");
     gen
 }
 
