@@ -1,19 +1,19 @@
 use std::collections::HashSet;
 
 use attribute_derive::FromAttr;
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{
-    punctuated::Punctuated,
-    Attribute,
-    Fields,
-    GenericArgument,
-    Ident,
-    PathArguments,
-    Type
+    parse_str, punctuated::Punctuated, Attribute, Expr, Fields, GenericArgument, Ident, PathArguments, Type
 };
 
 use crate::Attributes;
+
+macro_rules! new_ambiguous_ident {
+    ($e:expr) => {
+        Ident::new($e, Span::call_site())
+    };
+}
 
 /// Represents attributes passed to `UriBuilder`
 /// for building some URI path
@@ -38,7 +38,8 @@ pub struct MatchPatternAttrsParsed {
 #[attribute(ident = param, aliases=[parent, root])]
 #[attribute(error(missing_field = "`{field}` not specified"))]
 struct ParamAttrs {
-    pub name:     Option<String>,
+    pub name:      Option<String>,
+    pub map_from:  Option<String>,
     pub is_parent: Option<bool>,
 }
 
@@ -49,8 +50,9 @@ pub struct ParamAttrsParsed {
     pub field_name: Ident,
     pub name:       String,
     pub kind:       Type,
+    pub map_from:   Option<Expr>,
     pub is_option:  bool,
-    pub is_parent:   bool,
+    pub is_parent:  bool,
 }
 
 /// Builds the match arms for the `build` URI
@@ -65,36 +67,16 @@ pub fn derive_uribuilder_build_matches(paths: &[MatchPatternAttrsParsed], params
         // Edge case where a pattern presented
         // requires no parameters.
         if pattern.params.is_empty() {
-            params.iter().for_each(|p| {
-                let field_name = &p.field_name;
-                arm_lhs.extend(quote! { #field_name: None, })
-            });
-            arm_rhs.extend(quote! { (String::from(#path)) })
+            match_arms.extend(parse_match_arm_shallow(pattern, params));
         // Inclusive formatting of a pattern where
         // fields present themselves as `Some` and
         // excluding param fields that are `None`
         } else {
-            params.iter().for_each(|p| {
-                let field_name = &p.field_name;
-                if pattern.params.contains(p) {
-                    arm_lhs.extend(quote! { #field_name: Some(#field_name), });
-                } else {
-                    arm_lhs.extend(quote! { #field_name: None, })
-                }
-            });
-            arm_rhs.extend(quote! { format!(#path) });
+            match_arms.extend(parse_match_arm(pattern, params));
         }
-        // Round off match pattern with ignoring
-        // any non-parameter fields.
-        arm_lhs.extend(quote! { .. });
-        // Construct the full match arm from the
-        // left hand and right hand sides.
-        match_arms.extend(quote! {Self { #arm_lhs } => Ok(#arm_rhs),
-        });
     }
     match_arms.extend(quote! {
         _ => {
-            eprintln!("{self:#?}");
             Err(crate::uri::UriBuildError::UnrecognizedPattern.into())
         }
     });
@@ -170,11 +152,15 @@ pub fn derive_uribuilder_parse_params(fields: &Fields) -> Vec<ParamAttrsParsed> 
         } else {
             &kind
         }.to_owned();
+        let map_from = attrs
+            .map_from
+            .map(|mf| parse_str::<Expr>(&mf).expect("must be a parsable expression"));
 
         Some(ParamAttrsParsed {
             field_name: ident,
             name,
             kind,
+            map_from,
             is_option,
             is_parent,
         })
@@ -185,7 +171,7 @@ pub fn derive_uribuilder_parse_params(fields: &Fields) -> Vec<ParamAttrsParsed> 
 
 /// Validate all params have been declared
 /// inline with path patterns.
-pub fn derive_adminuri_validate_paths_by_params(paths: &[MatchPatternAttrsParsed], params: &[ParamAttrsParsed]) {
+pub fn derive_uribuilder_validate_paths_by_params(paths: &[MatchPatternAttrsParsed], params: &[ParamAttrsParsed]) {
     let mut param_map = HashSet::new();
     for match_path in paths.iter() {
         match_path.path.split('/').for_each(|p| {
@@ -217,6 +203,66 @@ fn parse_is_optional_type(kind: &Type) -> bool {
 
 fn parse_attr_is_parent(attr: &Attribute) -> bool {
     attr.meta.path().segments[0].ident == "parent"
+}
+
+fn parse_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed]) -> TokenStream {
+    let path = &pattern.path;
+    let mut lhs = quote! {};
+    let mut rhs = quote! {};
+    // We must break out the inner impl of the RHS
+    // in order to allow field mapping where it is
+    // required.
+    let mut rhs_inner = quote! {};
+
+    params.iter().enumerate().for_each(|(idx, p)| {
+        let field_name = &p.field_name;
+        let param_name = new_ambiguous_ident!(&p.name);
+        let index_name = new_ambiguous_ident!(&format!("p{idx}"));
+        // Simply apply the parameter field if no
+        // special formatting is required.
+        if !pattern.params.contains(p) {
+            lhs.extend(quote! { #field_name: None, });
+            return
+        }
+        // Apply mapper function to format a value
+        // from user-defined func.
+        if let Some(mf) = &p.map_from {
+            lhs.extend(quote! { #field_name: Some(#index_name), });
+            rhs_inner.extend(quote! {
+                let mapper = #mf; let #param_name = mapper(#index_name);
+            });
+        } else {
+            lhs.extend(quote! { #field_name: Some(#param_name), });
+        }
+    });
+    // Finalize RHS after determination of
+    // whether extra formatting rules are
+    // required.
+    rhs.extend(quote! {
+        {
+            #rhs_inner format!(#path)
+        }
+    });
+    // Round off match pattern by ignoring any
+    // non-parameter fields.
+    lhs.extend(quote! { .. });
+    // Construct the full match arm from the left
+    // and right hand sides.
+    let gen = quote! { Self { #lhs } => Ok(#rhs), };
+    eprintln!("{gen}");
+    gen
+}
+
+fn parse_match_arm_shallow(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed]) -> TokenStream {
+    let path = &pattern.path;
+    let mut lhs = quote! {};
+    let rhs = quote! { String::from(#path) };
+    params.iter().for_each(|p| {
+        let field_name = &p.field_name;
+        lhs.extend(quote! { #field_name: None, })
+    });
+    lhs.extend(quote! { .. });
+    quote! { Self { #lhs } => Ok(#rhs), }
 }
 
 fn parse_optional_type(kind: &Type) -> &Type {
