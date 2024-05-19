@@ -85,6 +85,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "oxinat"
+version = "0.1.0"
+dependencies = [
+ "oxinat_core",
+ "oxinat_derive",
+]
+
+[[package]]
 name = "oxinat_core"
 version = "0.1.0"
 dependencies = [
@@ -103,14 +111,6 @@ dependencies = [
  "quote",
  "syn",
  "thiserror",
-]
-
-[[package]]
-name = "oxixnat"
-version = "0.1.0"
-dependencies = [
- "oxinat_core",
- "oxinat_derive",
 ]
 
 [[package]]
