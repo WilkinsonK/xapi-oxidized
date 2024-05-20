@@ -81,7 +81,9 @@ pub fn derive_sysuri(input: TokenStream) -> TokenStream {
 /// 
 /// 
 /// e.g.
-/// ```rust
+/// ```no_compile
+/// use oxinat_derive::uri_builder_alias;
+/// 
 /// uri_builder_alias!(AliasedUriBuilder);
 /// // Supports non-generics as a single pattern.
 /// ImplAliasedUriBuilder! {

@@ -47,9 +47,9 @@ mod test {
     fn test_version_v2_impls_admin() {
         let ver = V2{};
 
-        assert_eq!(ver.site_config().build().unwrap(), String::from("data/siteConfig"));
-        assert_eq!(ver.preferences().build().unwrap(), String::from("data/prefs"));
-        assert_eq!(ver.schema().build().unwrap(), String::from("data/schemas"));
+        assert_eq!(ver.site_config().build().unwrap(), String::from("xapi/siteConfig"));
+        assert_eq!(ver.preferences().build().unwrap(), String::from("xapi/prefs"));
+        assert_eq!(ver.schema().build().unwrap(), String::from("xapi/schemas"));
     }
 
     #[test]
@@ -63,5 +63,24 @@ mod test {
 
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/siteConfig/buildInfo/some_property")
+    }
+
+    #[test]
+    fn test_version_v2_impls_sys() {
+        let ver = V2{};
+        let partial_uri = ver
+            .archive()
+            .catalogs()
+            .refresh();
+
+        let uri = partial_uri.build();
+        assert!(uri.is_ok(), "must be able to build without errors");
+        assert_eq!(uri.unwrap(), "xapi/archive/catalogs/refresh");
+
+        let uri = partial_uri
+            .with_operations(&["delete".to_string(), "append".to_string()])
+            .build();
+        assert!(uri.is_ok(), "must be able to build without errors");
+        assert_eq!(uri.unwrap(), "xapi/archive/catalogs/refresh/delete,append");
     }
 }

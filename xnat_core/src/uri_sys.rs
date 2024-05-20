@@ -11,6 +11,8 @@ ImplSysUriBuilder! {
 ImplSysUriBuilder! {
     (ArchiveUriBuilder<Parent>, Parent),
     (RefreshUriBuilder<Parent>, Parent),
+    (CatalogsUriBuilder<Parent>, Parent),
+    (DownloadUriBuilder<Parent>, Parent)
 }
 
 /// Represents the URI paths available for
@@ -57,8 +59,7 @@ where
 
 impl<Parent> CatalogsUriBuilder<Parent>
 where
-    Parent: SysUriBuilder,
-    Self: SysUriBuilder + Default,
+    Parent: SysUriBuilder + Default,
 {
     /// Continue the builder into a
     /// `RefreshUriBuilder`.
@@ -120,7 +121,7 @@ where
 {
     /// Continue the builder into a
     /// `CatalogsUriBuilder`.
-    pub fn catalog(&self) -> CatalogsUriBuilder<Self> {
+    pub fn catalogs(&self) -> CatalogsUriBuilder<Self> {
         CatalogsUriBuilder::from_parent(self.clone().into())
     }
 
