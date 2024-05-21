@@ -80,7 +80,7 @@ struct MyVersion;
 struct MyCustomVersion;
 ```
 
-#### Notice ####
+#### NOTICE ####
 You will need to have either included the `core` feature from the
 `oxinat` library, or add `oxinat_core` directly to your project and
 then import those traits respectively.
