@@ -15,8 +15,8 @@ server, via the XNAT standard interface. With that, there are some
 items that need to be completed before this project can be considered
 **production ready**:
 
-- [-] Well defined interface for building the URI endpoints.
-- [-] A simple to use, and extensible object which represents the
+- [ ] Well defined interface for building the URI endpoints.
+- [ ] A simple to use, and extensible object which represents the
       client.
 
 ### Additonal Goals ###
@@ -24,7 +24,7 @@ These goals are more nice-to-haves, but will open up development and
 maintenance of the project to broader use cases, making it also more
 useful to a wider audience.
 
-- [-] Expose portions of the core and derivitive sub-crates to allow
+- [ ] Expose portions of the core and derivitive sub-crates to allow
       for users to implement access to REST calls outside of the XNAT
       standard interface.
 - [ ] Optional support for logging specific parts of our interface for
