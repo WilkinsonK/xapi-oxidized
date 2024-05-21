@@ -6,11 +6,9 @@ use proc_macro::TokenStream;
 
 use proc_macro2::{Ident, Span};
 use quote::quote;
-use syn::{parse_macro_input, Attribute, Data, DeriveInput};
+use syn::{parse_macro_input, Attribute, DeriveInput};
 
-use uri::{
-    derive_uribuilder_validate_paths_by_params, derive_uribuilder_build_matches, derive_uribuilder_parse_params, derive_uribuilder_parse_paths
-};
+use uri::uribuilder;
 use crate::version::{
     derive_version_parse_root_uri,
     derive_version_parse_legacy
@@ -58,16 +56,16 @@ pub fn derive_adminuri(input: TokenStream) -> TokenStream {
 }
 
 /// Generates the methods required to implement a
-/// `SysUri` trait, allowing for a type to
+/// `SystemUri` trait, allowing for a type to
 /// represent the administrative endpoints
 /// available.
-#[proc_macro_derive(SysUri, attributes(sysuri))]
+#[proc_macro_derive(SystemUri, attributes(sysuri))]
 pub fn derive_sysuri(input: TokenStream) -> TokenStream {
     derive_input_boilerplate!(generics, ident; from input);
     let where_clause = &generics.where_clause;
 
     quote! {
-        impl #generics SysUri for #ident #generics #where_clause {}
+        impl #generics SystemUri for #ident #generics #where_clause {}
     }.into()
 }
 
@@ -100,13 +98,8 @@ pub fn derive_sysuri(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn uri_builder_alias(input: TokenStream) -> TokenStream {
     let ident = parse_macro_input!(input as Ident);
-    let trait_doc = "
-        This is an alias trait for traits
-        common in subsequent implmentations.
-    ";
-    let impl_doc  = &format!("
-        Generate implementations of `{ident}`.
-    ");
+    let trait_doc = "This is an alias trait for traits common in subsequent implmentations.";
+    let impl_doc  = &format!("Generate implementations of `{ident}`.");
     let impl_name = Ident::new(&format!("Impl{ident}"), Span::call_site());
     quote! {
         #[doc=#trait_doc]
@@ -131,88 +124,16 @@ pub fn uri_builder_alias(input: TokenStream) -> TokenStream {
 /// Generates the methods required to implement a
 /// `UriBuilder` trait, allowing the type to
 /// construct URI paths.
+/// 
+/// Currently we do not support the implementation
+/// against enums or unions. It is to be decided
+/// if unions will be included, but enums have
+/// proven, through experimental development, that
+/// extending this feature for support would
+/// benefit the user.
 #[proc_macro_derive(UriBuilder, attributes(parent, match_path, param))]
 pub fn derive_uribuilder(input: TokenStream) -> TokenStream {
-    derive_input_boilerplate!(attrs, data, generics, ident; from input);
-    let where_clause = &generics.where_clause;
-
-    let params = match data {
-        Data::Struct(d) => derive_uribuilder_parse_params(&d.fields),
-        _ => panic!("enums and unions are not currently supported")
-    };
-    let match_paths = derive_uribuilder_parse_paths(&attrs, &params);
-    derive_uribuilder_validate_paths_by_params(&match_paths, &params);
-    let match_arms = derive_uribuilder_build_matches(&match_paths, &params);
-
-    let mut gen = quote! {
-        impl #generics UriBuilder for #ident #generics #where_clause {
-            fn build(&self) -> anyhow::Result<String> {
-                match self {
-                    #match_arms
-                }
-            }
-        }
-    };
-
-    // Construct `with_{param}` methods to allow
-    // pre-construction declaration of parameters.
-    let mut with_methods = quote! {};
-    for param in params {
-        let method_name = Ident::new(&format!("with_{}", &param.name), Span::call_site());
-        let field_name  = &param.field_name;
-        let kind = &param.kind;
-
-        if param.is_option && !param.is_parent {
-            with_methods.extend(quote! {
-                /// Generated method to set the
-                /// `#field_name` of `#ident`
-                pub fn #method_name<V: Clone + Into<#kind>>(mut self, value: &V) -> Self {
-                    self.#field_name = Some((*value).to_owned().into());
-                    self
-                }
-            })
-        } else if param.is_option && param.is_parent {
-            with_methods.extend(quote! {
-                /// Generated method to set the
-                /// `#field_name` of `#ident`
-                pub fn with_parent(mut self, value: #kind) -> Self {
-                    self.#field_name = Some(value);
-                    self
-                }
-                /// Creates a new instance of this
-                /// type, presetting the parent
-                /// to the passed value.
-                pub fn from_parent(value: #kind) -> Self
-                where
-                    Self: Default,
-                {
-                    Self::default().with_parent(value)
-                }
-            })
-        } else {
-            panic!("non-optional params not currently supported")
-        }
-    }
-    gen.extend(quote! {
-        impl #generics #ident #generics #where_clause {
-            #with_methods
-        }
-    });
-
-    // Impl `std::fmt::Display` to qualify
-    // builder for being the potential victim of
-    // being joined as a parent builder.
-    gen.extend(quote! {
-        impl #generics std::fmt::Display for #ident #generics #where_clause {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(f, "{}", self
-                    .build()
-                    .expect("build must produce a string"))
-            }
-        }
-    });
-
-    gen.into()
+    uribuilder::build(input)
 }
 
 /// Generates the methods required to implement a

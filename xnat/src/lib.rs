@@ -1,4 +1,4 @@
-use oxinat_core::{AdminUri, AdminUriLegacy, SysUri, Version};
+use oxinat_core::{AdminUri, AdminUriLegacy, SystemUri, Version};
 
 #[cfg(feature = "core")]
 pub extern crate oxinat_core;
@@ -8,13 +8,14 @@ pub extern crate oxinat_derive;
 #[derive(Version, AdminUri)]
 #[version(root_uri = "data", legacy = true)]
 pub struct V1;
-#[derive(Version, AdminUri, SysUri)]
+#[derive(Version, AdminUri, SystemUri)]
 #[version(root_uri = "xapi")]
 pub struct V2;
 
 // TODO: impl std::mem::Drop for this struct.
 // https://stackoverflow.com/questions/42910662/is-it-possible-in-rust-to-delete-an-object-before-the-end-of-scope
 #[derive(Clone, Debug)]
+#[allow(dead_code)]
 pub struct Xnat<V: Version> {
     hostname: String,
     username: Option<String>,
@@ -22,6 +23,7 @@ pub struct Xnat<V: Version> {
     version:  V,
 }
 
+#[allow(dead_code)]
 pub struct XnatBuilder<V: Version> {
     hostname: String,
     username: Option<String>,
@@ -32,7 +34,7 @@ pub struct XnatBuilder<V: Version> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use oxinat_core::UriBuilder;
+    use oxinat_core::{UriBuilder, NotifyType};
 
     #[test]
     fn test_version_v1_impls_admin_legacy() {
@@ -78,9 +80,38 @@ mod test {
         assert_eq!(uri.unwrap(), "xapi/archive/catalogs/refresh");
 
         let uri = partial_uri
-            .with_operations(&["delete".to_string(), "append".to_string()])
+            .with_operations(&[
+                "delete".to_string(),
+                "append".to_string()
+            ])
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/archive/catalogs/refresh/delete,append");
+    }
+
+    #[test]
+    fn test_version2_impls_sys_notify() {
+        let ver = V2{};
+
+        let partial_uri = ver
+            .notifications()
+            .notify();
+
+        let nt = NotifyType::SmtpProperty(
+            "auth".to_owned(),
+            "HaHAhA".to_owned().into());
+        let uri = partial_uri
+            .clone()
+            .with_notify_type(&nt)
+            .build();
+        assert!(uri.is_ok(), "must be able to build without errors");
+        assert_eq!(uri.unwrap(), "xapi/notifications/notify/smtp/property/auth/HaHAhA");
+
+        let uri = partial_uri
+            .clone()
+            .with_notify_type(&NotifyType::Par)
+            .build();
+        assert!(uri.is_ok(), "must be able to build without errors");
+        assert_eq!(uri.unwrap(), "xapi/notifications/notify/par")
     }
 }
