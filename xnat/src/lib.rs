@@ -90,7 +90,7 @@ mod test {
     }
 
     #[test]
-    fn test_version2_impls_sys_notify() {
+    fn test_version_v2_impls_sys_notify() {
         let ver = V2{};
 
         let partial_uri = ver
