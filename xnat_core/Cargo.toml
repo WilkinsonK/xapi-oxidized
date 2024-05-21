@@ -1,0 +1,18 @@
+[package]
+name = "oxinat_core"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "oxinat_core"
+path = "src/lib.rs"
+crate-type = ["lib"]
+
+[features]
+derive = ["dep:oxinat_derive"]
+
+[dependencies]
+anyhow = "1.0.83"
+oxinat_derive = { path = "../xnat_derive", optional = true }
+thiserror = "1.0.60"

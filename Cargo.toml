@@ -1,21 +1,3 @@
-[package]
-name = "oxinat"
-version = "0.1.0"
-edition = "2021"
-
-[lib]
-name = "xapi_oxidized"
-path = "src/lib.rs"
-doc  = true
-crate-type = ["lib"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-futures = "0.3.30"
-home = "0.5.9"
-isahc = "1.7.2"
-netrc-rs = "0.1.2"
-serde = { version = "1.0.194", features = ["serde_derive", "derive"] }
-surf = "2.3.2"
-tokio = { version = "1.35.1", features = ["full"] }
+[workspace]
+members = ["xnat", "xnat_core", "xnat_derive"]
+resolver = "2"
