@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, hash::{DefaultHasher, Hash, Hasher}};
 use proc_macro::TokenStream as TokenStream1;
 
 use attribute_derive::FromAttr;
@@ -28,15 +28,17 @@ macro_rules! new_ambiguous_ident {
 #[attribute(ident = match_path)]
 #[attribute(error(missing_field = "`{field}` not specified"))]
 struct MatchPatternAttrs {
-    path: String,
+    path:     String,
+    requires: Option<String>,
 }
 
 /// Represents attributes passed to `UriBuilder`
 /// for building path patterns.
 #[derive(Debug, PartialEq, Eq)]
 pub struct MatchPatternAttrsParsed {
-    pub path:   String,
-    pub params: Vec<ParamAttrsParsed>,
+    pub path:     String,
+    pub params:   Vec<ParamAttrsParsed>,
+    pub requires: Option<Expr>
 }
 
 /// Represents attributes passed to the fields of
@@ -63,7 +65,6 @@ pub struct ParamAttrsParsed {
     pub is_option:  bool,
     pub is_parent:  bool,
 }
-
 
 /// Build a derived implementation of the target
 /// struct or enum type for a `UriBuilder`.
@@ -226,7 +227,30 @@ fn build_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
         } else {
             lhs.extend(quote! { #field_name: Some(#param_name), });
         }
+
+        if let Some(rq) = &p.requires {
+            let mut validator = rq.clone();
+            let validator = hash_new_ident(&mut validator, "validator".into());
+            rhs_inner.extend(quote! {
+                let #validator = #rq;
+                if !#validator(#param_name) {
+                    return Err(crate::uri::UriBuildError::Validation.into())
+                }
+            })
+        }
     });
+
+    if let Some(rq) = &pattern.requires {
+        let mut validator = rq.clone();
+        let validator = hash_new_ident(&mut validator, "validator".into());
+        rhs_inner.extend(quote! {
+            let #validator = #rq;
+            if !#validator(self) {
+                return Err(crate::uri::UriBuildError::Validation.into())
+            }
+        })
+    }
+
     // Finalize RHS after determination of
     // whether extra formatting rules are
     // required.
@@ -238,26 +262,7 @@ fn build_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
     // Round off match pattern by ignoring any
     // non-parameter fields.
     lhs.extend(quote! { .. });
-
-    // Produce a validation chain to allow users
-    // to conditionally return the 'built' URI if
-    // the URI matches the intended usage.
-    let parent = params.iter().find(|p| p.is_parent);
-    if parent.is_some_and(|p| p.requires.is_some()) {
-        let p = parent.unwrap();
-        let req  = &p.requires.clone().unwrap();
-        quote! {
-            Self { #lhs } => {
-                let validator = #req; if validator(self) {
-                    Ok(#rhs)
-                } else {
-                    Err(crate::uri::UriBuildError::Validation.into())
-                }
-            },
-        }
-    } else {
-        quote! { Self { #lhs } => Ok(#rhs), }
-    }
+    quote! { Self { #lhs } => Ok(#rhs), }
 }
 
 /// Performs a shallow construction of a match arm
@@ -341,6 +346,14 @@ fn filter_match_paths(attr: &&Attribute) -> bool {
 fn filter_params(attr: &&Attribute) -> bool {
     ["param", "parent"]
         .contains(&attr.meta.path().segments[0].ident.to_string().as_str())
+}
+
+/// Digests an arbitrary value into an ambiguous
+/// identity.
+fn hash_new_ident<H: Hash>(value: &mut H, label: Option<&str>) -> Ident {
+    let mut h = DefaultHasher::new();
+    value.hash(&mut h);
+    new_ambiguous_ident!("{}_{}", label.unwrap_or("hashed_id"), h.finish())
 }
 
 /// Determines if the attribute is a `parent`
@@ -453,9 +466,14 @@ fn parse_paths(attrs: &Attributes, params: &[ParamAttrsParsed]) -> Vec<MatchPatt
         .filter(filter_match_paths)
         .map(MatchPatternAttrs::from_attribute)
         .map(|a| {
+            let a = a.unwrap();
+            let requires = a
+                .requires
+                .map(|rq| parse_str::<Expr>(&rq).expect("must be a parsable expression"));
             let mut parsed = MatchPatternAttrsParsed{
-                path: a.unwrap().path,
-                params: vec![]
+                path: a.path,
+                params: vec![],
+                requires
             };
 
             // Pair parameter metadata to the

@@ -144,7 +144,7 @@ pub fn uri_builder_alias(input: TokenStream) -> TokenStream {
 /// proven, through experimental development, that
 /// extending this feature for support would
 /// benefit the user.
-#[proc_macro_derive(UriBuilder, attributes(parent, match_path, param))]
+#[proc_macro_derive(UriBuilder, attributes(parent, match_path, param, validator))]
 pub fn derive_uribuilder(input: TokenStream) -> TokenStream {
     uribuilder::build(input)
 }
