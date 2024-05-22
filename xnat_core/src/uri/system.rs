@@ -241,7 +241,7 @@ where
 /// Some supported options available for managing
 /// subscriber config options.
 #[derive(Clone, Debug, UriBuilder)]
-pub enum SubscriberOption {
+pub enum SubscriberOpt {
     Error,
     Issue,
     NewUser,
@@ -258,7 +258,7 @@ where
     Parent: SysUriBuilder,
 {
     #[param]
-    subscriber_option: Option<SubscriberOption>,
+    subscriber_option: Option<SubscriberOpt>,
     #[parent]
     parent: Option<Rc<Parent>>,
 }
@@ -311,13 +311,13 @@ where
     /// Produce the
     /// archive/xnatTask/checkNodeConfigurationStatus
     /// URI endpoint.
-    pub fn check_node_config_status(&self) -> anyhow::Result<String> {
+    pub fn build_check_node_config_status(&self) -> anyhow::Result<String> {
         self.build_join("checkNodeConfigurationStatus")
     }
 
     /// Produce the archive/xnatTask/taskList URI
     /// endpoint.
-    pub fn task_list(&self) -> anyhow::Result<String> {
+    pub fn build_task_list(&self) -> anyhow::Result<String> {
         self.build_join("taskList")
     }
 }

@@ -43,15 +43,14 @@ pub fn derive_adminuri(input: TokenStream) -> TokenStream {
 
     // Conditionally implement legacy endpoints.
     let mut gen = quote! {};
-    if derive_version_parse_legacy(&attrs) {
-        gen.extend(quote! {
-            impl #generics AdminUriLegacy for #ident #generics #where_clause {}
-        });
-    } else {
+    if !derive_version_parse_legacy(&attrs) {
         gen.extend(quote! {
             impl #generics AdminUri for #ident #generics #where_clause {}
         });
     }
+    gen.extend(quote! {
+        impl #generics AdminUriLegacy for #ident #generics #where_clause {}
+    });
     gen.into()
 }
 
@@ -66,6 +65,20 @@ pub fn derive_sysuri(input: TokenStream) -> TokenStream {
 
     quote! {
         impl #generics SystemUri for #ident #generics #where_clause {}
+    }.into()
+}
+
+/// Generates the methods required to implement a
+/// `UsersUri` trait, allowing for a type to
+/// represent the user administrative endpoints
+/// available.
+#[proc_macro_derive(UsersUri, attributes(usersuri))]
+pub fn derive_usersuri(input: TokenStream) -> TokenStream {
+    derive_input_boilerplate!(generics, ident; from input);
+    let where_clause = &generics.where_clause;
+
+    quote! {
+        impl #generics UsersUri for #ident #generics #where_clause {}
     }.into()
 }
 

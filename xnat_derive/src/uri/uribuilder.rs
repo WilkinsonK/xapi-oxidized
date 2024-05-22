@@ -47,6 +47,7 @@ pub struct MatchPatternAttrsParsed {
 struct ParamAttrs {
     pub name:      Option<String>,
     pub map_from:  Option<String>,
+    pub requires:  Option<String>,
     pub is_parent: Option<bool>,
 }
 
@@ -58,6 +59,7 @@ pub struct ParamAttrsParsed {
     pub name:       String,
     pub kind:       Type,
     pub map_from:   Option<Expr>,
+    pub requires:   Option<Expr>,
     pub is_option:  bool,
     pub is_parent:  bool,
 }
@@ -213,6 +215,7 @@ fn build_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
             lhs.extend(quote! { #field_name: None, });
             return
         }
+
         // Apply mapper function to format a value
         // from user-defined func.
         if let Some(mf) = &p.map_from {
@@ -235,10 +238,26 @@ fn build_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
     // Round off match pattern by ignoring any
     // non-parameter fields.
     lhs.extend(quote! { .. });
-    // Construct the full match arm from the left
-    // and right hand sides.
-    let gen = quote! { Self { #lhs } => Ok(#rhs), };
-    gen
+
+    // Produce a validation chain to allow users
+    // to conditionally return the 'built' URI if
+    // the URI matches the intended usage.
+    let parent = params.iter().find(|p| p.is_parent);
+    if parent.is_some_and(|p| p.requires.is_some()) {
+        let p = parent.unwrap();
+        let req  = &p.requires.clone().unwrap();
+        quote! {
+            Self { #lhs } => {
+                let validator = #req; if validator(self) {
+                    Ok(#rhs)
+                } else {
+                    Err(crate::uri::UriBuildError::Validation.into())
+                }
+            },
+        }
+    } else {
+        quote! { Self { #lhs } => Ok(#rhs), }
+    }
 }
 
 /// Performs a shallow construction of a match arm
@@ -408,12 +427,16 @@ fn parse_params(fields: &Fields) -> Vec<ParamAttrsParsed> {
         let map_from = attrs
             .map_from
             .map(|mf| parse_str::<Expr>(&mf).expect("must be a parsable expression"));
+        let requires = attrs
+            .requires
+            .map(|rq| parse_str::<Expr>(&rq).expect("must be a parsable expression"));
 
         ParamAttrsParsed {
             field_name: ident,
             name,
             kind,
             map_from,
+            requires,
             is_option,
             is_parent,
         }

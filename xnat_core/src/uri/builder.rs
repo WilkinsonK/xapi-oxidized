@@ -6,6 +6,8 @@ use thiserror::Error;
 pub enum UriBuildError {
     #[error("pattern could not be determined from arguments")]
     UnrecognizedPattern,
+    #[error("attempted to build an invalid URI path")]
+    Validation
 }
 
 /// Type is able to construct a URI usable for

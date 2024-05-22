@@ -1,4 +1,4 @@
-use oxinat_core::{AdminUri, AdminUriLegacy, SystemUri, Version};
+use oxinat_core::*;
 
 #[cfg(feature = "core")]
 pub extern crate oxinat_core;
@@ -8,7 +8,7 @@ pub extern crate oxinat_derive;
 #[derive(Version, AdminUri)]
 #[version(root_uri = "data", legacy = true)]
 pub struct V1;
-#[derive(Version, AdminUri, SystemUri)]
+#[derive(Version, AdminUri, SystemUri, UsersUri)]
 #[version(root_uri = "xapi")]
 pub struct V2;
 
