@@ -114,4 +114,20 @@ mod test {
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/notifications/notify/par")
     }
+
+    #[test]
+    fn test_version_v2_impls_users() {
+        let ver = V2{};
+
+        let uri = ver.users().groups().build();
+        assert!(uri.is_err(), "unset username must produce an error");
+
+        let uri = ver
+            .users()
+            .with_username(&"spyslikeus")
+            .groups()
+            .build();
+        assert!(uri.is_ok(), "must be able to build without errors");
+        assert_eq!(uri.unwrap(), "xapi/users/spyslikeus/groups");
+    }
 }
