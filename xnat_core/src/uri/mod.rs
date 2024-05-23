@@ -12,4 +12,4 @@ pub use system::{
     NotifyType,
     SubscriberOpt,
 };
-pub use users::UsersUri;
+pub use users::{UsersUri, UsersUriLegacy};

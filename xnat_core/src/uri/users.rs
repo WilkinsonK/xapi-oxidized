@@ -171,11 +171,34 @@ impl UserUriBuilder<String>
     }
 }
 
+#[derive(Clone, Debug, Default, UriBuilder)]
+#[match_path(path = "{parent}/users")]
+#[match_path(path = "{parent}/user/{user_identifier}")]
+#[match_path(path = "{parent}/users/favorites/Project/{project_id}")]
+pub struct UsersUriLegacyBuilder<Parent>
+where
+    Parent: UserAdminUriBuilder,
+{
+    #[param]
+    project_id: Option<String>,
+    #[param]
+    user_identifier: Option<String>,
+    #[parent]
+    parent: Option<Rc<Parent>>
+}
+
 /// Represents the URI paths available for
 /// endpoints meant for managing users.
 pub trait UsersUri: Version {
     #[inline]
     fn users(&self) -> UserUriBuilder<String> {
         UserUriBuilder::from_parent(self.root_uri().into())
+    }
+}
+
+pub trait UsersUriLegacy: Version {
+    #[inline]
+    fn users_legacy(&self) -> UsersUriLegacyBuilder<String> {
+        UsersUriLegacyBuilder::from_parent(self.root_uri().into())
     }
 }

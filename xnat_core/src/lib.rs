@@ -15,5 +15,6 @@ pub use crate::uri::{
     UriBuilder,
     UriBuildError,
     UsersUri,
+    UsersUriLegacy,
 };
 pub use crate::version::Version;

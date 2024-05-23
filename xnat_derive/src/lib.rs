@@ -74,12 +74,19 @@ pub fn derive_sysuri(input: TokenStream) -> TokenStream {
 /// available.
 #[proc_macro_derive(UsersUri, attributes(usersuri))]
 pub fn derive_usersuri(input: TokenStream) -> TokenStream {
-    derive_input_boilerplate!(generics, ident; from input);
+    derive_input_boilerplate!(attrs, generics, ident; from input);
     let where_clause = &generics.where_clause;
 
-    quote! {
-        impl #generics UsersUri for #ident #generics #where_clause {}
-    }.into()
+    let mut gen = quote! {};
+    if !derive_version_parse_legacy(&attrs) {
+        gen.extend(quote! {
+            impl #generics UsersUri for #ident #generics #where_clause {}
+        });
+    }
+    gen.extend(quote! {
+        impl #generics UsersUriLegacy for #ident #generics #where_clause {}
+    });
+    gen.into()
 }
 
 /// Generates an alias for `UriBuilder` and other
