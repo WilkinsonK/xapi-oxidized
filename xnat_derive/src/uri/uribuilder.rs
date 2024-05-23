@@ -229,8 +229,7 @@ fn build_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
         }
 
         if let Some(rq) = &p.requires {
-            let mut validator = rq.clone();
-            let validator = hash_new_ident(&mut validator, "validator".into());
+            let validator = hash_new_ident(&mut rq.clone(), "validator".into());
             rhs_inner.extend(quote! {
                 let #validator = #rq;
                 if !#validator(#param_name) {
@@ -241,8 +240,7 @@ fn build_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
     });
 
     if let Some(rq) = &pattern.requires {
-        let mut validator = rq.clone();
-        let validator = hash_new_ident(&mut validator, "validator".into());
+        let validator = hash_new_ident(&mut rq.clone(), "validator".into());
         rhs_inner.extend(quote! {
             let #validator = #rq;
             if !#validator(self) {
