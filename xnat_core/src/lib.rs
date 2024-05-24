@@ -1,7 +1,6 @@
 mod uri;
 mod version;
 
-#[cfg(feature = "derive")]
 pub use oxinat_derive::*;
 
 pub use crate::uri::{

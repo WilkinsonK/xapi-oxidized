@@ -12,9 +12,6 @@ name = "oxinat_core"
 path = "src/lib.rs"
 crate-type = ["lib"]
 
-[features]
-derive = []
-
 [dependencies]
 anyhow = "1.0.83"
 oxinat_derive = { path = "../xnat_derive", version = "0.5.0" }
