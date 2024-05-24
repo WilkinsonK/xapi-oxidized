@@ -17,5 +17,5 @@ derive = ["dep:oxinat_derive"]
 
 [dependencies]
 anyhow = "1.0.83"
-oxinat_derive = { path = "../xnat_derive", optional = true }
+oxinat_derive = { path = "../xnat_derive", version = "0.5.0", optional = true }
 thiserror = "1.0.60"
