@@ -1,8 +1,8 @@
-mod admin;
-mod auth;
-mod builder;
-mod system;
-mod users;
+pub mod admin;
+pub mod auth;
+pub mod builder;
+pub mod system;
+pub mod users;
 
 pub use admin::{AdminUri, AdminUriLegacy};
 pub use auth::AuthUriLegacy;

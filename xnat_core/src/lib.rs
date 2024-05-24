@@ -1,5 +1,5 @@
-mod uri;
-mod version;
+pub mod uri;
+pub mod version;
 
 pub use oxinat_derive::*;
 
