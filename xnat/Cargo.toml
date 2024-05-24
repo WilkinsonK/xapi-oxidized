@@ -17,5 +17,5 @@ core = []
 derive = []
 
 [dependencies]
-oxinat_core = { path = "../xnat_core" }
-oxinat_derive = { path = "../xnat_derive" }
+oxinat_core = { path = "../xnat_core", version = "0.5.0" }
+oxinat_derive = { path = "../xnat_derive", version = "0.5.0" }
