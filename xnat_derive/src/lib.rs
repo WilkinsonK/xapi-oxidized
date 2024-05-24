@@ -10,8 +10,7 @@ use syn::{parse_macro_input, Attribute, DeriveInput};
 
 use uri::uribuilder;
 use crate::version::{
-    derive_version_parse_root_uri,
-    derive_version_parse_legacy
+    derive_version_parse_legacy, derive_version_parse_root_uri, derive_version_parse_root_uri_legacy
 };
 
 /// Shortcut to avoid repetive usage of the same
@@ -36,7 +35,7 @@ type Attributes = Vec<Attribute>;
 /// `AdminUri` or `AdminUriLegacy` trait, allowing
 /// for a type to represent the administrative
 /// endpoints available.
-#[proc_macro_derive(AdminUri, attributes(adminuri))]
+#[proc_macro_derive(AdminUri)]
 pub fn derive_adminuri(input: TokenStream) -> TokenStream {
     derive_input_boilerplate!(generics, ident, attrs; from input);
     let where_clause = &generics.where_clause;
@@ -55,10 +54,23 @@ pub fn derive_adminuri(input: TokenStream) -> TokenStream {
 }
 
 /// Generates the methods required to implement a
+/// `AuthUri` trait, allowing for a type to
+/// represent the user authentication endpoints.
+#[proc_macro_derive(AuthUri)]
+pub fn derive_authuri(input: TokenStream) -> TokenStream {
+    derive_input_boilerplate!(generics, ident; from input);
+    let where_clause = &generics.where_clause;
+
+    quote! {
+        impl #generics AuthUriLegacy for #ident #generics #where_clause {}
+    }.into()
+}
+
+/// Generates the methods required to implement a
 /// `SystemUri` trait, allowing for a type to
 /// represent the administrative endpoints
 /// available.
-#[proc_macro_derive(SystemUri, attributes(sysuri))]
+#[proc_macro_derive(SystemUri)]
 pub fn derive_sysuri(input: TokenStream) -> TokenStream {
     derive_input_boilerplate!(generics, ident; from input);
     let where_clause = &generics.where_clause;
@@ -72,7 +84,7 @@ pub fn derive_sysuri(input: TokenStream) -> TokenStream {
 /// `UsersUri` trait, allowing for a type to
 /// represent the user administrative endpoints
 /// available.
-#[proc_macro_derive(UsersUri, attributes(usersuri))]
+#[proc_macro_derive(UsersUri)]
 pub fn derive_usersuri(input: TokenStream) -> TokenStream {
     derive_input_boilerplate!(attrs, generics, ident; from input);
     let where_clause = &generics.where_clause;
@@ -169,11 +181,16 @@ pub fn derive_version(input: TokenStream) -> TokenStream {
     // implementation.
     let root_uri = derive_version_parse_root_uri(&attrs)
         .unwrap_or_else(|_| ident.to_string().to_lowercase());
+    let root_uri_legacy = derive_version_parse_root_uri_legacy(&attrs).unwrap();
 
     quote! {
         impl #generics Version for #ident #generics #where_clause {
             fn root_uri(&self) -> String {
                 String::from(#root_uri)
+            }
+
+            fn root_uri_legacy(&self) -> String {
+                String::from(#root_uri_legacy)
             }
         }
     }.into()

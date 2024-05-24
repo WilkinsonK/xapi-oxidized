@@ -318,7 +318,7 @@ pub trait AdminUriLegacy: Version {
     /// URI endpoint to access site configuration.
     #[inline]
     fn config(&self) -> SiteConfigUriBuilderLegacy<String> {
-        SiteConfigUriBuilderLegacy::from_parent(self.root_uri().into())
+        SiteConfigUriBuilderLegacy::from_parent(self.root_uri_legacy().into())
     }
 }
 

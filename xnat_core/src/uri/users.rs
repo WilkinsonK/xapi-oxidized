@@ -48,6 +48,152 @@ pub struct ActiveUriBuilder<'a> {
     parent: Option<&'a UserUriBuilder<String>>
 }
 
+#[derive(Clone, Debug, Default, UriBuilder)]
+#[match_path(path = "{parent}/access", requires = "username_is_none!()")]
+#[match_path(path = "{parent}/access/{username}", requires = "username_is_none!()")]
+pub struct AccessUriBuilder<'a> {
+    #[param]
+    username: Option<String>,
+    #[parent]
+    parent: Option<&'a UserUriBuilder<String>>
+}
+
+/// Represents URI endpoints for an XNAT admin to
+/// manage user cached data.
+#[derive(Clone, Debug, Default, UriBuilder)]
+#[match_path(path = "{parent}/cache", requires = "username_is_none!()")]
+pub struct CacheUriBuilder<'a> {
+    #[parent]
+    parent: Option<&'a AccessUriBuilder<'a>>
+}
+
+/// Represents the URI path to allow an admin to
+/// invalidate user cached data.
+#[derive(Clone, Debug, Default, UriBuilder)]
+#[match_path(path = "{parent}/flush")]
+#[match_path(path = "{parent}/flush/{username}")]
+pub struct CacheFlushUriBuilder<'a> {
+    #[param]
+    username: Option<String>,
+    #[parent]
+    parent: Option<&'a CacheUriBuilder<'a>>
+}
+
+#[derive(Clone, Debug, Default, UriBuilder)]
+#[match_path(path = "parent/status")]
+pub struct CacheStatusUriBuilder<'a> {
+    #[parent]
+    parent: Option<&'a CacheUriBuilder<'a>>
+}
+
+impl CacheUriBuilder<'_> {
+    /// Continue the builder into a
+    /// `CacheFlushUriBuilder`.
+    pub fn flush(&self) -> CacheFlushUriBuilder {
+        CacheFlushUriBuilder::from_parent(self)
+    }
+
+    /// Continue the builder into a
+    /// `CacheStatusUriBuilder`.
+    pub fn status(&self) -> CacheStatusUriBuilder {
+        CacheStatusUriBuilder::from_parent(self)
+    }
+}
+
+#[derive(Clone, Debug, Default, UriBuilder)]
+#[match_path(path = "{parent}/displays")]
+#[match_path(path = "{parent}/displays/{display}")]
+pub struct DisplaysUriBuilder<'a> {
+    #[param]
+    display: Option<String>,
+    #[parent]
+    parent: Option<&'a AccessUriBuilder<'a>>
+}
+
+impl DisplaysUriBuilder<'_> {
+    /// Produces the URI displays/modified
+    /// endpoint.
+    pub fn modified(&self) -> anyhow::Result<String> {
+        if self.display.is_none() {
+            self.build_join("modified")
+        } else {
+            Err(UriBuildError::Validation.into())
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, UriBuilder)]
+#[match_path(path = "{parent}/permissions", requires = "username_is_none!()")]
+pub struct PermissionsUriBuilder<'a> {
+    #[parent]
+    parent: Option<&'a AccessUriBuilder<'a>>
+}
+
+#[derive(Clone, Debug, Default, UriBuilder)]
+#[match_path(path = "{parent}/group")]
+#[match_path(path = "{parent}/group/{project_id}")]
+pub struct GroupPermissionsUriBuilder<'a> {
+    #[param]
+    project_id: Option<String>,
+    #[parent]
+    parent: Option<&'a PermissionsUriBuilder<'a>>
+}
+
+#[derive(Clone, Debug, UriBuilder)]
+pub enum IrregularPermission {
+    Find,
+    Fix
+}
+
+#[derive(Clone, Debug, Default, UriBuilder)]
+#[match_path(path = "{parent}/irregular/{irregular_permission}")]
+pub struct IrregularPermissionsUriBuilder<'a> {
+    #[param]
+    irregular_permission: Option<IrregularPermission>,
+    #[parent]
+    parent: Option<&'a PermissionsUriBuilder<'a>>
+}
+
+impl PermissionsUriBuilder<'_> {
+    /// Continue the builder into a
+    /// `GroupPermissionsUriBuilder`.
+    pub fn group(&self) -> GroupPermissionsUriBuilder {
+        GroupPermissionsUriBuilder::from_parent(self)
+    }
+
+    /// Continue the builder into a
+    /// `IrregularPermissionsUriBuilder`.
+    pub fn irregular(&self) -> IrregularPermissionsUriBuilder {
+        IrregularPermissionsUriBuilder::from_parent(self)
+    }
+}
+
+impl AccessUriBuilder<'_> {
+    /// Produce the URI path access/projects or
+    /// access/{username}/projects
+    pub fn build_projects(&self) -> anyhow::Result<String> {
+        self.build_join("projects")
+    }
+
+    /// Continue the builder into a
+    /// `CacheStatusUriBuilder`.
+    pub fn cache(&self) -> CacheUriBuilder {
+        CacheUriBuilder::from_parent(self)
+    }
+
+    /// Continue the builder into a
+    /// `DisplaysUriBuilder`.
+    pub fn displays(&self) -> DisplaysUriBuilder {
+        DisplaysUriBuilder::from_parent(self)
+    }
+
+    /// Continue the builder into a
+    /// `PermissionsUriBuilder`.
+    pub fn permissions(&self) -> PermissionsUriBuilder {
+        PermissionsUriBuilder::from_parent(self)
+    }
+}
+
 /// Represents URI endpoints for an XNAT admin to
 /// manage whether a user is enabled or not.
 #[derive(Clone, Debug, Default, UriBuilder)]
@@ -111,6 +257,12 @@ pub struct VerifiedUriBuilder<'a> {
 
 impl UserUriBuilder<String>
 {
+    /// Continue the builder into an
+    /// `AccessUriBuilder`
+    pub fn access(&self) -> AccessUriBuilder {
+        AccessUriBuilder::from_parent(&Rc::new(self))
+    }
+
     /// Continue the builder into a
     /// `ActiveUriBuilder`.
     pub fn active(&self) -> ActiveUriBuilder {
@@ -319,6 +471,6 @@ pub trait UsersUriLegacy: Version {
     /// administration.
     #[inline]
     fn users_legacy(&self) -> UsersUriLegacyBuilder<String> {
-        UsersUriLegacyBuilder::from_parent(self.root_uri().into())
+        UsersUriLegacyBuilder::from_parent(self.root_uri_legacy().into())
     }
 }
