@@ -1,5 +1,8 @@
 [package]
 name = "oxinat_core"
+description = "oxinat xapi-oxidized core library"
+license = "../LICENSE.md"
+repository = "https://github.com/WilkinsonK/xapi-oxidized"
 version = "0.5.0"
 edition = "2021"
 

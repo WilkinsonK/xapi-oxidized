@@ -1,5 +1,8 @@
 [package]
 name = "oxinat"
+description = "XNAT REST API client"
+license = "../LICENSE.md"
+repository = "https://github.com/WilkinsonK/xapi-oxidized"
 version = "0.3.0"
 edition = "2021"
 
