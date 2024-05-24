@@ -5,7 +5,7 @@ pub extern crate oxinat_core;
 #[cfg(feature = "derive")]
 pub extern crate oxinat_derive;
 
-#[derive(Version, AdminUri)]
+#[derive(Version, AdminUri, UsersUri)]
 #[version(root_uri = "data", legacy = true)]
 pub struct V1;
 #[derive(Version, AdminUri, SystemUri, UsersUri)]
@@ -32,7 +32,7 @@ pub struct XnatBuilder<V: Version> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use oxinat_core::{UriBuilder, NotifyType};
 
@@ -70,20 +70,24 @@ mod test {
     #[test]
     fn test_version_v2_impls_sys() {
         let ver = V2{};
-        let partial_uri = ver
-            .archive()
-            .catalogs()
-            .refresh();
+        let partial_uri = ver.archive();
 
-        let uri = partial_uri.build();
+        let uri = partial_uri
+            .clone()
+            .catalogs()
+            .refresh()
+            .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/archive/catalogs/refresh");
 
         let uri = partial_uri
+            .clone()
+            .catalogs()
+            .refresh()
             .with_operations(&[
-                "delete".to_string(),
-                "append".to_string()
-            ])
+                    "delete".to_string(),
+                    "append".to_string()
+                ])
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/archive/catalogs/refresh/delete,append");
@@ -93,15 +97,14 @@ mod test {
     fn test_version_v2_impls_sys_notify() {
         let ver = V2{};
 
-        let partial_uri = ver
-            .notifications()
-            .notify();
+        let partial_uri = ver.notifications();
 
         let nt = NotifyType::SmtpProperty(
             "auth".to_owned(),
             "HaHAhA".to_owned().into());
         let uri = partial_uri
             .clone()
+            .notify()
             .with_notify_type(&nt)
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
@@ -109,6 +112,7 @@ mod test {
 
         let uri = partial_uri
             .clone()
+            .notify()
             .with_notify_type(&NotifyType::Par)
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");

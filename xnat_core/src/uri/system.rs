@@ -7,18 +7,18 @@ use crate::{UriBuilder, Version};
 uri_builder_alias!(SysUriBuilder);
 ImplSysUriBuilder! {
     (String),
+    (AllowUriBuilder<'_>),
+    (CatalogsUriBuilder<'_>),
+    (DownloadUriBuilder<'_>),
+    (MessagesUriBuilder<'_>),
+    (RefreshUriBuilder<'_>),
+    (NotifyUriBuilder<'_>),
+    (SubscribersUriBuilder<'_>),
 }
 ImplSysUriBuilder! {
-    (AllowUriBuilder<Parent>, Parent),
     (ArchiveUriBuilder<Parent>, Parent),
     (AsyncOpsUriBuilder<Parent>, Parent),
-    (CatalogsUriBuilder<Parent>, Parent),
-    (DownloadUriBuilder<Parent>, Parent),
-    (MessagesUriBuilder<Parent>, Parent),
     (NotificationsUriBuilder<Parent>, Parent),
-    (NotifyUriBuilder<Parent>, Parent),
-    (RefreshUriBuilder<Parent>, Parent),
-    (SubscribersUriBuilder<Parent>, Parent),
     (XnatTaskUriBuilder<Parent>, Parent),
 }
 
@@ -40,12 +40,10 @@ where
 /// against an XNAT archive catalog.
 #[derive(Clone, Debug, Default, UriBuilder)]
 #[match_path(path = "{parent}/catalogs")]
-pub struct CatalogsUriBuilder<Parent>
-where
-    Parent: SysUriBuilder,
+pub struct CatalogsUriBuilder<'a>
 {
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<&'a ArchiveUriBuilder<String>>
 }
 
 /// Represents the URI paths available for
@@ -54,24 +52,20 @@ where
 #[derive(Clone, Debug, Default, UriBuilder)]
 #[match_path(path = "{parent}/refresh")]
 #[match_path(path = "{parent}/refresh/{operations}")]
-pub struct RefreshUriBuilder<Parent>
-where
-    Parent: SysUriBuilder,
+pub struct RefreshUriBuilder<'a>
 {
     #[param(map_from=r#"|o: &Vec<_>| o.join(",")"#)]
     operations: Option<Vec<String>>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<&'a CatalogsUriBuilder<'a>>,
 }
 
-impl<Parent> CatalogsUriBuilder<Parent>
-where
-    Parent: SysUriBuilder + Default,
+impl CatalogsUriBuilder<'_>
 {
     /// Continue the builder into a
     /// `RefreshUriBuilder`.
-    pub fn refresh(&self) -> RefreshUriBuilder<Self> {
-        RefreshUriBuilder::from_parent(self.clone().into())
+    pub fn refresh(&self) -> RefreshUriBuilder {
+        RefreshUriBuilder::from_parent(&Rc::new(self))
     }
 }
 
@@ -80,19 +74,15 @@ where
 #[derive(Clone, Debug, Default, UriBuilder)]
 #[match_path(path = "{parent}/download")]
 #[match_path(path = "{parent}/download/{catalog_id}")]
-pub struct DownloadUriBuilder<Parent>
-where
-    Parent: SysUriBuilder,
+pub struct DownloadUriBuilder<'a>
 {
     #[param]
     catalog_id: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<&'a ArchiveUriBuilder<String>>
 }
 
-impl<Parent> DownloadUriBuilder<ArchiveUriBuilder<Parent>>
-where
-    Parent: SysUriBuilder,
+impl DownloadUriBuilder<'_>
 {
     /// Produce the
     /// archive/download/{catalog_id}/test URI
@@ -122,20 +112,18 @@ where
     }
 }
 
-impl<Parent> ArchiveUriBuilder<Parent>
-where
-    Parent: SysUriBuilder + Default,
+impl ArchiveUriBuilder<String>
 {
     /// Continue the builder into a
     /// `CatalogsUriBuilder`.
-    pub fn catalogs(&self) -> CatalogsUriBuilder<Self> {
-        CatalogsUriBuilder::from_parent(self.clone().into())
+    pub fn catalogs(&self) -> CatalogsUriBuilder {
+        CatalogsUriBuilder::from_parent(&Rc::new(self))
     }
 
     /// Continue the builder into a
     /// `DownloadUriBuilder`.
-    pub fn download(&self) -> DownloadUriBuilder<Self> {
-        DownloadUriBuilder::from_parent(self.clone().into())
+    pub fn download(&self) -> DownloadUriBuilder {
+        DownloadUriBuilder::from_parent(&Rc::new(self))
     }
 
     /// Produce the archive/upload/xml URI
@@ -164,16 +152,14 @@ where
 #[derive(Clone, Debug, Default, UriBuilder)]
 #[match_path(path = "{parent}/allow/{name}")]
 #[match_path(path = "{parent}/allow/{name}/{setting}")]
-pub struct AllowUriBuilder<Parent>
-where
-    Parent: SysUriBuilder,
+pub struct AllowUriBuilder<'a>
 {
     #[param]
     name: Option<String>,
     #[param]
     setting: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<&'a NotificationsUriBuilder<String>>,
 }
 
 /// Some supported message type by an XNAT
@@ -190,14 +176,12 @@ pub enum MessageType {
 /// user messaging configuration.
 #[derive(Clone, Debug, Default, UriBuilder)]
 #[match_path(path = "{parent}/messages/{message_type}")]
-pub struct MessagesUriBuilder<Parent>
-where
-    Parent: SysUriBuilder,
+pub struct MessagesUriBuilder<'a>
 {
     #[param]
     message_type: Option<MessageType>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<&'a NotificationsUriBuilder<String>>,
 }
 
 /// Some supported notification type by an XNAT
@@ -228,14 +212,12 @@ pub enum NotifyType {
 /// admin notifications to be enabled/disabled.
 #[derive(Clone, Debug, Default, UriBuilder)]
 #[match_path(path = "{parent}/notify/{notify_type}")]
-pub struct NotifyUriBuilder<Parent>
-where
-    Parent: SysUriBuilder,
+pub struct NotifyUriBuilder<'a>
 {
     #[param]
     notify_type: Option<NotifyType>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<&'a NotificationsUriBuilder<String>>,
 }
 
 /// Some supported options available for managing
@@ -253,42 +235,38 @@ pub enum SubscriberOpt {
 /// configuration.
 #[derive(Clone, Debug, Default, UriBuilder)]
 #[match_path(path = "{parent}/subscribers/{subscriber_option}")]
-pub struct SubscribersUriBuilder<Parent>
-where
-    Parent: SysUriBuilder,
+pub struct SubscribersUriBuilder<'a>
 {
     #[param]
     subscriber_option: Option<SubscriberOpt>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<&'a NotificationsUriBuilder<String>>,
 }
 
-impl<Parent> NotificationsUriBuilder<Parent>
-where
-    Parent: SysUriBuilder + Default,
+impl NotificationsUriBuilder<String>
 {
     /// Continue the builder into a
     /// `AllowUriBuilder`.
-    pub fn allow(&self) -> AllowUriBuilder<Self> {
-        AllowUriBuilder::from_parent(self.clone().into())
+    pub fn allow(&self) -> AllowUriBuilder {
+        AllowUriBuilder::from_parent(&Rc::new(self))
     }
 
     /// Continue the builder into a
     /// `MessagesUriBuilder`.
-    pub fn messages(&self) -> MessagesUriBuilder<Self> {
-        MessagesUriBuilder::from_parent(self.clone().into())
+    pub fn messages(&self) -> MessagesUriBuilder {
+        MessagesUriBuilder::from_parent(&Rc::new(self))
     }
 
     /// Continue the builder into a
     /// `NotifyUriBuilder`.
-    pub fn notify(&self) -> NotifyUriBuilder<Self> {
-        NotifyUriBuilder::from_parent(self.clone().into())
+    pub fn notify(&self) -> NotifyUriBuilder {
+        NotifyUriBuilder::from_parent(&Rc::new(self))
     }
 
     /// Continue the builder into a
     /// `SubscribersUriBuilder`.
-    pub fn subscribers(&self) -> SubscribersUriBuilder<Self> {
-        SubscribersUriBuilder::from_parent(self.clone().into())
+    pub fn subscribers(&self) -> SubscribersUriBuilder {
+        SubscribersUriBuilder::from_parent(&Rc::new(self))
     }
 }
 
@@ -304,9 +282,7 @@ where
     parent: Option<Rc<Parent>>,
 }
 
-impl<Parent> XnatTaskUriBuilder<Parent>
-where
-    Parent: SysUriBuilder,
+impl XnatTaskUriBuilder<String>
 {
     /// Produce the
     /// archive/xnatTask/checkNodeConfigurationStatus

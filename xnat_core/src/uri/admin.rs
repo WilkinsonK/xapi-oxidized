@@ -10,21 +10,21 @@ uri_builder_alias!(AdminUriBuilder);
 // Requires no generics for parent or otherwise.
 ImplAdminUriBuilder! {
     (String),
+    (DataTypesUriBuilder<'_>),
+    (ElementsUriBuilder<'_>),
+    (NamesUriBuilder<'_>),
+    (BuildInfoUriBuilder<'_>),
+    (UptimeUriBuilder<'_>),
+    (ValuesUriBuilder<'_>),
+    (IniUriBuilder<'_>),
+    (PropsUriBuilder<'_>)
 }
 // Requires generics for parent.
 ImplAdminUriBuilder! {
     (SchemaUriBuilder<Parent>, Parent),
-    (DataTypesUriBuilder<Parent>, Parent),
-    (ElementsUriBuilder<Parent>, Parent),
-    (NamesUriBuilder<Parent>, Parent),
     (SiteConfigUriBuilder<Parent>, Parent),
-    (BuildInfoUriBuilder<Parent>, Parent),
-    (UptimeUriBuilder<Parent>, Parent),
-    (ValuesUriBuilder<Parent>, Parent),
     (SiteConfigUriBuilderLegacy<Parent>, Parent),
     (PreferenceUriBuilder<Parent>, Parent),
-    (IniUriBuilder<Parent>, Parent),
-    (PropsUriBuilder<Parent>, Parent)
 }
 
 /// Represents the URI paths available for
@@ -51,12 +51,10 @@ where
 /// data type information from some XNAT.
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/datatypes")]
-pub struct DataTypesUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder,
+pub struct DataTypesUriBuilder<'a>
 {
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<&'a SchemaUriBuilder<String>>,
 }
 
 /// Represents the URI path to items concerning
@@ -64,19 +62,15 @@ where
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/elements")]
 #[match_path(path = "{parent}/elements/{data_type}")]
-pub struct ElementsUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder,
+pub struct ElementsUriBuilder<'a>
 {
     #[param]
     data_type: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<&'a DataTypesUriBuilder<'a>>,
 }
 
-impl<Parent> ElementsUriBuilder<SchemaUriBuilder<Parent>>
-where
-    Parent: AdminUriBuilder,
+impl ElementsUriBuilder<'_>
 {
     /// Produce the
     /// schemas/datatypes/all URI endpoint.
@@ -91,19 +85,15 @@ where
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/names")]
 #[match_path(path = "{parent}/names/{data_type}")]
-pub struct NamesUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder,
+pub struct NamesUriBuilder<'a>
 {
     #[param]
     data_type: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<&'a DataTypesUriBuilder<'a>>,
 }
 
-impl<Parent> NamesUriBuilder<SchemaUriBuilder<Parent>>
-where
-    Parent: AdminUriBuilder,
+impl NamesUriBuilder<'_>
 {
     /// Produce the schemas/names/all URI
     /// endpoint.
@@ -112,31 +102,27 @@ where
     }
 }
 
-impl<Parent> DataTypesUriBuilder<SchemaUriBuilder<Parent>>
-where
-    Parent: AdminUriBuilder + Default,
+impl DataTypesUriBuilder<'_>
 {
     /// Continue the builder into a data type
     /// `ElementsUriBuilder`.
-    pub fn elements(&self) -> ElementsUriBuilder<Self> {
-        ElementsUriBuilder::from_parent(self.clone().into())
+    pub fn elements(&self) -> ElementsUriBuilder {
+        ElementsUriBuilder::from_parent(&Rc::new(self))
     }
 
     /// Continue the builder into a data type
     /// `NamesUriBuilder`.
-    pub fn names(&self) -> NamesUriBuilder<Self> {
-        NamesUriBuilder::from_parent(self.clone().into())
+    pub fn names(&self) -> NamesUriBuilder {
+        NamesUriBuilder::from_parent(&Rc::new(self))
     }
 }
 
-impl<Parent> SchemaUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder + Default,
+impl SchemaUriBuilder<String>
 {
     /// Continue the builder into a
     /// `DataTypesUriBuilder`.
-    pub fn datatypes(&self) -> DataTypesUriBuilder<Self> {
-        DataTypesUriBuilder::from_parent(self.clone().into())
+    pub fn datatypes(&self) -> DataTypesUriBuilder {
+        DataTypesUriBuilder::from_parent(&Rc::new(self))
     }
 }
 
@@ -161,19 +147,15 @@ where
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/buildInfo")]
 #[match_path(path = "{parent}/buildInfo/{property}")]
-pub struct BuildInfoUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder,
+pub struct BuildInfoUriBuilder<'a>
 {
     #[param]
     property: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<&'a SiteConfigUriBuilder<String>>
 }
 
-impl<Parent> BuildInfoUriBuilder<SiteConfigUriBuilder<Parent>>
-where
-    Parent: AdminUriBuilder,
+impl BuildInfoUriBuilder<'_>
 {
     /// Produce the
     /// siteConfig/buildInfo/attributes URI
@@ -187,17 +169,13 @@ where
 /// getting system uptime.
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/uptime")]
-pub struct UptimeUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder,
+pub struct UptimeUriBuilder<'a>
 {
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<&'a SiteConfigUriBuilder<String>>
 }
 
-impl<Parent> UptimeUriBuilder<SiteConfigUriBuilder<Parent>>
-where
-    Parent: AdminUriBuilder,
+impl UptimeUriBuilder<'_>
 {
     /// Produce the siteConfig/uptime/display
     /// URI endpoint.
@@ -210,37 +188,32 @@ where
 /// acquiring an XNAT's configuration properties.
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/values/{preferences}")]
-pub struct ValuesUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder,
+pub struct ValuesUriBuilder<'a>
 {
     #[param]
     preferences: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<&'a SiteConfigUriBuilder<String>>
 }
 
-impl<Parent> SiteConfigUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder + Default,
+impl SiteConfigUriBuilder<String>
 {
     /// Continue the builder into a
     /// `BuildInfoUriBuilder`.
-    pub fn build_info(&self) -> BuildInfoUriBuilder<Self> {
-        // TODO: fix this clone nightmare.
-        BuildInfoUriBuilder::from_parent(self.clone().into())
+    pub fn build_info(&self) -> BuildInfoUriBuilder {
+        BuildInfoUriBuilder::from_parent(&Rc::new(self))
     }
 
     /// Continue the builder into a
     /// `UptimeUriBuilder`.
-    pub fn uptime(&self) -> UptimeUriBuilder<Self> {
-        UptimeUriBuilder::from_parent(self.clone().into())
+    pub fn uptime(&self) -> UptimeUriBuilder {
+        UptimeUriBuilder::from_parent(&Rc::new(self))
     }
 
     /// Produce a siteConfig/values/{pref} URI
     /// endpoint.
     pub fn values(&self, pref: &str) -> anyhow::Result<String> {
-        ValuesUriBuilder::from_parent(self.clone().into())
+        ValuesUriBuilder::from_parent(&Rc::new(self))
             .with_preferences(&pref)
             .build()
     }
@@ -281,14 +254,12 @@ where
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/ini")]
 #[match_path(path = "{parent}/ini/{tool_id}")]
-pub struct IniUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder,
+pub struct IniUriBuilder<'a>
 {
     #[param]
     tool_id: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<&'a PreferenceUriBuilder<String>>
 }
 
 /// Represents the URI paths available to a user
@@ -296,30 +267,26 @@ where
 #[derive(Debug, Default, Clone, UriBuilder)]
 #[match_path(path = "{parent}/props")]
 #[match_path(path = "{parent}/props/{tool_id}")]
-pub struct PropsUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder,
+pub struct PropsUriBuilder<'a>
 {
     #[param]
     tool_id: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<&'a PreferenceUriBuilder<String>>
 }
 
-impl<Parent> PreferenceUriBuilder<Parent>
-where
-    Parent: AdminUriBuilder + Default,
+impl PreferenceUriBuilder<String>
 {
     /// Continue the builder into a
     /// `IniUriBuilder`.
-    pub fn ini(&self) -> IniUriBuilder<Self> {
-        IniUriBuilder::from_parent(self.clone().into())
+    pub fn ini(&self) -> IniUriBuilder {
+        IniUriBuilder::from_parent(&Rc::new(self))
     }
 
     /// Continue the builder into a
     /// `PropsUriBuilder`.
-    pub fn properties(&self) -> PropsUriBuilder<Self> {
-        PropsUriBuilder::from_parent(self.clone().into())
+    pub fn properties(&self) -> PropsUriBuilder {
+        PropsUriBuilder::from_parent(&Rc::new(self))
     }
 }
 
