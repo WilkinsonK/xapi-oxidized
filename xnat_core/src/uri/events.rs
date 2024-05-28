@@ -192,6 +192,20 @@ impl EventsUriBuilder<String> {
     }
 }
 
+/// Represents URI paths for event tracking API.
+#[derive(Clone, Debug, Default, UriBuilder)]
+#[match_path(path = "{parent}/event_tracking")]
+#[match_path(path = "{parent}/event_tracking/{key}")]
+pub struct EventTrackingUriBuilder<Parent>
+where
+    Parent: EventsAdminUriBuilder,
+{
+    #[param]
+    key: Option<String>,
+    #[parent]
+    parent: Option<Rc<Parent>>,
+}
+
 /// Represents the URI paths available for
 /// endpoints meant for managing events.
 pub trait EventsUri: Version {
@@ -199,5 +213,12 @@ pub trait EventsUri: Version {
     #[inline]
     fn events(&self) -> EventsUriBuilder<String> {
         EventsUriBuilder::from_parent(self.root_uri().into())
+    }
+
+    /// URI endpoints to manage XNAT event
+    /// tracking.
+    #[inline]
+    fn event_tracking(&self) -> EventTrackingUriBuilder<String> {
+        EventTrackingUriBuilder::from_parent(self.root_uri().into())
     }
 }
