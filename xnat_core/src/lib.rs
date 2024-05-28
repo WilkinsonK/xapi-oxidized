@@ -3,7 +3,8 @@ pub mod version;
 
 pub use oxinat_derive::*;
 
-pub use crate::uri::{
+pub use crate::uri::{UriBuilder, UriBuildError};
+pub use crate::uri::admin::{
     AdminUri,
     AdminUriLegacy,
     AuthUriLegacy,
@@ -21,8 +22,6 @@ pub use crate::uri::{
     SubscriptionAction,
     SubscriberOpt,
     SystemUri,
-    UriBuilder,
-    UriBuildError,
     UsersUri,
     UsersUriLegacy,
 };
