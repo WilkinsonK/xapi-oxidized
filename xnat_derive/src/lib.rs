@@ -67,6 +67,19 @@ pub fn derive_authuri(input: TokenStream) -> TokenStream {
 }
 
 /// Generates the methods required to implement a
+/// `EventsUri` trait, allowing for a type to
+/// represent the XNAT event system.
+#[proc_macro_derive(EventUri)]
+pub fn derive_eventuri(input: TokenStream) -> TokenStream {
+    derive_input_boilerplate!(generics, ident; from input);
+    let where_clause = &generics.where_clause;
+
+    quote! {
+        impl #generics EventsUri for #ident #generics #where_clause {}
+    }.into()
+}
+
+/// Generates the methods required to implement a
 /// `SystemUri` trait, allowing for a type to
 /// represent the administrative endpoints
 /// available.

@@ -1,4 +1,4 @@
-use std::{collections::HashSet, hash::{DefaultHasher, Hash, Hasher}};
+use std::collections::HashSet;
 use proc_macro::TokenStream as TokenStream1;
 
 use attribute_derive::FromAttr;
@@ -212,8 +212,10 @@ fn build_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
         let index_name = new_ambiguous_ident!("p{}", idx);
         // Simply apply the parameter field if no
         // special formatting is required.
-        if !pattern.params.contains(p) {
+        if !pattern.params.contains(p) && p.is_option {
             lhs.extend(quote! { #field_name: None, });
+            return
+        } else if !pattern.params.contains(p) {
             return
         }
 
@@ -229,24 +231,17 @@ fn build_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
         }
 
         if let Some(rq) = &p.requires {
-            let validator = hash_new_ident(&mut rq.clone(), "validator".into());
             rhs_inner.extend(quote! {
-                let #validator = #rq;
-                if !#validator(#param_name) {
+                if !#rq(#param_name) {
                     return Err(crate::uri::UriBuildError::Validation.into())
                 }
             })
         }
     });
 
+    let mut conditional = quote! {};
     if let Some(rq) = &pattern.requires {
-        let validator = hash_new_ident(&mut rq.clone(), "validator".into());
-        rhs_inner.extend(quote! {
-            let #validator = #rq;
-            if !#validator(self) {
-                return Err(crate::uri::UriBuildError::Validation.into())
-            }
-        })
+        conditional.extend(quote! { if #rq(self) })
     }
 
     // Finalize RHS after determination of
@@ -260,7 +255,7 @@ fn build_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
     // Round off match pattern by ignoring any
     // non-parameter fields.
     lhs.extend(quote! { .. });
-    quote! { Self { #lhs } => Ok(#rhs), }
+    quote! { Self { #lhs } #conditional => Ok(#rhs), }
 }
 
 /// Performs a shallow construction of a match arm
@@ -290,10 +285,6 @@ fn build_methods(input: &DeriveInput, params: &[ParamAttrsParsed]) -> TokenStrea
         let field_name  = &param.field_name;
         let kind        = &param.kind;
 
-        if !param.is_option {
-            panic!("non-optional params not currently supported")
-        }
-
         if param.is_parent {
             with_methods.extend(quote! {
                 /// Generated method to set the
@@ -312,12 +303,19 @@ fn build_methods(input: &DeriveInput, params: &[ParamAttrsParsed]) -> TokenStrea
                     Self::default().with_parent(value)
                 }
             })
-        } else {
+        } else if param.is_option {
             with_methods.extend(quote! {
                 /// Generated method to set the
                 /// `#field_name` of `#ident`
                 pub fn #method_name<V: Clone + Into<#kind>>(mut self, value: &V) -> Self {
                     self.#field_name = Some((*value).to_owned().into());
+                    self
+                }
+            })
+        } else {
+            with_methods.extend(quote! {
+                pub fn #method_name<V: Clone + Into<#kind>>(mut self, value: &V) -> Self {
+                    self.#field_name = value.to_owned().into();
                     self
                 }
             })
@@ -344,14 +342,6 @@ fn filter_match_paths(attr: &&Attribute) -> bool {
 fn filter_params(attr: &&Attribute) -> bool {
     ["param", "parent"]
         .contains(&attr.meta.path().segments[0].ident.to_string().as_str())
-}
-
-/// Digests an arbitrary value into an ambiguous
-/// identity.
-fn hash_new_ident<H: Hash>(value: &mut H, label: Option<&str>) -> Ident {
-    let mut h = DefaultHasher::new();
-    value.hash(&mut h);
-    new_ambiguous_ident!("{}_{}", label.unwrap_or("hashed_id"), h.finish())
 }
 
 /// Determines if the attribute is a `parent`
@@ -429,7 +419,10 @@ fn parse_params(fields: &Fields) -> Vec<ParamAttrsParsed> {
 
         let is_parent = attrs.is_parent.unwrap_or_default();
         let is_option = is_optional_type(&kind);
-        let name = attrs.name.unwrap_or(ident.to_string());
+        let name = attrs
+            .name
+            .as_ref().unwrap_or(&ident.to_string())
+            .to_owned();
         let kind = if is_option {
             parse_optional_type(&kind)
         } else {
@@ -437,10 +430,12 @@ fn parse_params(fields: &Fields) -> Vec<ParamAttrsParsed> {
         }.to_owned();
         let map_from = attrs
             .map_from
-            .map(|mf| parse_str::<Expr>(&mf).expect("must be a parsable expression"));
+            .as_ref()
+            .map(|mf| parse_str::<Expr>(mf).expect("must be a parsable expression"));
         let requires = attrs
             .requires
-            .map(|rq| parse_str::<Expr>(&rq).expect("must be a parsable expression"));
+            .as_ref()
+            .map(|rq| parse_str::<Expr>(rq).expect("must be a parsable expression"));
 
         ParamAttrsParsed {
             field_name: ident,
