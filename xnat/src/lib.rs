@@ -8,7 +8,7 @@ pub extern crate oxinat_derive;
 #[derive(Version, AdminUri, AuthUri, UsersUri)]
 #[version(root_uri = "data", legacy = true)]
 pub struct V1;
-#[derive(Version, AdminUri, EventUri, AuthUri, SystemUri, UsersUri)]
+#[derive(Version, FullUri)]
 #[version(root_uri = "xapi", root_uri_legacy = "data")]
 pub struct V2;
 
