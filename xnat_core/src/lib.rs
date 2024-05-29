@@ -1,9 +1,10 @@
 pub mod uri;
 pub mod version;
 
+pub use anyhow;
 pub use oxinat_derive::*;
 
-pub use crate::uri::{UriBuilder, UriBuildError};
+pub use crate::uri::{UriBuilder, UriBuildError, BuildResult};
 pub use crate::uri::admin::{
     AdminUri,
     AdminUriLegacy,
@@ -27,10 +28,14 @@ pub use crate::uri::admin::{
     UsersUriLegacy,
 };
 pub use crate::uri::data::{
+    ArchiveUri,
     ExperimentUri,
+    ExperimentUriArchive,
     ProjectUri,
+    ProjectUriArchive,
     ProjectUriLegacy,
     ProjectAttributeType,
+    SubjectUriArchive,
     SubjectUriLegacy,
 };
 pub use crate::version::Version;

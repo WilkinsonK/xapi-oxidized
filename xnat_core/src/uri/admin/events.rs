@@ -151,7 +151,7 @@ pub struct SubscriptionUriBuilder<'a> {
 
 impl EventUriBuilder<'_> {
     /// Produce the event/properties URI endpoint.
-    pub fn build_properties(&self) -> anyhow::Result<String> {
+    pub fn build_properties(&self) -> crate::BuildResult {
         if is_event_type!(One)(self) {
             self.build_join("properties")
         } else {
@@ -169,7 +169,7 @@ impl EventsUriBuilder<String> {
 
     /// Produces the events/prefs URI
     /// endpoint.
-    pub fn build_pref(&self) -> anyhow::Result<String> {
+    pub fn build_pref(&self) -> crate::BuildResult {
         self.build_join("prefs")
     }
 

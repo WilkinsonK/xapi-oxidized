@@ -5,10 +5,10 @@ pub extern crate oxinat_core;
 #[cfg(feature = "derive")]
 pub extern crate oxinat_derive;
 
-#[derive(Version, AdminUri, AuthUri, ServicesUri, UsersUri)]
+#[derive(Clone, Version, AdminUri, AuthUri, ServicesUri, UsersUri)]
 #[version(root_uri = "data", legacy = true)]
 pub struct V1;
-#[derive(Version, FullUri)]
+#[derive(Clone, Version, FullUri)]
 #[version(root_uri = "xapi", data_uri = "data")]
 pub struct V2;
 
@@ -38,24 +38,21 @@ mod tests {
 
     #[test]
     fn test_version_v1_impls_admin_legacy01() {
-        let ver = V1{};
-        let uri = ver.config().build();
+        let uri = V1.config().build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "data/config")
     }
 
     #[test]
     fn test_version_v2_impls_admin01() {
-        let ver = V2{};
-        assert_eq!(ver.site_config().build().unwrap(), "xapi/siteConfig");
-        assert_eq!(ver.preferences().build().unwrap(), "xapi/prefs");
-        assert_eq!(ver.schema().build().unwrap(), "xapi/schemas");
+        assert_eq!(V2.site_config().build().unwrap(), "xapi/siteConfig");
+        assert_eq!(V2.preferences().build().unwrap(), "xapi/prefs");
+        assert_eq!(V2.schema().build().unwrap(), "xapi/schemas");
     }
 
     #[test]
     fn test_version_v2_impls_events_action01() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .events()
             .actions()
             .with_event_type(EventType::One)
@@ -66,8 +63,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_events_action02() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .events()
             .actions()
             .build();
@@ -77,8 +73,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_events_action03() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .events()
             .actions()
             .with_event_type(EventType::Multiple)
@@ -89,8 +84,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_events_subscription01() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .events()
             .subscription()
             .with_action(SubscriptionAction::Filter)
@@ -101,8 +95,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_events_subscription02() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .events()
             .subscription()
             .with_action(SubscriptionAction::Validate)
@@ -113,8 +106,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_events_subscription03() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .events()
             .subscription()
             .with_action(SubscriptionAction::Activate)
@@ -126,8 +118,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_events_subscription04() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .events()
             .subscription()
             .with_id("SOME_ID")
@@ -138,8 +129,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_site_config01() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .site_config()
             .build_info()
             .with_property(&String::from("some_property"))
@@ -150,8 +140,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_sys01() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .archive()
             .catalogs()
             .refresh()
@@ -162,8 +151,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_sys02() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .archive()
             .catalogs()
             .refresh()
@@ -178,12 +166,10 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_sys_notify01() {
-        let ver = V2{};
-
         let nt = NotifyType::SmtpProperty(
             "auth".to_owned(),
             "HaHAhA".to_owned().into());
-        let uri = ver
+        let uri = V2
             .notifications()
             .notify()
             .with_notify_type(nt)
@@ -194,8 +180,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_sys_notify02() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .notifications()
             .notify()
             .with_notify_type(NotifyType::Par)
@@ -206,15 +191,13 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_users01() {
-        let ver = V2{};
-        let uri = ver.users().groups().build();
+        let uri = V2.users().groups().build();
         assert!(uri.is_err(), "unset username must produce an error");
     }
 
     #[test]
     fn test_version_v2_impls_users02() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .users()
             .with_username("spyslikeus")
             .groups()
@@ -225,8 +208,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_session_data01() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .experiment_data()
             .by_project("some_project")
             .build();
@@ -236,8 +218,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_session_data02() {
-        let ver = V2{};
-        let uri = ver
+        let uri = V2
             .experiment_data()
             .by_project("some_project")
             .with_experiment("some_session")
@@ -248,9 +229,7 @@ mod tests {
 
     #[test]
     fn test_version_v2_impls_session_data03() {
-        let ver = V2{};
-        ver.project_data().with_experiment("some_experiment").experiments();
-        let uri = ver
+        let uri = V2
             .experiment_data()
             .by_project("some_project")
             .with_experiment("some_session")
@@ -258,6 +237,6 @@ mod tests {
             .with_scan(45u64)
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "data/projects/some_project/experiments/some_session/scans/45")
+        assert_eq!(uri.unwrap(), "data/projects/some_project/experiments/some_session/scans/45");
     }
 }

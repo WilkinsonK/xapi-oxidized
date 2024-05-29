@@ -6,11 +6,13 @@ use proc_macro::TokenStream;
 
 use proc_macro2::{Ident, Span};
 use quote::quote;
-use syn::{parse_macro_input, Attribute, DeriveInput};
+use syn::{parse_macro_input, Attribute, Data, DeriveInput, Fields};
 
 use uri::uribuilder;
 use crate::version::{
-    derive_version_parse_legacy, derive_version_parse_root_uri, derive_version_parse_data_uri
+    derive_version_parse_legacy,
+    derive_version_parse_root_uri,
+    derive_version_parse_data_uri
 };
 
 /// Shortcut to avoid repetive usage of the same
@@ -53,6 +55,7 @@ pub fn derive_alluri(input: TokenStream) -> TokenStream {
     let mut gen = TokenStream::new();
     [
         derive_adminuri,
+        derive_archiveuri,
         derive_authuri,
         derive_dicomuri,
         derive_eventuri,
@@ -85,6 +88,14 @@ pub fn derive_adminuri(input: TokenStream) -> TokenStream {
 }
 
 /// Generates the methods required to implement a
+/// `ArchiveUri` trait, allowing for a type to
+/// represent the XNAT archive access endpoints.
+#[proc_macro_derive(ArchiveUri)]
+pub fn derive_archiveuri(input: TokenStream) -> TokenStream {
+    empty_impl!(ArchiveUri; from input).into()
+}
+
+/// Generates the methods required to implement a
 /// `AuthUri` trait, allowing for a type to
 /// represent the user authentication endpoints.
 #[proc_macro_derive(AuthUri)]
@@ -113,7 +124,10 @@ pub fn derive_eventuri(input: TokenStream) -> TokenStream {
 /// represent the XNAT experiments system.
 #[proc_macro_derive(ExperimentUri)]
 pub fn derive_experimenturi(input: TokenStream) -> TokenStream {
-    empty_impl!(ExperimentUri; from input).into()
+    let mut gen = quote! {};
+    gen.extend(empty_impl!(ExperimentUri; from input));
+    gen.extend(empty_impl!(ExperimentUriArchive; from input));
+    gen.into()
 }
 
 /// Generates the methods required to implement a
@@ -135,6 +149,7 @@ pub fn derive_projectsuri(input: TokenStream) -> TokenStream {
     if !derive_version_parse_legacy(&attrs) {
         gen.extend(empty_impl!(ProjectUri; from input))
     }
+    gen.extend(empty_impl!(ProjectUriArchive; from input));
     gen.extend(empty_impl!(ProjectUriLegacy; from input));
     gen.into()
 }
@@ -154,7 +169,10 @@ pub fn derive_serviceuri(input: TokenStream) -> TokenStream {
 /// management.
 #[proc_macro_derive(SubjectUri)]
 pub fn derive_subjecturi(input: TokenStream) -> TokenStream {
-    empty_impl!(SubjectUriLegacy; from input).into()
+    let mut gen = quote! {};
+    gen.extend(empty_impl!(SubjectUriLegacy; from input));
+    gen.extend(empty_impl!(SubjectUriArchive; from input));
+    gen.into()
 }
 
 /// Generates the methods required to implement a
@@ -254,7 +272,7 @@ pub fn derive_version(input: TokenStream) -> TokenStream {
     // derive input, including the raw details,
     // generic declarations and attributes passed
     // through version() calls.
-    derive_input_boilerplate!(attrs, generics, ident; from input);
+    derive_input_boilerplate!(attrs, data, generics, ident; from input);
     let where_clause = &generics.where_clause;
 
     // Determine the `root_uri` attribute to be
@@ -264,7 +282,8 @@ pub fn derive_version(input: TokenStream) -> TokenStream {
         .unwrap_or_else(|_| ident.to_string().to_lowercase());
     let data_uri = derive_version_parse_data_uri(&attrs).unwrap();
 
-    quote! {
+    let mut gen = quote! {};
+    gen.extend(quote! {
         impl #generics Version for #ident #generics #where_clause {
             fn root_uri(&self) -> String {
                 String::from(#root_uri)
@@ -274,5 +293,41 @@ pub fn derive_version(input: TokenStream) -> TokenStream {
                 String::from(#data_uri)
             }
         }
-    }.into()
+    });
+    gen.extend(quote! {
+        impl #generics UriBuilder for #ident #generics #where_clause {
+            fn build(&self) -> crate::BuildResult {
+                Ok(self.root_uri())
+            }
+        }
+    });
+    gen.extend(quote! {
+        impl #generics std::fmt::Display for #ident #generics #where_clause {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{}", self.root_uri())
+            }
+        }
+    });
+
+    let mut default_calls = quote! {};
+    match data {
+        Data::Struct(d) => d.fields.to_owned(),
+        _ => Fields::Unit,
+    }
+        .iter()
+        .for_each(|f| {
+            let field_ident = &f.ident;
+            let field_type  = &f.ty;
+            default_calls.extend(quote! {
+                #field_ident: #field_type::default(),
+            })
+        });
+    gen.extend(quote! {
+        impl #generics Default for #ident #generics #where_clause {
+            fn default() -> Self {
+                Self { #default_calls }
+            }
+        }
+    });
+    gen.into()
 }

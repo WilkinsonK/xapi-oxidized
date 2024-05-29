@@ -117,7 +117,7 @@ fn build_enum(input: &DeriveInput, data: &DataEnum) -> TokenStream {
     let where_clause      = &generics.where_clause;
     let gen = quote! {
         impl #generics UriBuilder for #ident #generics #where_clause {
-            fn build(&self) -> anyhow::Result<String> {
+            fn build(&self) -> crate::BuildResult {
                 Ok(self.to_string().into())
             }
         }
@@ -146,7 +146,7 @@ fn build_struct(input: &DeriveInput, data: &DataStruct) -> TokenStream {
     let match_arms = build_matches(&match_paths, &params);
     let mut gen = quote! {
         impl #generics UriBuilder for #ident #generics #where_clause {
-            fn build(&self) -> anyhow::Result<String> {
+            fn build(&self) -> crate::BuildResult {
                 match self {
                     #match_arms
                 }

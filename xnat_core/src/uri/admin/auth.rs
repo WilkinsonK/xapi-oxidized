@@ -100,7 +100,7 @@ impl TokensUriBuilder<'_> {
 impl ServicesUriBuilder<'_> {
     /// Produces the endpoint used to request a
     /// new user session.
-    pub fn build_auth(&self) -> anyhow::Result<String> {
+    pub fn build_auth(&self) -> crate::BuildResult {
         self.build_join("auth")
     }
 
@@ -114,7 +114,7 @@ impl ServicesUriBuilder<'_> {
 impl AuthUriLegacyBuilder<String> {
     /// Produces the endpoint used for managing
     /// the logged in user's session.
-    pub fn build_jsessionid(&self) -> anyhow::Result<String> {
+    pub fn build_jsessionid(&self) -> crate::BuildResult {
         self.build_join("JSESSIONID")
     }
 

@@ -87,27 +87,27 @@ impl DownloadUriBuilder<'_>
     /// Produce the
     /// archive/download/{catalog_id}/test URI
     /// endpoint.
-    pub fn build_test(&self) -> anyhow::Result<String> {
+    pub fn build_test(&self) -> crate::BuildResult {
         self.build_join("test")
     }
 
     /// Produce the archive/downloadwithsize URI
     /// endpoint.
-    pub fn build_with_size(&self) -> anyhow::Result<String> {
+    pub fn build_with_size(&self) -> crate::BuildResult {
         self.parent.as_ref().unwrap().build_join("downloadwithsize")
     }
 
     /// Produce the
     /// archive/download/{catalog_id}/xml URI
     /// endpoint.
-    pub fn build_xml(&self) -> anyhow::Result<String> {
+    pub fn build_xml(&self) -> crate::BuildResult {
         self.build_join("xml")
     }
 
     /// Produce the
     /// archive/download/{catalog_id}/zip URI
     /// endpoint.
-    pub fn build_zip(&self) -> anyhow::Result<String> {
+    pub fn build_zip(&self) -> crate::BuildResult {
         self.build_join("zip")
     }
 }
@@ -128,7 +128,7 @@ impl ArchiveUriBuilder<String>
 
     /// Produce the archive/upload/xml URI
     /// endpoint.
-    pub fn build_upload_xml(&self) -> anyhow::Result<String> {
+    pub fn build_upload_xml(&self) -> crate::BuildResult {
         self.build_join("upload/xml")
     }
 }
@@ -287,13 +287,13 @@ impl XnatTaskUriBuilder<String>
     /// Produce the
     /// archive/xnatTask/checkNodeConfigurationStatus
     /// URI endpoint.
-    pub fn build_check_node_config_status(&self) -> anyhow::Result<String> {
+    pub fn build_check_node_config_status(&self) -> crate::BuildResult {
         self.build_join("checkNodeConfigurationStatus")
     }
 
     /// Produce the archive/xnatTask/taskList URI
     /// endpoint.
-    pub fn build_task_list(&self) -> anyhow::Result<String> {
+    pub fn build_task_list(&self) -> crate::BuildResult {
         self.build_join("taskList")
     }
 }

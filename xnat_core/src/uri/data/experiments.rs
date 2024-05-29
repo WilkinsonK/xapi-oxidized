@@ -115,7 +115,7 @@ where
     }
 
     /// Produce the quarantine status URI path.
-    pub fn quarantine_status(&self) -> anyhow::Result<String> {
+    pub fn quarantine_status(&self) -> crate::BuildResult {
         self.build_join("status")
     }
 }
@@ -151,8 +151,21 @@ impl ExperimentUriLegacyBuilder<String> {
 /// Represents the URI endpoints available for
 /// XNAT experiment management.
 pub trait ExperimentUri: Version {
+    /// Represents the URI endpoints available for
+    /// XNAT experiment management.
     #[inline]
     fn experiment_data(&self) -> ExperimentUriLegacyBuilder<String> {
         ExperimentUriLegacyBuilder::from_parent(self.data_uri().into())
+    }
+}
+
+/// Represents the URI paths to access archive
+/// paths for session data.
+pub trait ExperimentUriArchive: Version {
+    /// Represents the URI paths to access archive
+    /// paths for session data.
+    #[inline]
+    fn experiment_archive(&self) -> ExperimentUriLegacyBuilder<String> {
+        ExperimentUriLegacyBuilder::from_parent("archive".to_string().into())
     }
 }

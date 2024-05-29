@@ -75,6 +75,17 @@ impl SubjectUriLegacyBuilder<String> {
     }
 }
 
+/// Represents the URI paths to access archive
+/// paths for subject data.
+pub trait SubjectUriArchive: Version {
+    /// Represents the URI paths to access archive
+    /// paths for subject data.
+    #[inline]
+    fn subject_archive(&self) -> SubjectUriLegacyBuilder<String> {
+        SubjectUriLegacyBuilder::from_parent("archive".to_string().into())
+    }
+}
+
 pub trait SubjectUriLegacy: Version {
     /// Legacy URI endpoints for manipulating
     /// subject data.

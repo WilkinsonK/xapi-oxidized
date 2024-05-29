@@ -113,7 +113,7 @@ pub struct DisplaysUriBuilder<'a> {
 impl DisplaysUriBuilder<'_> {
     /// Produces the URI displays/modified
     /// endpoint.
-    pub fn modified(&self) -> anyhow::Result<String> {
+    pub fn modified(&self) -> crate::BuildResult {
         if self.display.is_none() {
             self.build_join("modified")
         } else {
@@ -171,7 +171,7 @@ impl PermissionsUriBuilder<'_> {
 impl AccessUriBuilder<'_> {
     /// Produce the URI path access/projects or
     /// access/{username}/projects
-    pub fn build_projects(&self) -> anyhow::Result<String> {
+    pub fn build_projects(&self) -> crate::BuildResult {
         self.build_join("projects")
     }
 
@@ -270,12 +270,12 @@ impl UserUriBuilder<String>
     }
 
     /// Produces the users/current URI endpoint.
-    pub fn build_current(&self) -> anyhow::Result<String> {
+    pub fn build_current(&self) -> crate::BuildResult {
         self.build_join("current")
     }
 
     /// Produces the users/projects URI endpoint.
-    pub fn build_projects(&self) -> anyhow::Result<String> {
+    pub fn build_projects(&self) -> crate::BuildResult {
         if self.username.is_none() {
             self.build_join("projects")
         } else {
@@ -284,7 +284,7 @@ impl UserUriBuilder<String>
     }
 
     /// Produces the users/username URI endpoint.
-    pub fn build_username(&self) -> anyhow::Result<String> {
+    pub fn build_username(&self) -> crate::BuildResult {
         if self.username.is_none() {
             self.build_join("username")
         } else {
@@ -365,7 +365,7 @@ pub struct ResourcesUriBuilder<'a> {
 impl ResourcesUriBuilder<'_> {
     /// Produce the resources/{folder}/files URI
     /// endpoint to access read to all files.
-    pub fn build_files(&self) -> anyhow::Result<String> {
+    pub fn build_files(&self) -> crate::BuildResult {
         if self.file.is_none() && self.folder.is_some() {
             self.build_join("projects")
         } else {

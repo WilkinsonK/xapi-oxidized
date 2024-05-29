@@ -207,7 +207,7 @@ pub struct DicomScpLegacyUriBuilder<'a> {
 
 impl DicomUriLegacyBuilder<String> {
     /// Produce the scanners URI path.
-    pub fn build_scanners(&self) -> anyhow::Result<String> {
+    pub fn build_scanners(&self) -> crate::BuildResult {
         self.build_join("scanners")
     }
 

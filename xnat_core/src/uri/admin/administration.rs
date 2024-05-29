@@ -74,7 +74,7 @@ impl ElementsUriBuilder<'_>
 {
     /// Produce the
     /// schemas/datatypes/all URI endpoint.
-    pub fn build_all(&self) -> anyhow::Result<String> {
+    pub fn build_all(&self) -> crate::BuildResult {
         self.build_join("all")
     }
 }
@@ -97,7 +97,7 @@ impl NamesUriBuilder<'_>
 {
     /// Produce the schemas/names/all URI
     /// endpoint.
-    pub fn build_all(&self) -> anyhow::Result<String> {
+    pub fn build_all(&self) -> crate::BuildResult {
         self.build_join("all")
     }
 }
@@ -160,7 +160,7 @@ impl BuildInfoUriBuilder<'_>
     /// Produce the
     /// siteConfig/buildInfo/attributes URI
     /// endpoint.
-    pub fn build_attributes(&self) -> anyhow::Result<String> {
+    pub fn build_attributes(&self) -> crate::BuildResult {
         self.build_join("attributes")
     }
 }
@@ -179,7 +179,7 @@ impl UptimeUriBuilder<'_>
 {
     /// Produce the siteConfig/uptime/display
     /// URI endpoint.
-    pub fn build_display(&self) -> anyhow::Result<String> {
+    pub fn build_display(&self) -> crate::BuildResult {
         self.build_join("display")
     }
 }
@@ -212,7 +212,7 @@ impl SiteConfigUriBuilder<String>
 
     /// Produce a siteConfig/values/{pref} URI
     /// endpoint.
-    pub fn values(&self, pref: &str) -> anyhow::Result<String> {
+    pub fn values(&self, pref: &str) -> crate::BuildResult {
         ValuesUriBuilder::from_parent(&Arc::new(self))
             .with_preferences(pref)
             .build()

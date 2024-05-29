@@ -36,7 +36,7 @@ pub trait PluginUri: Version {
 
     /// URI endpoint to access plugin settings.
     #[inline]
-    fn plugin_settings(&self) -> anyhow::Result<String> {
+    fn plugin_settings(&self) -> crate::BuildResult {
         self.root_uri().build_join("pluginOpenUrls/settings")
     }
 }

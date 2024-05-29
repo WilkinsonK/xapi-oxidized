@@ -5,6 +5,21 @@ pub mod resources;
 pub mod shared;
 pub mod subjects;
 
-pub use experiments::ExperimentUri;
-pub use projects::{ProjectUri, ProjectUriLegacy, ProjectAttributeType};
-pub use subjects::SubjectUriLegacy;
+pub use archive::{
+    ArchiveUri,
+    ProcessorOpt,
+};
+pub use experiments::{
+    ExperimentUri,
+    ExperimentUriArchive
+};
+pub use projects::{
+    ProjectUri,
+    ProjectUriArchive,
+    ProjectUriLegacy,
+    ProjectAttributeType
+};
+pub use subjects::{
+    SubjectUriArchive,
+    SubjectUriLegacy
+};

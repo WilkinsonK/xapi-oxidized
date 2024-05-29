@@ -156,7 +156,7 @@ impl ProjectUriLegacyBuilder<String> {
 
     /// Produce the data/projects/{id}/pars URI
     /// path.
-    pub fn build_pars(&self) -> anyhow::Result<String> {
+    pub fn build_pars(&self) -> crate::BuildResult {
         self
             .id
             .is_some()
@@ -205,6 +205,17 @@ pub trait ProjectUri: Version {
     #[inline]
     fn projects(&self) -> ProjectUriBuilder<String> {
         ProjectUriBuilder::from_parent(self.root_uri().into())
+    }
+}
+
+/// Represents the URI paths to access archive
+/// paths for project data.
+pub trait ProjectUriArchive: Version {
+    /// URI paths for accessing project archive
+    /// data.
+    #[inline]
+    fn project_archive(&self) -> ProjectUriBuilder<String> {
+        ProjectUriBuilder::from_parent("archive".to_string().into())
     }
 }
 
