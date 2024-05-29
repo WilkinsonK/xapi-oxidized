@@ -19,7 +19,7 @@ server, via the XNAT standard interface. With that, there are some
 items that need to be completed before this project can be considered
 **production ready**:
 
-- [ ] Well defined interface for building the URI endpoints.
+- [x] Well defined interface for building the URI endpoints.
 - [ ] A simple to use, and extensible object which represents the
       client.
 
@@ -36,16 +36,16 @@ useful to a wider audience.
 - [ ] Optional support for building this project as a `Python` module.
 
 ## Current status ##
-The project has come along nicely, now with a better understanding of
-the language being used at the top of the tech stack. This third
-revision includes the use of **procedural macros**. This has been a
-tremendous door to open, and has improved the workflow considerably.
+Most of the URI endpoints have been mapped with some exceptions. While
+the remaining endpoints have been left not mapped, they would not be
+deemed as immediately important, and as such can be postponed until a
+later time.
 
-I am currently still mapping out the URI building elements required to
-ease the burden of interacting with an XNAT. This is more or less the
-core functionality as sending a request has already been implemented
-by many other useful crates that I'm looking forward to consider as
-the backbone of RESTful transactions.
+Next will be moving on to the client portion of this library. Some
+time will be taken to consider how this will be executed, but actual
+implementation will probably be only a short time. This being that
+we really will be doing is making some simple REST calls to
+validate a connections; at least for creating the intial interface.
 
 ## Using this Project ##
 While this project is still in alpha, there is a lot to be desired
