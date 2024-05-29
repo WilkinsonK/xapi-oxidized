@@ -308,14 +308,14 @@ fn build_methods(input: &DeriveInput, params: &[ParamAttrsParsed]) -> TokenStrea
             with_methods.extend(quote! {
                 /// Generated method to set the
                 /// `#field_name` of `#ident`
-                pub fn #method_name<V: Clone + Into<#kind>>(mut self, value: &V) -> Self {
-                    self.#field_name = Some((*value).to_owned().into());
+                pub fn #method_name<V: Clone + Into<#kind>>(mut self, value: V) -> Self {
+                    self.#field_name = Some(value.to_owned().into());
                     self
                 }
             })
         } else {
             with_methods.extend(quote! {
-                pub fn #method_name<V: Clone + Into<#kind>>(mut self, value: &V) -> Self {
+                pub fn #method_name<V: Clone + Into<#kind>>(mut self, value: V) -> Self {
                     self.#field_name = value.to_owned().into();
                     self
                 }

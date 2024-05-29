@@ -41,15 +41,15 @@ mod tests {
         let ver = V1{};
         let uri = ver.config().build();
         assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), String::from("data/config"))
+        assert_eq!(uri.unwrap(), "data/config")
     }
 
     #[test]
     fn test_version_v2_impls_admin01() {
         let ver = V2{};
-        assert_eq!(ver.site_config().build().unwrap(), String::from("xapi/siteConfig"));
-        assert_eq!(ver.preferences().build().unwrap(), String::from("xapi/prefs"));
-        assert_eq!(ver.schema().build().unwrap(), String::from("xapi/schemas"));
+        assert_eq!(ver.site_config().build().unwrap(), "xapi/siteConfig");
+        assert_eq!(ver.preferences().build().unwrap(), "xapi/prefs");
+        assert_eq!(ver.schema().build().unwrap(), "xapi/schemas");
     }
 
     #[test]
@@ -58,7 +58,7 @@ mod tests {
         let uri = ver
             .events()
             .actions()
-            .with_event_type(&EventType::One)
+            .with_event_type(EventType::One)
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/events/action")
@@ -81,7 +81,7 @@ mod tests {
         let uri = ver
             .events()
             .actions()
-            .with_event_type(&EventType::Multiple)
+            .with_event_type(EventType::Multiple)
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/events/actions");
@@ -93,7 +93,7 @@ mod tests {
         let uri = ver
             .events()
             .subscription()
-            .with_action(&SubscriptionAction::Filter)
+            .with_action(SubscriptionAction::Filter)
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/events/subscription/filter");
@@ -105,7 +105,7 @@ mod tests {
         let uri = ver
             .events()
             .subscription()
-            .with_action(&SubscriptionAction::Validate)
+            .with_action(SubscriptionAction::Validate)
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/events/subscription/validate");
@@ -117,8 +117,8 @@ mod tests {
         let uri = ver
             .events()
             .subscription()
-            .with_action(&SubscriptionAction::Activate)
-            .with_id(&"SOME_ID")
+            .with_action(SubscriptionAction::Activate)
+            .with_id("SOME_ID")
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/events/subscription/SOME_ID/activate");
@@ -130,7 +130,7 @@ mod tests {
         let uri = ver
             .events()
             .subscription()
-            .with_id(&"SOME_ID")
+            .with_id("SOME_ID")
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/events/subscription/SOME_ID");
@@ -186,7 +186,7 @@ mod tests {
         let uri = ver
             .notifications()
             .notify()
-            .with_notify_type(&nt)
+            .with_notify_type(nt)
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/notifications/notify/smtp/property/auth/HaHAhA");
@@ -198,7 +198,7 @@ mod tests {
         let uri = ver
             .notifications()
             .notify()
-            .with_notify_type(&NotifyType::Par)
+            .with_notify_type(NotifyType::Par)
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/notifications/notify/par")
@@ -216,7 +216,7 @@ mod tests {
         let ver = V2{};
         let uri = ver
             .users()
-            .with_username(&"spyslikeus")
+            .with_username("spyslikeus")
             .groups()
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
@@ -240,7 +240,7 @@ mod tests {
         let uri = ver
             .experiment_data()
             .by_project("some_project")
-            .with_experiment(&"some_session")
+            .with_experiment("some_session")
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "data/projects/some_project/experiments/some_session")
@@ -249,12 +249,13 @@ mod tests {
     #[test]
     fn test_version_v2_impls_session_data03() {
         let ver = V2{};
+        ver.project_data().with_experiment("some_experiment").experiments();
         let uri = ver
             .experiment_data()
             .by_project("some_project")
-            .with_experiment(&"some_session")
+            .with_experiment("some_session")
             .scans()
-            .with_scan(&45u64)
+            .with_scan(45u64)
             .build();
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "data/projects/some_project/experiments/some_session/scans/45")

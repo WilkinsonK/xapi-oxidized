@@ -169,7 +169,7 @@ impl ProjectUriLegacyBuilder<String> {
     pub fn experiments(&self) -> ExperimentUriLegacyBuilder<Self> {
         let b = ExperimentUriLegacyBuilder::from_parent(Rc::new(self.to_owned()));
         match self.experiment.as_ref() {
-            Some(exp) => b.with_experiment(&exp),
+            Some(exp) => b.with_experiment(exp),
             _ => b
         }
     }
@@ -185,7 +185,7 @@ impl ProjectUriLegacyBuilder<String> {
     pub fn subjects(&self) -> SubjectUriLegacyBuilder<Self> {
         let b = SubjectUriLegacyBuilder::from_parent(Rc::new(self.to_owned()));
         match self.subject.as_ref() {
-            Some(sbj) => b.with_subject(&sbj),
+            Some(sbj) => b.with_subject(sbj),
             _ => b
         }
     }

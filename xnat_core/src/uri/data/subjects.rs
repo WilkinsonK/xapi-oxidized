@@ -38,15 +38,15 @@ impl SubjectUriLegacyBuilder<String> {
     pub fn by_project(&self, project: &str) -> SubjectUriLegacyBuilder<ProjectUriLegacyBuilder<String>> {
         let parent = self.parent.as_ref().unwrap().clone();
         let mut b = ProjectUriLegacyBuilder::from_parent(parent)
-            .with_id(&project)
+            .with_id(project)
             .subjects();
 
         b = match self.subject.as_ref() {
-            Some(sbj) => b.with_subject(&sbj),
+            Some(sbj) => b.with_subject(sbj),
             _ => b
         };
         b = match self.experiment.as_ref() {
-            Some(exp) => b.with_experiment(&exp),
+            Some(exp) => b.with_experiment(exp),
             _ => b
         };
         b
@@ -57,7 +57,7 @@ impl SubjectUriLegacyBuilder<String> {
     pub fn experiments(&self) -> ExperimentUriLegacyBuilder<Self> {
         let b = ExperimentUriLegacyBuilder::from_parent(Rc::new(self.to_owned()));
         match self.experiment.as_ref() {
-            Some(exp) => b.with_experiment(&exp),
+            Some(exp) => b.with_experiment(exp),
             _ => b
         }
     }

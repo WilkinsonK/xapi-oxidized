@@ -126,10 +126,10 @@ impl ExperimentUriLegacyBuilder<String> {
     pub fn by_project(&self, project: &str) -> ExperimentUriLegacyBuilder<ProjectUriLegacyBuilder<String>> {
         let parent = self.parent.as_ref().unwrap().clone();
         let b = ProjectUriLegacyBuilder::from_parent(parent)
-            .with_id(&project)
+            .with_id(project)
             .experiments();
         match self.experiment.as_ref() {
-            Some(exp) => b.with_experiment(&exp),
+            Some(exp) => b.with_experiment(exp),
             _ => b
         }
     }
@@ -139,10 +139,10 @@ impl ExperimentUriLegacyBuilder<String> {
     pub fn by_subject(&self, subject: &str) -> ExperimentUriLegacyBuilder<SubjectUriLegacyBuilder<String>> {
         let parent = self.parent.as_ref().unwrap().clone();
         let b = SubjectUriLegacyBuilder::from_parent(parent)
-            .with_subject(&subject)
+            .with_subject(subject)
             .experiments();
         match self.experiment.as_ref() {
-            Some(exp) => b.with_experiment(&exp),
+            Some(exp) => b.with_experiment(exp),
             _ => b
         }
     }

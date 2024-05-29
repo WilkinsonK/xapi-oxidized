@@ -214,7 +214,7 @@ impl SiteConfigUriBuilder<String>
     /// endpoint.
     pub fn values(&self, pref: &str) -> anyhow::Result<String> {
         ValuesUriBuilder::from_parent(&Rc::new(self))
-            .with_preferences(&pref)
+            .with_preferences(pref)
             .build()
     }
 }
@@ -332,10 +332,10 @@ mod test {
         .with_parent("".to_string().into());
         assert_eq!(b.build().unwrap(), String::from("/schemas"));
 
-        let b = b.with_schema(&String::from("phoney_schema"));
+        let b = b.with_schema(String::from("phoney_schema"));
         assert_eq!(b.build().unwrap(), String::from("/schemas/phoney_schema"));
 
-        let b = b.with_namespace(&String::from("phoney_namespace"));
+        let b = b.with_namespace(String::from("phoney_namespace"));
         assert_eq!(b.build().unwrap(), String::from("/phoney_namespace/phoney_schema"))
     }
 }
