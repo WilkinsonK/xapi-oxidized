@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use oxinat_derive::{uri_builder_alias, UriBuilder};
 
@@ -43,7 +43,7 @@ where
     #[param]
     namespace: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 /// Represents the URI path to items concerning
@@ -107,13 +107,13 @@ impl DataTypesUriBuilder<'_>
     /// Continue the builder into a data type
     /// `ElementsUriBuilder`.
     pub fn elements(&self) -> ElementsUriBuilder {
-        ElementsUriBuilder::from_parent(&Rc::new(self))
+        ElementsUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a data type
     /// `NamesUriBuilder`.
     pub fn names(&self) -> NamesUriBuilder {
-        NamesUriBuilder::from_parent(&Rc::new(self))
+        NamesUriBuilder::from_parent(&Arc::new(self))
     }
 }
 
@@ -122,7 +122,7 @@ impl SchemaUriBuilder<String>
     /// Continue the builder into a
     /// `DataTypesUriBuilder`.
     pub fn datatypes(&self) -> DataTypesUriBuilder {
-        DataTypesUriBuilder::from_parent(&Rc::new(self))
+        DataTypesUriBuilder::from_parent(&Arc::new(self))
     }
 }
 
@@ -139,7 +139,7 @@ where
     #[param]
     property: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 /// Represents and builds URI endpoints for
@@ -201,19 +201,19 @@ impl SiteConfigUriBuilder<String>
     /// Continue the builder into a
     /// `BuildInfoUriBuilder`.
     pub fn build_info(&self) -> BuildInfoUriBuilder {
-        BuildInfoUriBuilder::from_parent(&Rc::new(self))
+        BuildInfoUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `UptimeUriBuilder`.
     pub fn uptime(&self) -> UptimeUriBuilder {
-        UptimeUriBuilder::from_parent(&Rc::new(self))
+        UptimeUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Produce a siteConfig/values/{pref} URI
     /// endpoint.
     pub fn values(&self, pref: &str) -> anyhow::Result<String> {
-        ValuesUriBuilder::from_parent(&Rc::new(self))
+        ValuesUriBuilder::from_parent(&Arc::new(self))
             .with_preferences(pref)
             .build()
     }
@@ -232,7 +232,7 @@ where
     #[param]
     tool_id: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 /// Represents the URI paths available for
@@ -245,7 +245,7 @@ where
     Parent: AdminUriBuilder,
 {
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<Arc<Parent>>,
 }
 
 /// Represents the URI paths available to a user
@@ -280,13 +280,13 @@ impl PreferenceUriBuilder<String>
     /// Continue the builder into a
     /// `IniUriBuilder`.
     pub fn ini(&self) -> IniUriBuilder {
-        IniUriBuilder::from_parent(&Rc::new(self))
+        IniUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `PropsUriBuilder`.
     pub fn properties(&self) -> PropsUriBuilder {
-        PropsUriBuilder::from_parent(&Rc::new(self))
+        PropsUriBuilder::from_parent(&Arc::new(self))
     }
 }
 

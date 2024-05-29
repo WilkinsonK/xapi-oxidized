@@ -1,4 +1,4 @@
-use std::{fmt::Debug, rc::Rc};
+use std::{fmt::Debug, sync::Arc};
 
 use crate::{UriBuilder, Version};
 
@@ -9,7 +9,7 @@ where
     Parent: Clone + Debug + UriBuilder,
 {
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 impl ServicesUriLegacyBuilder<String> {

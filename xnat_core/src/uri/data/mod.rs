@@ -1,3 +1,4 @@
+pub mod archive;
 pub mod experiments;
 pub mod projects;
 pub mod resources;

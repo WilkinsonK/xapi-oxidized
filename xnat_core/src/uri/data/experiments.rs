@@ -1,4 +1,4 @@
-use std::{fmt::Debug, rc::Rc};
+use std::{fmt::Debug, sync::Arc};
 
 use oxinat_derive::uri_builder_alias;
 
@@ -41,7 +41,7 @@ where
     #[param]
     experiment: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 macro_rules! parent_has_experiment {
@@ -97,7 +97,7 @@ where
     /// Continue the builder into a
     /// `ResourceUriBuilder`.
     pub fn resources(&self) -> ResourcesUriBuilder<'_, Self> {
-        ResourcesUriBuilder::from_parent(&Rc::new(self))
+        ResourcesUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
@@ -111,7 +111,7 @@ where
     /// Continue the builder into a
     /// `SharedProjectUriBuilder`.
     pub fn shared(&self) -> SharedProjectUriBuilder<'_, Self> {
-        SharedProjectUriBuilder::from_parent(&Rc::new(self))
+        SharedProjectUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Produce the quarantine status URI path.

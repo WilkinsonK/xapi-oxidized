@@ -1,4 +1,4 @@
-use std::{fmt::Debug, rc::Rc};
+use std::{fmt::Debug, sync::Arc};
 
 use oxinat_derive::uri_builder_alias;
 
@@ -21,7 +21,7 @@ where
     #[param]
     project: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 /// Dictates what the subendpoint should be for
@@ -164,7 +164,7 @@ impl EventsUriBuilder<String> {
     /// Continue the builder into a
     /// `ActionsUriBuilder`.
     pub fn actions(&self) -> ActionsUriBuilder {
-        ActionsUriBuilder::from_parent(&Rc::new(self))
+        ActionsUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Produces the events/prefs URI
@@ -176,19 +176,19 @@ impl EventsUriBuilder<String> {
     /// Continue the builder into a
     /// `DeliveredUriBuilder`.
     pub fn delivered(&self) -> DeliveredUriBuilder {
-        DeliveredUriBuilder::from_parent(&Rc::new(self))
+        DeliveredUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `EventUriBuilder`.
     pub fn event(&self) -> EventUriBuilder {
-        EventUriBuilder::from_parent(&Rc::new(self))
+        EventUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `SubscriptionUriBuilder`.
     pub fn subscription(&self) -> SubscriptionUriBuilder {
-        SubscriptionUriBuilder::from_parent(&Rc::new(self))
+        SubscriptionUriBuilder::from_parent(&Arc::new(self))
     }
 }
 
@@ -203,7 +203,7 @@ where
     #[param]
     key: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<Arc<Parent>>,
 }
 
 /// Represents the URI paths available for

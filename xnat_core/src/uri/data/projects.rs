@@ -1,4 +1,4 @@
-use std::{fmt::Debug, path::PathBuf, rc::Rc};
+use std::{fmt::Debug, path::PathBuf, sync::Arc};
 
 use oxinat_derive::uri_builder_alias;
 
@@ -20,7 +20,7 @@ where
     Parent: ProjectDataUriBuilder,
 {
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 /// Represents URI endpoint paths available for
@@ -64,7 +64,7 @@ where
     #[param]
     id: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -151,7 +151,7 @@ impl ProjectUriLegacyBuilder<String> {
     /// Continue the builder into a
     /// `AttributesUriBuilder`
     pub fn attributes(&self) -> AttributesUriBuilder {
-        AttributesUriBuilder::from_parent(&Rc::new(self))
+        AttributesUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Produce the data/projects/{id}/pars URI
@@ -167,7 +167,7 @@ impl ProjectUriLegacyBuilder<String> {
     /// Continue the builder into a
     /// `ExperimentUriLegacyBuilder`.
     pub fn experiments(&self) -> ExperimentUriLegacyBuilder<Self> {
-        let b = ExperimentUriLegacyBuilder::from_parent(Rc::new(self.to_owned()));
+        let b = ExperimentUriLegacyBuilder::from_parent(Arc::new(self.to_owned()));
         match self.experiment.as_ref() {
             Some(exp) => b.with_experiment(exp),
             _ => b
@@ -177,13 +177,13 @@ impl ProjectUriLegacyBuilder<String> {
     /// Continue the builder into a
     /// `ResourceUriBuilder`.
     pub fn resources(&self) -> ResourcesUriBuilder<'_, Self> {
-        ResourcesUriBuilder::from_parent(&Rc::new(self))
+        ResourcesUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `SubjectUriLegacyBuilder`.
     pub fn subjects(&self) -> SubjectUriLegacyBuilder<Self> {
-        let b = SubjectUriLegacyBuilder::from_parent(Rc::new(self.to_owned()));
+        let b = SubjectUriLegacyBuilder::from_parent(Arc::new(self.to_owned()));
         match self.subject.as_ref() {
             Some(sbj) => b.with_subject(sbj),
             _ => b
@@ -193,7 +193,7 @@ impl ProjectUriLegacyBuilder<String> {
     /// Continue the builder into a
     /// `UsersUriBuilder`.
     pub fn users(&self) -> UsersUriBuilder {
-        UsersUriBuilder::from_parent(&Rc::new(self))
+        UsersUriBuilder::from_parent(&Arc::new(self))
     }
 }
 

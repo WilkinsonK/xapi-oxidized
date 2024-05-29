@@ -1,4 +1,4 @@
-use std::{fmt::Debug, rc::Rc};
+use std::{fmt::Debug, sync::Arc};
 
 use oxinat_derive::uri_builder_alias;
 
@@ -18,7 +18,7 @@ where
     Parent: AuthenticateUriBuilder
 {
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 /// Represents the URI paths responsible for
@@ -121,7 +121,7 @@ impl AuthUriLegacyBuilder<String> {
     /// Continue the builder into a
     /// `AuthServicesUriBuilder`.
     pub fn services(&self) -> ServicesUriBuilder {
-        ServicesUriBuilder::from_parent(&Rc::new(self))
+        ServicesUriBuilder::from_parent(&Arc::new(self))
     }
 }
 

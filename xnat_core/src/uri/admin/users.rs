@@ -1,4 +1,4 @@
-use std::{fmt::Debug, path::PathBuf, rc::Rc};
+use std::{fmt::Debug, path::PathBuf, sync::Arc};
 
 use oxinat_derive::uri_builder_alias;
 
@@ -33,7 +33,7 @@ where
     #[param]
     username: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 /// Represents URI endpoints for an XNAT admin to
@@ -260,13 +260,13 @@ impl UserUriBuilder<String>
     /// Continue the builder into an
     /// `AccessUriBuilder`
     pub fn access(&self) -> AccessUriBuilder {
-        AccessUriBuilder::from_parent(&Rc::new(self))
+        AccessUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `ActiveUriBuilder`.
     pub fn active(&self) -> ActiveUriBuilder {
-        ActiveUriBuilder::from_parent(&Rc::new(self))
+        ActiveUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Produces the users/current URI endpoint.
@@ -295,31 +295,31 @@ impl UserUriBuilder<String>
     /// Continue the builder into an
     /// `EnabledUriBuilder`.
     pub fn enabled(&self) -> EnabledUriBuilder {
-        EnabledUriBuilder::from_parent(&Rc::new(self))
+        EnabledUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `GroupsUriBuilder`.
     pub fn groups(&self) -> GroupsUriBuilder {
-        GroupsUriBuilder::from_parent(&Rc::new(self))
+        GroupsUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `ProfilesUriBuilder`.
     pub fn profiles(&self) -> ProfilesUriBuilder {
-        ProfilesUriBuilder::from_parent(&Rc::new(self))
+        ProfilesUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `RolesUriBuilder`.
     pub fn roles(&self) -> RolesUriBuilder {
-        RolesUriBuilder::from_parent(&Rc::new(self))
+        RolesUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `VerifiedUriBuilder`.
     pub fn verified(&self) -> VerifiedUriBuilder {
-        VerifiedUriBuilder::from_parent(&Rc::new(self))
+        VerifiedUriBuilder::from_parent(&Arc::new(self))
     }
 }
 
@@ -335,7 +335,7 @@ where
     #[param]
     username: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 /// Represents the legacy URI endpoint paths
@@ -378,7 +378,7 @@ impl CacheUriLegacyBuilder<'_> {
     /// Continue the builder into a
     /// `ResourcesUriBuilder`
     pub fn resources(&self) -> ResourcesUriBuilder {
-        ResourcesUriBuilder::from_parent(&Rc::new(self))
+        ResourcesUriBuilder::from_parent(&Arc::new(self))
     }
 }
 
@@ -428,7 +428,7 @@ impl ProjectsUriBuilder<'_> {
     /// Continue the builder into a
     /// `ProjectAccessUriBuilder`.
     pub fn pars(&self) -> ProjectAccessUriBuilder {
-        ProjectAccessUriBuilder::from_parent(&Rc::new(self))
+        ProjectAccessUriBuilder::from_parent(&Arc::new(self))
     }
 }
 
@@ -436,19 +436,19 @@ impl UsersUriLegacyBuilder<String> {
     /// Continue the builder into a
     /// `CacheUriBuilder`.
     pub fn cache(&self) -> CacheUriLegacyBuilder {
-        CacheUriLegacyBuilder::from_parent(&Rc::new(self))
+        CacheUriLegacyBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `FavoritesUriBuilder`.
     pub fn favorites(&self) -> FavoritesUriBuilder {
-        FavoritesUriBuilder::from_parent(&Rc::new(self))
+        FavoritesUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `ProjectsUriBuilder`.
     pub fn projects(&self) -> ProjectsUriBuilder {
-        ProjectsUriBuilder::from_parent(&Rc::new(self))
+        ProjectsUriBuilder::from_parent(&Arc::new(self))
     }
 }
 

@@ -1,4 +1,4 @@
-use std::{fmt::Debug, rc::Rc};
+use std::{fmt::Debug, sync::Arc};
 
 use oxinat_derive::uri_builder_alias;
 
@@ -21,7 +21,7 @@ where
     #[param]
     plugin: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<Arc<Parent>>,
 }
 
 /// Represent the URI paths available for

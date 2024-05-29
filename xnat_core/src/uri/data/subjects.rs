@@ -1,4 +1,4 @@
-use std::{fmt::Debug, rc::Rc};
+use std::{fmt::Debug, sync::Arc};
 
 use oxinat_derive::uri_builder_alias;
 
@@ -29,7 +29,7 @@ where
     #[param]
     subject: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 impl SubjectUriLegacyBuilder<String> {
@@ -55,7 +55,7 @@ impl SubjectUriLegacyBuilder<String> {
     /// Continue the builder into a
     /// `ExperimentUriLegacyBuilder`.
     pub fn experiments(&self) -> ExperimentUriLegacyBuilder<Self> {
-        let b = ExperimentUriLegacyBuilder::from_parent(Rc::new(self.to_owned()));
+        let b = ExperimentUriLegacyBuilder::from_parent(Arc::new(self.to_owned()));
         match self.experiment.as_ref() {
             Some(exp) => b.with_experiment(exp),
             _ => b
@@ -65,7 +65,7 @@ impl SubjectUriLegacyBuilder<String> {
     /// Continue the builder into a
     /// `ResourceUriBuilder`.
     pub fn resources(&self) -> ResourcesUriBuilder<'_, Self> {
-        ResourcesUriBuilder::from_parent(&Rc::new(self))
+        ResourcesUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a

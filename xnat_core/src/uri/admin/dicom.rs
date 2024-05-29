@@ -1,4 +1,4 @@
-use std::{fmt::Debug, rc::Rc};
+use std::{fmt::Debug, sync::Arc};
 
 use oxinat_derive::uri_builder_alias;
 
@@ -22,7 +22,7 @@ where
     Parent: DicomAdminUriBuilder,
 {
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -163,19 +163,19 @@ impl DicomUriBuilder<String> {
     /// Continue the builder into a
     /// `AnonymizeUriBuilder`.
     pub fn anonymize(&self) -> AnonymizeUriBuilder {
-        AnonymizeUriBuilder::from_parent(&Rc::new(self))
+        AnonymizeUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `ListImportUriBuilder`.
     pub fn list(&self) -> ListImportUriBuilder {
-        ListImportUriBuilder::from_parent(&Rc::new(self))
+        ListImportUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `DicomScpUriBuilder`.
     pub fn scp(&self) -> DicomScpUriBuilder {
-        DicomScpUriBuilder::from_parent(&Rc::new(self))
+        DicomScpUriBuilder::from_parent(&Arc::new(self))
     }
 }
 
@@ -188,7 +188,7 @@ where
     Parent: DicomAdminUriBuilder,
 {
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<Arc<Parent>>,
 }
 
 /// Legacy DICOM SCP endpoints.
@@ -214,7 +214,7 @@ impl DicomUriLegacyBuilder<String> {
     /// Continue the builder into a
     /// `DicomScpUriLegacyBuilder`.
     pub fn scp(&self) -> DicomScpLegacyUriBuilder {
-        DicomScpLegacyUriBuilder::from_parent(&Rc::new(self))
+        DicomScpLegacyUriBuilder::from_parent(&Arc::new(self))
     }
 }
 

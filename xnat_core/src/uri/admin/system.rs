@@ -1,4 +1,4 @@
-use std::{fmt::Debug, rc::Rc};
+use std::{fmt::Debug, sync::Arc};
 
 use oxinat_derive::uri_builder_alias;
 
@@ -32,7 +32,7 @@ where
     Parent: SysUriBuilder,
 {
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<Arc<Parent>>,
 }
 
 /// Represents the URI paths available for
@@ -65,7 +65,7 @@ impl CatalogsUriBuilder<'_>
     /// Continue the builder into a
     /// `RefreshUriBuilder`.
     pub fn refresh(&self) -> RefreshUriBuilder {
-        RefreshUriBuilder::from_parent(&Rc::new(self))
+        RefreshUriBuilder::from_parent(&Arc::new(self))
     }
 }
 
@@ -117,13 +117,13 @@ impl ArchiveUriBuilder<String>
     /// Continue the builder into a
     /// `CatalogsUriBuilder`.
     pub fn catalogs(&self) -> CatalogsUriBuilder {
-        CatalogsUriBuilder::from_parent(&Rc::new(self))
+        CatalogsUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `DownloadUriBuilder`.
     pub fn download(&self) -> DownloadUriBuilder {
-        DownloadUriBuilder::from_parent(&Rc::new(self))
+        DownloadUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Produce the archive/upload/xml URI
@@ -143,7 +143,7 @@ where
     Parent: SysUriBuilder,
 {
     #[parent]
-    parent: Option<Rc<Parent>>
+    parent: Option<Arc<Parent>>
 }
 
 /// Represents URI endpoint paths available for
@@ -248,25 +248,25 @@ impl NotificationsUriBuilder<String>
     /// Continue the builder into a
     /// `AllowUriBuilder`.
     pub fn allow(&self) -> AllowUriBuilder {
-        AllowUriBuilder::from_parent(&Rc::new(self))
+        AllowUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `MessagesUriBuilder`.
     pub fn messages(&self) -> MessagesUriBuilder {
-        MessagesUriBuilder::from_parent(&Rc::new(self))
+        MessagesUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `NotifyUriBuilder`.
     pub fn notify(&self) -> NotifyUriBuilder {
-        NotifyUriBuilder::from_parent(&Rc::new(self))
+        NotifyUriBuilder::from_parent(&Arc::new(self))
     }
 
     /// Continue the builder into a
     /// `SubscribersUriBuilder`.
     pub fn subscribers(&self) -> SubscribersUriBuilder {
-        SubscribersUriBuilder::from_parent(&Rc::new(self))
+        SubscribersUriBuilder::from_parent(&Arc::new(self))
     }
 }
 
@@ -279,7 +279,7 @@ where
     Parent: SysUriBuilder,
 {
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<Arc<Parent>>,
 }
 
 impl XnatTaskUriBuilder<String>
@@ -310,7 +310,7 @@ where
     #[param]
     preference: Option<String>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<Arc<Parent>>,
 }
 
 #[derive(Clone, Debug, UriBuilder)]
@@ -336,7 +336,7 @@ where
     #[param]
     config_opt: Option<LogConfigOpt>,
     #[parent]
-    parent: Option<Rc<Parent>>,
+    parent: Option<Arc<Parent>>,
 }
 
 /// Represent the URI paths available for
