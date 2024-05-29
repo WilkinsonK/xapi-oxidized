@@ -121,7 +121,7 @@ where
 }
 
 impl ExperimentUriLegacyBuilder<String> {
-    /// Reconstrucct this builder to allow search
+    /// Reconstruct this builder to allow search
     /// by project.
     pub fn by_project(&self, project: &str) -> ExperimentUriLegacyBuilder<ProjectUriLegacyBuilder<String>> {
         let parent = self.parent.as_ref().unwrap().clone();
