@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
 use crate::UriBuilder;
 
@@ -7,7 +7,7 @@ use crate::UriBuilder;
 #[match_path(path = "{parent}/projects/{shared}")]
 pub struct SharedProjectUriBuilder<'a, Parent>
 where
-    Parent: Display,
+    Parent: Display + Debug,
 {
     #[param]
     shared: Option<String>,

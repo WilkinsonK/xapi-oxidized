@@ -63,6 +63,7 @@ pub struct ParamAttrsParsed {
     pub map_from:   Option<Expr>,
     pub requires:   Option<Expr>,
     pub is_option:  bool,
+    pub is_param:   bool,
     pub is_parent:  bool,
 }
 
@@ -206,7 +207,7 @@ fn build_match_arm(pattern: &MatchPatternAttrsParsed, params: &[ParamAttrsParsed
     // required.
     let mut rhs_inner = quote! {};
 
-    params.iter().enumerate().for_each(|(idx, p)| {
+    params.iter().filter(|p| p.is_param).enumerate().for_each(|(idx, p)| {
         let field_name = &p.field_name;
         let param_name = new_ambiguous_ident!(&p.name);
         let index_name = new_ambiguous_ident!("p{}", idx);
@@ -266,7 +267,7 @@ fn build_match_arm_shallow(pattern: &MatchPatternAttrsParsed, params: &[ParamAtt
     let path = &pattern.path;
     let mut lhs = quote! {};
     let rhs = quote! { String::from(#path) };
-    params.iter().for_each(|p| {
+    params.iter().filter(|p| p.is_param).for_each(|p| {
         let field_name = &p.field_name;
         lhs.extend(quote! { #field_name: None, })
     });
@@ -401,10 +402,16 @@ fn parse_params(fields: &Fields) -> Vec<ParamAttrsParsed> {
     .enumerate()
     .map(|(idx, f)| {
         let ident = f
-            .ident
-            .clone()
-            .unwrap_or(new_ambiguous_ident!("p{}", idx));
-        let attrs = f
+        .ident
+        .clone()
+        .unwrap_or(new_ambiguous_ident!("p{}", idx));
+    let is_param = !f
+        .attrs
+        .iter()
+        .filter(filter_params)
+        .collect::<Vec<_>>()
+        .is_empty();
+    let attrs = f
             .attrs
             .iter()
             .find(filter_params)
@@ -445,6 +452,7 @@ fn parse_params(fields: &Fields) -> Vec<ParamAttrsParsed> {
             requires,
             is_option,
             is_parent,
+            is_param,
         }
     })
     .collect()

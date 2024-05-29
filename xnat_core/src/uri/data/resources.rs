@@ -1,4 +1,4 @@
-use std::{fmt::Display, path::PathBuf};
+use std::{fmt::{Debug, Display}, path::PathBuf};
 
 use crate::UriBuilder;
 
@@ -10,7 +10,7 @@ use crate::UriBuilder;
 #[match_path(path = "{parent}/resources/{resource}/files/{file}")]
 pub struct ResourcesUriBuilder<'a, Parent>
 where
-    Parent: Display,
+    Parent: Display + Debug,
 {
     #[param]
     resource: Option<String>,

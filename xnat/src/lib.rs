@@ -222,4 +222,41 @@ mod tests {
         assert!(uri.is_ok(), "must be able to build without errors");
         assert_eq!(uri.unwrap(), "xapi/users/spyslikeus/groups");
     }
+
+    #[test]
+    fn test_version_v2_impls_session_data01() {
+        let ver = V2{};
+        let uri = ver
+            .experiment_data()
+            .by_project("some_project")
+            .build();
+        assert!(uri.is_ok(), "must be able to build without errors");
+        assert_eq!(uri.unwrap(), "data/projects/some_project/experiments")
+    }
+
+    #[test]
+    fn test_version_v2_impls_session_data02() {
+        let ver = V2{};
+        let uri = ver
+            .experiment_data()
+            .by_project("some_project")
+            .with_experiment(&"some_session")
+            .build();
+        assert!(uri.is_ok(), "must be able to build without errors");
+        assert_eq!(uri.unwrap(), "data/projects/some_project/experiments/some_session")
+    }
+
+    #[test]
+    fn test_version_v2_impls_session_data03() {
+        let ver = V2{};
+        let uri = ver
+            .experiment_data()
+            .by_project("some_project")
+            .with_experiment(&"some_session")
+            .scans()
+            .with_scan(&45u64)
+            .build();
+        assert!(uri.is_ok(), "must be able to build without errors");
+        assert_eq!(uri.unwrap(), "data/projects/some_project/experiments/some_session/scans/45")
+    }
 }
