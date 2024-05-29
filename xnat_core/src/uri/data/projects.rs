@@ -4,6 +4,8 @@ use oxinat_derive::uri_builder_alias;
 
 use crate::{UriBuildError, UriBuilder, Version};
 
+use super::{experiments::ExperimentUriLegacyBuilder, resources::ResourcesUriBuilder, subjects::SubjectUriLegacyBuilder};
+
 uri_builder_alias!(ProjectDataUriBuilder);
 ImplProjectDataUriBuilder! {
     (String),
@@ -56,6 +58,9 @@ pub struct ProjectUriLegacyBuilder<Parent>
 where
     Parent: ProjectDataUriBuilder,
 {
+    subject:    Option<String>,
+    experiment: Option<String>,
+
     #[param]
     id: Option<String>,
     #[parent]
@@ -160,12 +165,40 @@ impl ProjectUriLegacyBuilder<String> {
     }
 
     /// Continue the builder into a
+    /// `ExperimentUriLegacyBuilder`.
+    pub fn experiments(&self) -> ExperimentUriLegacyBuilder<Self> {
+        let b = ExperimentUriLegacyBuilder::from_parent(Rc::new(self.to_owned()));
+        match self.experiment.as_ref() {
+            Some(exp) => b.with_experiment(&exp),
+            _ => b
+        }
+    }
+
+    /// Continue the builder into a
+    /// `ResourceUriBuilder`.
+    pub fn resources(&self) -> ResourcesUriBuilder<'_, Self> {
+        ResourcesUriBuilder::from_parent(&Rc::new(self))
+    }
+
+    /// Continue the builder into a
+    /// `SubjectUriLegacyBuilder`.
+    pub fn subjects(&self) -> SubjectUriLegacyBuilder<Self> {
+        let b = SubjectUriLegacyBuilder::from_parent(Rc::new(self.to_owned()));
+        match self.subject.as_ref() {
+            Some(sbj) => b.with_subject(&sbj),
+            _ => b
+        }
+    }
+
+    /// Continue the builder into a
     /// `UsersUriBuilder`.
     pub fn users(&self) -> UsersUriBuilder {
         UsersUriBuilder::from_parent(&Rc::new(self))
     }
 }
 
+/// Represents the URI paths to access and modify
+/// XNAT projects.
 pub trait ProjectUri: Version {
     /// URI endpoints for manipulating project
     /// data.

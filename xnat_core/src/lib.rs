@@ -27,7 +27,10 @@ pub use crate::uri::admin::{
     UsersUriLegacy,
 };
 pub use crate::uri::data::{
+    ExperimentUri,
+    ProjectUri,
     ProjectUriLegacy,
     ProjectAttributeType,
+    SubjectUriLegacy,
 };
 pub use crate::version::Version;

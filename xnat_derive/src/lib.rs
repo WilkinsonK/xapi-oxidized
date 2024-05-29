@@ -56,9 +56,11 @@ pub fn derive_alluri(input: TokenStream) -> TokenStream {
         derive_authuri,
         derive_dicomuri,
         derive_eventuri,
+        derive_experimenturi,
         derive_pluginuri,
         derive_projectsuri,
         derive_serviceuri,
+        derive_subjecturi,
         derive_sysuri,
         derive_usersuri
     ].iter().for_each(|deriver| gen.extend(deriver(input.clone())));
@@ -107,6 +109,14 @@ pub fn derive_eventuri(input: TokenStream) -> TokenStream {
 }
 
 /// Generates the methods required to implement a
+/// `ExperimentsUri` trait, allowing for atype to
+/// represent the XNAT experiments system.
+#[proc_macro_derive(ExperimentUri)]
+pub fn derive_experimenturi(input: TokenStream) -> TokenStream {
+    empty_impl!(ExperimentUri; from input).into()
+}
+
+/// Generates the methods required to implement a
 /// `PluginUri` trait, allowing for a type to
 /// represent the plugin management endpoints.
 #[proc_macro_derive(PluginUri)]
@@ -129,13 +139,22 @@ pub fn derive_projectsuri(input: TokenStream) -> TokenStream {
     gen.into()
 }
 
-/// Generates the methods requires to implement a
+/// Generates the methods required to implement a
 /// `ServicesUri` trait. allowing for a type to
 /// represent certain service endpoints
 /// available.
 #[proc_macro_derive(ServicesUri)]
 pub fn derive_serviceuri(input: TokenStream) -> TokenStream {
     empty_impl!(ServicesUriLegacy; from input).into()
+}
+
+/// Generates the methods required to implement a
+/// `SubjectUri` trait, allowing for a type to
+/// represent the endpoints available for subject
+/// management.
+#[proc_macro_derive(SubjectUri)]
+pub fn derive_subjecturi(input: TokenStream) -> TokenStream {
+    empty_impl!(SubjectUriLegacy; from input).into()
 }
 
 /// Generates the methods required to implement a
