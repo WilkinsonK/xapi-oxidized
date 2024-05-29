@@ -19,6 +19,7 @@ pub use crate::uri::admin::{
     NotifyType,
     PluginUri,
     ScpAction,
+    ServicesUriLegacy,
     SubscriptionAction,
     SubscriberOpt,
     SystemUri,

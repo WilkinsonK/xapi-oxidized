@@ -1,4 +1,4 @@
-pub mod admin;
+pub mod administration;
 pub mod auth;
 pub mod dicom;
 pub mod events;
@@ -7,7 +7,7 @@ pub mod services;
 pub mod system;
 pub mod users;
 
-pub use admin::{AdminUri, AdminUriLegacy};
+pub use administration::{AdminUri, AdminUriLegacy};
 pub use auth::AuthUriLegacy;
 pub use dicom::{
     AnonAction,
@@ -22,6 +22,7 @@ pub use events::{
     SubscriptionAction,
 };
 pub use plugins::PluginUri;
+pub use services::ServicesUriLegacy;
 pub use system::{
     SystemUri,
     LogConfigOpt,

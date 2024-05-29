@@ -5,11 +5,11 @@ pub extern crate oxinat_core;
 #[cfg(feature = "derive")]
 pub extern crate oxinat_derive;
 
-#[derive(Version, AdminUri, AuthUri, UsersUri)]
+#[derive(Version, AdminUri, AuthUri, ServicesUri, UsersUri)]
 #[version(root_uri = "data", legacy = true)]
 pub struct V1;
 #[derive(Version, FullUri)]
-#[version(root_uri = "xapi", root_uri_legacy = "data")]
+#[version(root_uri = "xapi", data_uri = "data")]
 pub struct V2;
 
 // TODO: impl std::mem::Drop for this struct.

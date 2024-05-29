@@ -50,7 +50,7 @@ impl ServicesUriLegacyBuilder<String> {
 /// service management.
 pub trait ServicesUriLegacy: Version {
     #[inline]
-    fn events(&self) -> ServicesUriLegacyBuilder<String> {
-        ServicesUriLegacyBuilder::from_parent(self.root_uri_legacy().into())
+    fn services(&self) -> ServicesUriLegacyBuilder<String> {
+        ServicesUriLegacyBuilder::from_parent(self.data_uri().into())
     }
 }

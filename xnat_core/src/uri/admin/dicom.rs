@@ -234,6 +234,6 @@ pub trait DicomUri: Version {
 pub trait DicomUriLegacy: Version {
     #[inline]
     fn dicom_legacy(&self) -> DicomUriLegacyBuilder<String> {
-        DicomUriLegacyBuilder::from_parent(self.root_uri_legacy().into())
+        DicomUriLegacyBuilder::from_parent(self.data_uri().into())
     }
 }

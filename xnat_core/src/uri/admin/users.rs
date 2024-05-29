@@ -471,6 +471,6 @@ pub trait UsersUriLegacy: Version {
     /// administration.
     #[inline]
     fn users_legacy(&self) -> UsersUriLegacyBuilder<String> {
-        UsersUriLegacyBuilder::from_parent(self.root_uri_legacy().into())
+        UsersUriLegacyBuilder::from_parent(self.data_uri().into())
     }
 }

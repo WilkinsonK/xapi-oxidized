@@ -18,7 +18,7 @@ enum VersionAttrsError {
 struct VersionAttrs {
     legacy:   Option<bool>,
     root_uri: Option<String>,
-    root_uri_legacy: Option<String>,
+    data_uri: Option<String>,
 }
 
 /// Attempt to parse out the attribute `root_uri`
@@ -33,10 +33,10 @@ pub fn derive_version_parse_root_uri(attrs: &Attributes) -> anyhow::Result<Strin
 /// Attempt to parse out the attribute
 /// `root_uri_legacy` to be used in `Version`
 /// derived implementation.
-pub fn derive_version_parse_root_uri_legacy(attrs: &Attributes) -> anyhow::Result<String> {
+pub fn derive_version_parse_data_uri(attrs: &Attributes) -> anyhow::Result<String> {
     let va = VersionAttrs::from_attributes(attrs)?;
     va
-        .root_uri_legacy
+        .data_uri
         .or(va.root_uri)
         .ok_or(VersionAttrsError::RootURINotDeclared.into())
 }

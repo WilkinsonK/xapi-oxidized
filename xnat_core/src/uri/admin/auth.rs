@@ -129,6 +129,6 @@ impl AuthUriLegacyBuilder<String> {
 /// authentication.
 pub trait AuthUriLegacy: Version {
     fn auth_legacy(&self) -> AuthUriLegacyBuilder<String> {
-        AuthUriLegacyBuilder::from_parent(self.root_uri_legacy().into())
+        AuthUriLegacyBuilder::from_parent(self.data_uri().into())
     }
 }

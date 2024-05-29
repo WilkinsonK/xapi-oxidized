@@ -10,7 +10,7 @@ use syn::{parse_macro_input, Attribute, DeriveInput};
 
 use uri::uribuilder;
 use crate::version::{
-    derive_version_parse_legacy, derive_version_parse_root_uri, derive_version_parse_root_uri_legacy
+    derive_version_parse_legacy, derive_version_parse_root_uri, derive_version_parse_data_uri
 };
 
 /// Shortcut to avoid repetive usage of the same
@@ -57,6 +57,7 @@ pub fn derive_alluri(input: TokenStream) -> TokenStream {
         derive_dicomuri,
         derive_eventuri,
         derive_pluginuri,
+        derive_serviceuri,
         derive_sysuri,
         derive_usersuri
     ].iter().for_each(|deriver| gen.extend(deriver(input.clone())));
@@ -110,6 +111,15 @@ pub fn derive_eventuri(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(PluginUri)]
 pub fn derive_pluginuri(input: TokenStream) -> TokenStream {
     empty_impl!(PluginUri; from input).into()
+}
+
+/// Generates the methods requires to implement a
+/// `ServicesUri` trait. allowing for a type to
+/// represent certain service endpoints
+/// available.
+#[proc_macro_derive(ServicesUri)]
+pub fn derive_serviceuri(input: TokenStream) -> TokenStream {
+    empty_impl!(ServicesUriLegacy; from input).into()
 }
 
 /// Generates the methods required to implement a
@@ -217,7 +227,7 @@ pub fn derive_version(input: TokenStream) -> TokenStream {
     // implementation.
     let root_uri = derive_version_parse_root_uri(&attrs)
         .unwrap_or_else(|_| ident.to_string().to_lowercase());
-    let root_uri_legacy = derive_version_parse_root_uri_legacy(&attrs).unwrap();
+    let data_uri = derive_version_parse_data_uri(&attrs).unwrap();
 
     quote! {
         impl #generics Version for #ident #generics #where_clause {
@@ -225,8 +235,8 @@ pub fn derive_version(input: TokenStream) -> TokenStream {
                 String::from(#root_uri)
             }
 
-            fn root_uri_legacy(&self) -> String {
-                String::from(#root_uri_legacy)
+            fn data_uri(&self) -> String {
+                String::from(#data_uri)
             }
         }
     }.into()

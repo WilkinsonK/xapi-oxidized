@@ -5,6 +5,6 @@ pub trait Version {
     /// version.
     fn root_uri(&self) -> String;
     /// Represents the root URI used by the API
-    /// to access legacy endpoints.
-    fn root_uri_legacy(&self) -> String;
+    /// to access legacy  and data endpoints.
+    fn data_uri(&self) -> String;
 }
