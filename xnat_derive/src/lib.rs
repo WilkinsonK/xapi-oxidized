@@ -57,6 +57,7 @@ pub fn derive_alluri(input: TokenStream) -> TokenStream {
         derive_dicomuri,
         derive_eventuri,
         derive_pluginuri,
+        derive_projectsuri,
         derive_serviceuri,
         derive_sysuri,
         derive_usersuri
@@ -111,6 +112,21 @@ pub fn derive_eventuri(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(PluginUri)]
 pub fn derive_pluginuri(input: TokenStream) -> TokenStream {
     empty_impl!(PluginUri; from input).into()
+}
+
+/// Generates the methods required to implement a
+/// `ProjectUri` trait, allowing for a type to
+/// represent the endpoints available for project
+/// management.
+#[proc_macro_derive(ProjectUri)]
+pub fn derive_projectsuri(input: TokenStream) -> TokenStream {
+    derive_input_boilerplate!(attrs; from input);
+    let mut gen = quote! {};
+    if !derive_version_parse_legacy(&attrs) {
+        gen.extend(empty_impl!(ProjectUri; from input))
+    }
+    gen.extend(empty_impl!(ProjectUriLegacy; from input));
+    gen.into()
 }
 
 /// Generates the methods requires to implement a
