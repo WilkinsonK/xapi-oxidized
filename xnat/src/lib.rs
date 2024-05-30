@@ -18,23 +18,121 @@ pub struct V2;
 #[allow(dead_code)]
 pub struct Xnat<V: Version> {
     hostname: String,
-    username: Option<String>,
-    password: Option<String>,
     version:  V,
+}
+
+impl<V: Version + Clone> Xnat<V> {
+    pub fn configure(hostname: &str) -> XnatBuilder<V> {
+        XnatBuilder::new(hostname)
+    }
+
+    fn attempt_connect(&mut self, username: &str, password: &str) -> anyhow::Result<()>
+    where
+        V: AuthUriLegacy,
+    {
+        let token = format!("{username}:{password}");
+        Ok(())
+    }
 }
 
 #[allow(dead_code)]
 pub struct XnatBuilder<V: Version> {
     hostname: String,
     username: Option<String>,
+    use_secure: bool,
     password: Option<String>,
     version:  Option<V>,
+}
+
+impl<V: Version + Clone> XnatBuilder<V> {
+    pub fn build(&self) -> anyhow::Result<Xnat<V>> {
+        Ok(Xnat {
+            hostname: self.get_host()?,
+            version:  self.get_version()?,
+        })
+    }
+
+    pub fn connect(&self) -> anyhow::Result<Xnat<V>>
+    where
+        V: AuthUriLegacy,
+    {
+        let mut client = self.build()?;
+        client
+            .attempt_connect(&self.get_username(), &self.get_password())?;
+        Ok(client)
+    }
+
+    pub fn new(hostname: &str) -> Self {
+        XnatBuilder{
+            hostname:   hostname.to_owned(),
+            username:   None,
+            use_secure: false,
+            password:   None,
+            version:    None
+        }
+    }
+
+    pub fn use_secure(mut self, value: bool) -> Self {
+        self.use_secure = value;
+        self
+    }
+
+    pub fn with_hostname(mut self, hostname: &str) -> Self {
+        hostname.clone_into(&mut self.hostname);
+        self
+    }
+
+    pub fn with_password(mut self, password: &str) -> Self {
+        self.password.clone_from(&Some(password.to_owned()));
+        self
+    }
+
+    pub fn with_username(mut self, username: &str) -> Self {
+        self.username.clone_from(&Some(username.to_owned()));
+        self
+    }
+
+    pub fn with_version(mut self, version: V) -> Self {
+        self.version = Some(version);
+        self
+    }
+
+    fn get_host(&self) -> anyhow::Result<String> {
+        let protocol = match self.use_secure {
+            true => "https",
+            false => "http"
+        };
+        let hostname = self.hostname.clone();
+        Ok(format!("{protocol}://{hostname}"))
+    }
+
+    fn get_password(&self) -> String {
+        self.password.as_ref().unwrap_or(&String::new()).to_owned()
+    }
+
+    fn get_username(&self) -> String {
+        self.username.as_ref().unwrap_or(&String::new()).to_owned()
+    }
+
+    fn get_version(&self) -> anyhow::Result<V> {
+        Ok(self.version.as_ref().cloned().unwrap())
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use oxinat_core::{UriBuilder, EventType, NotifyType, SubscriptionAction};
+
+    #[test]
+    fn test_client_builder() {
+        let client = Xnat::configure("some.xnat.host")
+            .with_version(V2)
+            .with_password("phoney_password")
+            .with_username("phoney_username")
+            .build();
+        assert!(client.is_ok(), "must be able to build client without any errors")
+    }
 
     #[test]
     fn test_version_v1_impls_admin_legacy01() {

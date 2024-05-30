@@ -19,3 +19,4 @@ derive = []
 [dependencies]
 oxinat_core = { path = "../xnat_core", version = "0.8.0" }
 oxinat_derive = { path = "../xnat_derive", version = "0.7.0" }
+reqwest = { version = "0.12.4", features = ["blocking"] }
