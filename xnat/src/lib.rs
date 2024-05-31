@@ -1,9 +1,29 @@
+use std::time::Duration;
+
+use async_trait::async_trait;
+use reqwest::{header::HeaderValue, redirect::Policy, Client, Method};
+
 use oxinat_core::*;
 
 #[cfg(feature = "core")]
 pub extern crate oxinat_core;
 #[cfg(feature = "derive")]
 pub extern crate oxinat_derive;
+
+static APP_CONNECT_TIMEOUT: u64 = 5;
+static APP_USER_AGENT: &str = concat!(
+    env!("CARGO_PKG_NAME"),
+    "/",
+    env!("CARGO_PKG_VERSION")
+);
+
+type RequestBuilderResult = anyhow::Result<reqwest::RequestBuilder>;
+
+#[derive(Debug, thiserror::Error)]
+pub enum ClientError {
+    #[error("`{0}` does not support method `{1}`")]
+    UnsupportedMethod(Method, String)
+}
 
 #[derive(Clone, Version, AdminUri, AuthUri, ServicesUri, UsersUri)]
 #[version(root_uri = "data", legacy = true)]
@@ -12,13 +32,34 @@ pub struct V1;
 #[version(root_uri = "xapi", data_uri = "data")]
 pub struct V2;
 
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Timeouts {
+    pub connect: Option<Duration>,
+    pub read:    Option<Duration>,
+}
+
+impl Timeouts {
+    pub fn connect(&self) -> Duration {
+        self
+            .connect
+            .unwrap_or(Duration::from_secs(APP_CONNECT_TIMEOUT))
+    }
+
+    pub fn read(&self) -> Duration {
+        self.read.unwrap_or(self.connect())
+    }
+}
+
 // TODO: impl std::mem::Drop for this struct.
 // https://stackoverflow.com/questions/42910662/is-it-possible-in-rust-to-delete-an-object-before-the-end-of-scope
 #[derive(Clone, Debug)]
 #[allow(dead_code)]
 pub struct Xnat<V: Version> {
-    hostname: String,
-    version:  V,
+    base_url:   reqwest::Url,
+    session_id: Option<String>,
+    timeouts:   Timeouts,
+    use_secure: bool,
+    version:    V,
 }
 
 impl<V: Version + Clone> Xnat<V> {
@@ -26,48 +67,155 @@ impl<V: Version + Clone> Xnat<V> {
         XnatBuilder::new(hostname)
     }
 
-    fn attempt_connect(&mut self, username: &str, password: &str) -> anyhow::Result<()>
+    pub fn new_client(&self) -> anyhow::Result<reqwest::Client> {
+        let builder = reqwest::ClientBuilder::new()
+            .connect_timeout(self.timeouts.connect())
+            .read_timeout(self.timeouts.read())
+            .redirect(Policy::default())
+            .https_only(self.use_secure)
+            .danger_accept_invalid_certs(!self.use_secure)
+            .user_agent(APP_USER_AGENT);
+        Ok(builder.build()?)
+    }
+
+    async fn request<UB: UriBuilder>(&self, method: Method, uri: &UB) -> RequestBuilderResult {
+        let mut url = self.base_url.clone();
+        url.set_path(&uri.build()?);
+
+        let jar = reqwest::cookie::Jar::default();
+        jar.add_cookie_str(
+            &format!("JSESSIONID={}", self.session_id.as_ref().unwrap()),
+            &url
+        );
+
+        let builder = self
+            .client()?
+            .request(method, url.to_owned());
+        Ok(builder)
+    }
+
+    async fn method_is_supported<UB: UriBuilder>(&self, method: &Method, uri: &UB) -> anyhow::Result<bool> {
+        let res = self
+            .options(uri)
+            .await?
+            .send()
+            .await?;
+
+        let is_supported = |a: &HeaderValue| {
+            !a.is_empty() && a.to_str().unwrap().contains(method.as_str())
+        };
+        Ok(res.headers().get("Allow").is_some_and(is_supported))
+    }
+
+    async fn request_if_supported<UB: UriBuilder>(&self, method: Method, uri: &UB) -> RequestBuilderResult {
+        if self.method_is_supported(&method, uri).await? {
+            self.request(method, uri).await
+        } else {
+            Err(ClientError::UnsupportedMethod(method, uri.to_string()).into())
+        }
+    }
+
+    async fn head<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+        self.request_if_supported(Method::HEAD, uri).await
+    }
+
+    async fn delete<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+        self.request_if_supported(Method::DELETE, uri).await
+    }
+
+    async fn get<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+        self.request_if_supported(Method::GET, uri).await
+    }
+
+    async fn options<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+        self.request(Method::OPTIONS, uri).await
+    }
+
+    async fn post<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+        self.request_if_supported(Method::POST, uri).await
+    }
+
+    async fn put<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+        self.request_if_supported(Method::PUT, uri).await
+    }
+}
+
+pub trait ClientCore {
+    fn client(&self) -> anyhow::Result<reqwest::Client>;
+}
+
+impl<V: Version + Clone> ClientCore for Xnat<V> {
+    fn client(&self) -> anyhow::Result<reqwest::Client> {
+        self.new_client()
+    }
+}
+
+pub trait ClientAuth: ClientCore {
+    fn auth_uri(&self) -> BuildResult;
+}
+
+impl ClientAuth for Xnat<V1> {
+    fn auth_uri(&self) -> BuildResult
     where
-        V: AuthUriLegacy,
+        V1: AuthUriLegacy,
     {
-        let token = format!("{username}:{password}");
-        Ok(())
+        self.version.auth_legacy().build_jsessionid()
+    }
+}
+
+impl ClientAuth for Xnat<V2> {
+    fn auth_uri(&self) -> BuildResult
+    where
+        V2: AuthUriLegacy,
+    {
+        self.version.auth_legacy().build_jsessionid()
+    }
+}
+
+#[async_trait(?Send)]
+pub trait ClientToken: ClientCore {
+    async fn acquire(&mut self) -> anyhow::Result<()>;
+}
+
+#[async_trait(?Send)]
+impl<V: Version + Clone> ClientToken for Xnat<V>
+where
+    Self: ClientAuth,
+{
+    async fn acquire(&mut self) -> anyhow::Result<()> {
+        let res = self
+            .post(&self.auth_uri()?)
+            .await?
+            .send()
+            .await?;
+        self.session_id.clone_from(&res.text().await.ok());
+        todo!()
     }
 }
 
 #[allow(dead_code)]
 pub struct XnatBuilder<V: Version> {
-    hostname: String,
-    username: Option<String>,
+    hostname:   String,
+    password:   Option<String>,
+    timeouts:   Option<Timeouts>,
+    username:   Option<String>,
     use_secure: bool,
-    password: Option<String>,
-    version:  Option<V>,
+    version:    Option<V>,
+}
+
+enum UrlKind<'a> {
+    Base,
+    Credentialed(&'a str, Option<&'a str>),
 }
 
 impl<V: Version + Clone> XnatBuilder<V> {
-    pub fn build(&self) -> anyhow::Result<Xnat<V>> {
-        Ok(Xnat {
-            hostname: self.get_host()?,
-            version:  self.get_version()?,
-        })
-    }
-
-    pub fn connect(&self) -> anyhow::Result<Xnat<V>>
-    where
-        V: AuthUriLegacy,
-    {
-        let mut client = self.build()?;
-        client
-            .attempt_connect(&self.get_username(), &self.get_password())?;
-        Ok(client)
-    }
-
     pub fn new(hostname: &str) -> Self {
         XnatBuilder{
             hostname:   hostname.to_owned(),
+            password:   None,
+            timeouts:   None,
             username:   None,
             use_secure: false,
-            password:   None,
             version:    None
         }
     }
@@ -87,6 +235,11 @@ impl<V: Version + Clone> XnatBuilder<V> {
         self
     }
 
+    pub fn with_timeouts(mut self, timeouts: &Timeouts) -> Self {
+        self.timeouts.clone_from(&Some(timeouts.to_owned()));
+        self
+    }
+
     pub fn with_username(mut self, username: &str) -> Self {
         self.username.clone_from(&Some(username.to_owned()));
         self
@@ -97,244 +250,79 @@ impl<V: Version + Clone> XnatBuilder<V> {
         self
     }
 
-    fn get_host(&self) -> anyhow::Result<String> {
-        let protocol = match self.use_secure {
-            true => "https",
-            false => "http"
-        };
-        let hostname = self.hostname.clone();
-        Ok(format!("{protocol}://{hostname}"))
+    fn base_url(&self, kind: UrlKind) -> anyhow::Result<reqwest::Url> {
+        let mut host = reqwest::Url::parse("http://stud")?;
+        host.set_host(Some(&self.hostname.clone()))?;
+        host.set_scheme(if self.use_secure {
+            "https"
+        } else {
+            "http"
+        }).unwrap();
+
+        Ok(match kind {
+            UrlKind::Base => host,
+            UrlKind::Credentialed(u, p) => {
+                host.set_password(p).unwrap();
+                host.set_username(u).unwrap();
+                host
+            }
+        })
     }
 
-    fn get_password(&self) -> String {
-        self.password.as_ref().unwrap_or(&String::new()).to_owned()
-    }
-
-    fn get_username(&self) -> String {
-        self.username.as_ref().unwrap_or(&String::new()).to_owned()
-    }
-
-    fn get_version(&self) -> anyhow::Result<V> {
+    fn version(&self) -> anyhow::Result<V> {
         Ok(self.version.as_ref().cloned().unwrap())
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use oxinat_core::{UriBuilder, EventType, NotifyType, SubscriptionAction};
+pub trait ClientBuilder {
+    type Client;
 
-    #[test]
-    fn test_client_builder() {
-        let client = Xnat::configure("some.xnat.host")
-            .with_version(V2)
-            .with_password("phoney_password")
-            .with_username("phoney_username")
-            .build();
-        assert!(client.is_ok(), "must be able to build client without any errors")
+    fn build(&self) -> anyhow::Result<Self::Client>;
+}
+
+impl<V: Version + Clone> ClientBuilder for XnatBuilder<V> {
+    type Client = Xnat<V>;
+
+    fn build(&self) -> anyhow::Result<Self::Client> {
+        Ok(Xnat {
+            base_url:   self.base_url(UrlKind::Base)?,
+            session_id: None,
+            timeouts:   self.timeouts.unwrap_or_default(),
+            use_secure: self.use_secure,
+            version:    self.version()?,
+        })
     }
+}
 
-    #[test]
-    fn test_version_v1_impls_admin_legacy01() {
-        let uri = V1.config().build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "data/config")
-    }
+#[async_trait(?Send)]
+pub trait ClientBuilderToken: ClientBuilder
+where
+    Self::Client: ClientAuth,
+{
+    async fn acquire(&self) -> anyhow::Result<Self::Client>;
+}
 
-    #[test]
-    fn test_version_v2_impls_admin01() {
-        assert_eq!(V2.site_config().build().unwrap(), "xapi/siteConfig");
-        assert_eq!(V2.preferences().build().unwrap(), "xapi/prefs");
-        assert_eq!(V2.schema().build().unwrap(), "xapi/schemas");
-    }
+#[async_trait(?Send)]
+impl<V: Version + Clone> ClientBuilderToken for XnatBuilder<V>
+where
+    Self::Client: ClientAuth,
+{
+    async fn acquire(&self) -> anyhow::Result<Self::Client> {
+        let mut client = self.build()?;
 
-    #[test]
-    fn test_version_v2_impls_events_action01() {
-        let uri = V2
-            .events()
-            .actions()
-            .with_event_type(EventType::One)
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/events/action")
-    }
+        let creds  = UrlKind::Credentialed(
+            &self.hostname,
+            self.password.as_deref());
+        let mut base_url = self.base_url(creds)?;
+        base_url.set_path(&client.auth_uri()?);
 
-    #[test]
-    fn test_version_v2_impls_events_action02() {
-        let uri = V2
-            .events()
-            .actions()
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/events/allactions")
-    }
+        let res = client
+            .client()?
+            .post(base_url)
+            .send()
+            .await?;
+        client.session_id.clone_from(&res.text().await.ok());
 
-    #[test]
-    fn test_version_v2_impls_events_action03() {
-        let uri = V2
-            .events()
-            .actions()
-            .with_event_type(EventType::Multiple)
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/events/actions");
-    }
-
-    #[test]
-    fn test_version_v2_impls_events_subscription01() {
-        let uri = V2
-            .events()
-            .subscription()
-            .with_action(SubscriptionAction::Filter)
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/events/subscription/filter");
-    }
-
-    #[test]
-    fn test_version_v2_impls_events_subscription02() {
-        let uri = V2
-            .events()
-            .subscription()
-            .with_action(SubscriptionAction::Validate)
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/events/subscription/validate");
-    }
-
-    #[test]
-    fn test_version_v2_impls_events_subscription03() {
-        let uri = V2
-            .events()
-            .subscription()
-            .with_action(SubscriptionAction::Activate)
-            .with_id("SOME_ID")
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/events/subscription/SOME_ID/activate");
-    }
-
-    #[test]
-    fn test_version_v2_impls_events_subscription04() {
-        let uri = V2
-            .events()
-            .subscription()
-            .with_id("SOME_ID")
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/events/subscription/SOME_ID");
-    }
-
-    #[test]
-    fn test_version_v2_impls_site_config01() {
-        let uri = V2
-            .site_config()
-            .build_info()
-            .with_property(&String::from("some_property"))
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/siteConfig/buildInfo/some_property")
-    }
-
-    #[test]
-    fn test_version_v2_impls_sys01() {
-        let uri = V2
-            .archive()
-            .catalogs()
-            .refresh()
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/archive/catalogs/refresh");
-    }
-
-    #[test]
-    fn test_version_v2_impls_sys02() {
-        let uri = V2
-            .archive()
-            .catalogs()
-            .refresh()
-            .with_operations(&[
-                    "delete".to_string(),
-                    "append".to_string()
-                ])
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/archive/catalogs/refresh/delete,append");
-    }
-
-    #[test]
-    fn test_version_v2_impls_sys_notify01() {
-        let nt = NotifyType::SmtpProperty(
-            "auth".to_owned(),
-            "HaHAhA".to_owned().into());
-        let uri = V2
-            .notifications()
-            .notify()
-            .with_notify_type(nt)
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/notifications/notify/smtp/property/auth/HaHAhA");
-    }
-
-    #[test]
-    fn test_version_v2_impls_sys_notify02() {
-        let uri = V2
-            .notifications()
-            .notify()
-            .with_notify_type(NotifyType::Par)
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/notifications/notify/par")
-    }
-
-    #[test]
-    fn test_version_v2_impls_users01() {
-        let uri = V2.users().groups().build();
-        assert!(uri.is_err(), "unset username must produce an error");
-    }
-
-    #[test]
-    fn test_version_v2_impls_users02() {
-        let uri = V2
-            .users()
-            .with_username("spyslikeus")
-            .groups()
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "xapi/users/spyslikeus/groups");
-    }
-
-    #[test]
-    fn test_version_v2_impls_session_data01() {
-        let uri = V2
-            .experiment_data()
-            .by_project("some_project")
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "data/projects/some_project/experiments")
-    }
-
-    #[test]
-    fn test_version_v2_impls_session_data02() {
-        let uri = V2
-            .experiment_data()
-            .by_project("some_project")
-            .with_experiment("some_session")
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "data/projects/some_project/experiments/some_session")
-    }
-
-    #[test]
-    fn test_version_v2_impls_session_data03() {
-        let uri = V2
-            .experiment_data()
-            .by_project("some_project")
-            .with_experiment("some_session")
-            .scans()
-            .with_scan(45u64)
-            .build();
-        assert!(uri.is_ok(), "must be able to build without errors");
-        assert_eq!(uri.unwrap(), "data/projects/some_project/experiments/some_session/scans/45");
+        Ok(client)
     }
 }

@@ -3,7 +3,7 @@ name = "oxinat"
 description = "XNAT REST API client"
 license = "BSD-3-Clause"
 repository = "https://github.com/WilkinsonK/xapi-oxidized"
-version = "0.4.2"
+version = "0.5.0"
 edition = "2021"
 
 [lib]
@@ -17,6 +17,12 @@ core = []
 derive = []
 
 [dependencies]
+async-trait = "0.1.80"
 oxinat_core = { path = "../xnat_core", version = "0.8.0" }
 oxinat_derive = { path = "../xnat_derive", version = "0.7.0" }
-reqwest = { version = "0.12.4", features = ["blocking"] }
+reqwest = { version = "0.12.4", features = ["cookies"] }
+thiserror = "1.0.61"
+
+[dev-dependencies]
+dotenv = "0.15.0"
+tokio = { version = "1.38.0", features = ["full"] }
