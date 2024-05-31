@@ -3,7 +3,7 @@ name = "oxinat"
 description = "XNAT REST API client"
 license = "BSD-3-Clause"
 repository = "https://github.com/WilkinsonK/xapi-oxidized"
-version = "0.6.1"
+version = "0.6.2"
 edition = "2021"
 
 [lib]
