@@ -13,7 +13,7 @@ path = "src/lib.rs"
 crate-type = ["lib"]
 
 [dependencies]
-anyhow = "1.0.83"
+anyhow = "1.0.86"
 async-trait = "0.1.80"
 oxinat_derive = { path = "../xnat_derive", version = "0.7.2" }
 reqwest = { version = "0.12.4", features = ["cookies"] }
