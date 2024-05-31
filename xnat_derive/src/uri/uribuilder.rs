@@ -115,8 +115,10 @@ fn build_enum(input: &DeriveInput, data: &DataEnum) -> TokenStream {
 
     let (ident, generics) = (&input.ident, &input.generics);
     let where_clause      = &generics.where_clause;
+    let crate_ident       = crate::get_crate_ident();
+
     let gen = quote! {
-        impl #generics UriBuilder for #ident #generics #where_clause {
+        impl #generics #crate_ident::UriBuilder for #ident #generics #where_clause {
             fn build(&self) -> crate::BuildResult {
                 Ok(self.to_string().into())
             }
@@ -137,6 +139,7 @@ fn build_enum(input: &DeriveInput, data: &DataEnum) -> TokenStream {
 /// Implements necessary methods for a struct to
 /// qualify as a `UriBuilder`.
 fn build_struct(input: &DeriveInput, data: &DataStruct) -> TokenStream {
+    let crate_ident  = crate::get_crate_ident();
     let where_clause = &input.generics.where_clause;
     let params       = parse_params(&data.fields);
     let match_paths  = parse_paths(&input.attrs, &params);
@@ -144,9 +147,10 @@ fn build_struct(input: &DeriveInput, data: &DataStruct) -> TokenStream {
 
     let (ident, generics) = (&input.ident, &input.generics);
     let match_arms = build_matches(&match_paths, &params);
+
     let mut gen = quote! {
-        impl #generics UriBuilder for #ident #generics #where_clause {
-            fn build(&self) -> crate::BuildResult {
+        impl #generics #crate_ident::UriBuilder for #ident #generics #where_clause {
+            fn build(&self) -> #crate_ident::BuildResult {
                 match self {
                     #match_arms
                 }

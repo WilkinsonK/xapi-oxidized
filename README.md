@@ -20,7 +20,7 @@ items that need to be completed before this project can be considered
 **production ready**:
 
 - [x] Well defined interface for building the URI endpoints.
-- [ ] A simple to use, and extensible object which represents the
+- [x] A simple to use, and extensible object which represents the
       client.
 
 ### Additonal Goals ###
@@ -28,7 +28,7 @@ These goals are more nice-to-haves, but will open up development and
 maintenance of the project to broader use cases, making it also more
 useful to a wider audience.
 
-- [ ] Expose portions of the core and derivitive sub-crates to allow
+- [x] Expose portions of the core and derivitive sub-crates to allow
       for users to implement access to REST calls outside of the XNAT
       standard interface.
 - [ ] Optional support for logging specific parts of our interface for
@@ -36,16 +36,11 @@ useful to a wider audience.
 - [ ] Optional support for building this project as a `Python` module.
 
 ## Current status ##
-Most of the URI endpoints have been mapped with some exceptions. While
-the remaining endpoints have been left not mapped, they would not be
-deemed as immediately important, and as such can be postponed until a
-later time.
-
-Next will be moving on to the client portion of this library. Some
-time will be taken to consider how this will be executed, but actual
-implementation will probably be only a short time. This being that
-we really will be doing is making some simple REST calls to
-validate a connections; at least for creating the intial interface.
+An initial XNAT client has been defined with the rudimentary
+functionality to validate a session ID as a `token`. This includes
+acquisition and relinquishment of said `token` at the user's
+discretion, but client `tokens` are automatically invalidated when the
+client object is dropped.
 
 ## Using this Project ##
 While this project is still in alpha, there is a lot to be desired

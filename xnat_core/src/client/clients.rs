@@ -108,6 +108,19 @@ pub trait ClientCore {
     fn client(&self) -> anyhow::Result<reqwest::Client>;
     /// Initialize an `XnatBuilder` allowing
     /// configuration of an XNAT client.
+    /// 
+    /// ```no_compile
+    /// use oxinat_core::*;
+    /// 
+    /// #[derive(Clone, Version, FullUri)]
+    /// #[version(root_uri = "xapi", data_uri = "data")]
+    /// struct MyVersion;
+    /// 
+    /// let builder = Xnat::configure("xnat.host.org")
+    ///     .with_version(MyVersion)
+    ///     .with_password("my-password")
+    ///     .with_username("my-username");
+    /// ```
     fn configure(hostname: &str) -> XnatBuilder<Self::Version>;
     /// Create a new instance of an XNAT client.
     fn new(base_url: &reqwest::Url, timeouts: &Option<Timeouts>, use_secure: bool, version: &Self::Version) -> Self;
@@ -246,8 +259,38 @@ impl<V: Version + Clone> ClientREST for Xnat<V> {
 #[async_trait(?Send)]
 pub trait ClientToken: ClientCore {
     /// Acquire an auth token from the XNAT host.
+    /// 
+    /// ```no_compile
+    /// use oxinat_core::*;
+    /// 
+    /// #[derive(Clone, Version, FullUri)]
+    /// #[version(root_uri = "xapi", data_uri = "data")]
+    /// struct MyVersion;
+    /// 
+    /// let client = Xnat::configure("xnat.host.org")
+    ///     .with_version(MyVersion)
+    ///     .with_password("my-password")
+    ///     .with_username("my-username")
+    ///     .acquire().await?;
+    /// ```
     async fn acquire(&mut self) -> anyhow::Result<()>;
     /// Invalidates the auto token.
+    /// 
+    /// ```no_compile
+    /// use oxinat_core::*;
+    /// 
+    /// #[derive(Clone, Version, FullUri)]
+    /// #[version(root_uri = "xapi", data_uri = "data")]
+    /// struct MyVersion;
+    /// 
+    /// let client = Xnat::configure("xnat.host.org")
+    ///     .with_version(MyVersion)
+    ///     .with_password("my-password")
+    ///     .with_username("my-username")
+    ///     .acquire().await?;
+    /// 
+    /// client.release().await?;
+    /// ```
     async fn release(&mut self) -> anyhow::Result<()>;
 }
 

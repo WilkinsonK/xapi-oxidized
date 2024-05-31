@@ -1,6 +1,8 @@
 use reqwest::Method;
 use thiserror::Error;
 
+/// Errors specific to the purpose of interactions
+/// between an XNAT client and the host.
 #[derive(Debug, Error)]
 pub enum ClientError {
     #[error("could not successfully acquire auth token ({0})")]

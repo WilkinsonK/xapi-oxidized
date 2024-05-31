@@ -55,6 +55,19 @@ pub trait ClientBuilderCore {
 
     /// Attempt to build a client from this
     /// builder.
+    /// 
+    /// ```no_compile
+    /// use oxinat_core::*;
+    /// 
+    /// #[derive(Clone, Version, FullUri)]
+    /// #[version(root_uri = "xapi", data_uri = "data")]
+    /// struct MyVersion;
+    /// 
+    /// let builder = XnatBuilder::new("xnat.host.org")
+    ///     .with_version(MyVersion)
+    ///     .with_password("my-password")
+    ///     .with_username("my-username");
+    /// ```
     fn build(&self) -> anyhow::Result<Self::Client>;
     /// Initialize a new builder instance.
     fn new(hostname: &str) -> Self;
@@ -148,6 +161,24 @@ pub trait ClientBuilderToken: ClientBuilderCore
 where
     Self::Client: ClientAuth,
 {
+    /// Brokers the acquisition of a `token` via
+    /// user authentication when constructing a
+    /// new client.
+    /// 
+    /// ```no_compile
+    /// use oxinat_core::*;
+    /// 
+    /// #[derive(Clone, Version, FullUri)]
+    /// #[version(root_uri = "xapi", data_uri = "data")]
+    /// struct MyVersion;
+    /// 
+    /// let builder = XnatBuilder::new("xnat.host.org")
+    ///     .with_version(MyVersion)
+    ///     .with_password("my-password")
+    ///     .with_username("my-username");
+    /// 
+    /// let client = builder.acquire().await?;
+    /// ```
     async fn acquire(&self) -> anyhow::Result<Self::Client>;
 }
 

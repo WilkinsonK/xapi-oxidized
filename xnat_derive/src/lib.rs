@@ -36,19 +36,42 @@ macro_rules! derive_input_boilerplate {
 /// where a trait is entirely comprised of inline
 /// definitions.
 macro_rules! empty_impl {
-    ($derive_name:ident; from $input:ident) => {
+    ($derive_name:path; from $input:ident) => {
         {
             derive_input_boilerplate!(ident, generics; from $input);
             let where_clause = &generics.where_clause;
+            let crate_ident  = get_crate_ident();
             quote! {
-                impl #generics $derive_name for #ident #generics #where_clause {}
+                impl #generics #crate_ident::$derive_name for #ident #generics #where_clause {}
             }
         }
     };
 }
 
+/// Shortcut to create an ambiguous ident token.
+macro_rules! new_ambiguous_ident {
+    ($e:expr, $($vars:expr),+ $(,)?) => {
+        Ident::new(
+            &format!($e, $($vars,)+),
+            Span::call_site()
+        )
+    };
+    ($e:expr) => {
+        Ident::new($e, Span::call_site())
+    }
+}
+
 /// Alias for `Vec<syn::Attribute>`.
 type Attributes = Vec<Attribute>;
+
+fn get_crate_ident() -> Ident {
+    let pkg_name = std::env::var("CARGO_PKG_NAME").unwrap_or("crate".into());
+    new_ambiguous_ident!(if pkg_name == "oxinat_core" {
+        "crate"
+    } else {
+        "oxinat_core"
+    })
+}
 
 #[proc_macro_derive(FullUri)]
 pub fn derive_alluri(input: TokenStream) -> TokenStream {
@@ -274,6 +297,7 @@ pub fn derive_version(input: TokenStream) -> TokenStream {
     // through version() calls.
     derive_input_boilerplate!(attrs, data, generics, ident; from input);
     let where_clause = &generics.where_clause;
+    let crate_ident  = get_crate_ident();
 
     // Determine the `root_uri` attribute to be
     // passed to the actual derived
@@ -284,7 +308,7 @@ pub fn derive_version(input: TokenStream) -> TokenStream {
 
     let mut gen = quote! {};
     gen.extend(quote! {
-        impl #generics Version for #ident #generics #where_clause {
+        impl #generics #crate_ident::Version for #ident #generics #where_clause {
             fn root_uri(&self) -> String {
                 String::from(#root_uri)
             }
@@ -295,8 +319,8 @@ pub fn derive_version(input: TokenStream) -> TokenStream {
         }
     });
     gen.extend(quote! {
-        impl #generics UriBuilder for #ident #generics #where_clause {
-            fn build(&self) -> crate::BuildResult {
+        impl #generics #crate_ident::UriBuilder for #ident #generics #where_clause {
+            fn build(&self) -> oxinat_core::BuildResult {
                 Ok(self.root_uri())
             }
         }

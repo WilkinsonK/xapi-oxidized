@@ -676,7 +676,7 @@ dependencies = [
 
 [[package]]
 name = "oxinat"
-version = "0.5.1"
+version = "0.6.0"
 dependencies = [
  "dotenv",
  "oxinat_core",
@@ -687,7 +687,7 @@ dependencies = [
 
 [[package]]
 name = "oxinat_core"
-version = "0.8.0"
+version = "0.9.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -699,7 +699,7 @@ dependencies = [
 
 [[package]]
 name = "oxinat_derive"
-version = "0.7.0"
+version = "0.7.2"
 dependencies = [
  "anyhow",
  "attribute-derive",
