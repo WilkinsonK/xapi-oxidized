@@ -11,7 +11,8 @@ static APP_USER_AGENT: &str = concat!(
 );
 
 pub use builder::{
-    ClientBuilder,
+    ClientBuilderCore,
+    ClientBuilderAttrs,
     ClientBuilderToken,
     XnatBuilder
 };

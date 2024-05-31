@@ -3,7 +3,7 @@ use reqwest::{header::HeaderValue, redirect::Policy, Method};
 
 use oxinat_core::*;
 
-use super::builder::XnatBuilder;
+use super::builder::{ClientBuilderCore, XnatBuilder};
 use super::error::ClientError;
 use super::timeouts::Timeouts;
 
@@ -41,14 +41,21 @@ impl<V: Version> Drop for Xnat<V> {
             .build()
             .unwrap();
         rt.spawn(async move {
-            client.delete(url).send().await.expect("must delete token")
+            let res = client
+                .delete(url)
+                .send()
+                .await
+                .expect("must delete token");
+            tokrel_validator(res)
+                .await
+                .expect("token must be invalidated");
         });
         rt.shutdown_background();
     }
 }
 
 impl<V: Version> Xnat<V> {
-    /// Get the `JSESESSIONID` cookie.
+    /// Get the `JSESSIONID` cookie.
     pub fn get_session_id(&self) -> String {
         self.session_id.as_ref().unwrap().to_owned()
     }
@@ -251,17 +258,46 @@ where
             .await?
             .send()
             .await?;
-        self.session_id.clone_from(&res.text().await.ok());
-        Ok(())
+        tokacq_validator(res).await.map(|token| {
+            self.set_session_id(&token);
+        })
     }
 
     async fn release(&mut self) -> anyhow::Result<()> {
-        self
+        let res = self
             .delete(&self.auth_uri()?)
             .await?
             .send()
             .await?;
-        self.session_id.take();
+        tokrel_validator(res).await.map(|r| {
+            self.session_id.take();
+            r
+        })
+    }
+}
+
+/// Helper function for token acquisition to
+/// validate that the transaction was successful.
+pub async fn tokacq_validator(res: reqwest::Response) -> anyhow::Result<String> {
+    let status = res.status();
+    if status.is_success() {
+        Ok(res.text().await?)
+    } else if status.is_client_error() {
+        Err(ClientError::AuthFailure(status.as_u16()).into())
+    } else {
+        Err(ClientError::ServerFailure(status.as_u16()).into())
+    }
+}
+
+/// Helper function for token relinquishment to
+/// validate that the transaction was successful.
+pub async fn tokrel_validator(res: reqwest::Response) -> anyhow::Result<()> {
+    let status = res.status();
+    if status.is_success() {
         Ok(())
+    } else if status.is_client_error() {
+        Err(ClientError::DeauthFailure(status.as_u16()).into())
+    } else {
+        Err(ClientError::ServerFailure(status.as_u16()).into())
     }
 }

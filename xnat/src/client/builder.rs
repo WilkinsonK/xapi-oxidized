@@ -5,6 +5,8 @@ use oxinat_core::*;
 use super::timeouts::Timeouts;
 use super::clients::{ClientAuth, ClientCore, Xnat};
 
+/// A building pattern type meant for constructing
+/// an XNAT client.
 #[allow(dead_code)]
 pub struct XnatBuilder<V: Version> {
     hostname:   String,
@@ -15,53 +17,14 @@ pub struct XnatBuilder<V: Version> {
     version:    Option<V>,
 }
 
+/// Internal usage only. Dictates how a URL should
+/// be constructed.
 enum UrlKind<'a> {
     Base,
     Credentialed(&'a str, Option<&'a str>),
 }
 
 impl<V: Version + Clone> XnatBuilder<V> {
-    pub fn new(hostname: &str) -> Self {
-        XnatBuilder{
-            hostname:   hostname.to_owned(),
-            password:   None,
-            timeouts:   None,
-            username:   None,
-            use_secure: false,
-            version:    None
-        }
-    }
-
-    pub fn use_secure(mut self, value: bool) -> Self {
-        self.use_secure = value;
-        self
-    }
-
-    pub fn with_hostname(mut self, hostname: &str) -> Self {
-        hostname.clone_into(&mut self.hostname);
-        self
-    }
-
-    pub fn with_password(mut self, password: &str) -> Self {
-        self.password.clone_from(&Some(password.to_owned()));
-        self
-    }
-
-    pub fn with_timeouts(mut self, timeouts: &Timeouts) -> Self {
-        self.timeouts.clone_from(&Some(timeouts.to_owned()));
-        self
-    }
-
-    pub fn with_username(mut self, username: &str) -> Self {
-        self.username.clone_from(&Some(username.to_owned()));
-        self
-    }
-
-    pub fn with_version(mut self, version: V) -> Self {
-        self.version = Some(version);
-        self
-    }
-
     fn base_url(&self, kind: UrlKind) -> anyhow::Result<reqwest::Url> {
         let mut host = reqwest::Url::parse("http://stud")?;
         host.set_host(Some(&self.hostname.clone()))?;
@@ -86,13 +49,19 @@ impl<V: Version + Clone> XnatBuilder<V> {
     }
 }
 
-pub trait ClientBuilder {
+/// Core methods required by all subsequent
+/// client building traits.
+pub trait ClientBuilderCore {
     type Client;
 
+    /// Attempt to build a client from this
+    /// builder.
     fn build(&self) -> anyhow::Result<Self::Client>;
+    /// Initialize a new builder instance.
+    fn new(hostname: &str) -> Self;
 }
 
-impl<V: Version + Clone> ClientBuilder for XnatBuilder<V> {
+impl<V: Version + Clone> ClientBuilderCore for XnatBuilder<V> {
     type Client = Xnat<V>;
 
     fn build(&self) -> anyhow::Result<Self::Client> {
@@ -103,10 +72,80 @@ impl<V: Version + Clone> ClientBuilder for XnatBuilder<V> {
             &self.version()?,
         ))
     }
+
+    fn new(hostname: &str) -> Self {
+        XnatBuilder{
+            hostname:   hostname.to_owned(),
+            password:   None,
+            timeouts:   None,
+            username:   None,
+            use_secure: false,
+            version:    None
+        }
+    }
+}
+
+/// Trait dictates the methods used to customize
+/// how the resulting clients are constructed.
+pub trait ClientBuilderAttrs: ClientBuilderCore {
+    type Version: Version + Clone;
+
+    /// Set whether constructed clients should
+    /// use secure protocols and verify SSL certs.
+    fn use_secure(self, value: bool) -> Self;
+    /// Set the host name that will be assigned
+    /// to constructed clients.
+    fn with_hostname(self, hostname: &str) -> Self;
+    /// Set the auth password to be used for
+    /// token acquisition for constructed clients.
+    fn with_password(self, password: &str) -> Self;
+    /// Set the timeout values (connect & read) to
+    /// be assigned to constructed clients.
+    fn with_timeouts(self, timeouts: &Timeouts) -> Self;
+    /// Set the auth username to be used for
+    /// token acquisition for constructed clients.
+    fn with_username(self, username: &str) -> Self;
+    /// Set the API version representation to be
+    /// assigned to constructed clients.
+    fn with_version(self, version: Self::Version) -> Self;
+}
+
+impl<V: Version + Clone> ClientBuilderAttrs for XnatBuilder<V> {
+    type Version = V;
+
+    fn use_secure(mut self, value: bool) -> Self {
+        self.use_secure = value;
+        self
+    }
+
+    fn with_hostname(mut self, hostname: &str) -> Self {
+        hostname.clone_into(&mut self.hostname);
+        self
+    }
+
+    fn with_password(mut self, password: &str) -> Self {
+        self.password.clone_from(&Some(password.to_owned()));
+        self
+    }
+
+    fn with_timeouts(mut self, timeouts: &Timeouts) -> Self {
+        self.timeouts.clone_from(&Some(timeouts.to_owned()));
+        self
+    }
+
+    fn with_username(mut self, username: &str) -> Self {
+        self.username.clone_from(&Some(username.to_owned()));
+        self
+    }
+
+    fn with_version(mut self, version: Self::Version) -> Self {
+        self.version = Some(version);
+        self
+    }
 }
 
 #[async_trait(?Send)]
-pub trait ClientBuilderToken: ClientBuilder
+pub trait ClientBuilderToken: ClientBuilderCore
 where
     Self::Client: ClientAuth,
 {
@@ -132,7 +171,12 @@ where
             .post(base_url)
             .send()
             .await?;
-        client.set_session_id(&res.text().await.unwrap());
-        Ok(client)
+
+        super::clients::tokacq_validator(res)
+            .await
+            .map(|token| {
+                client.set_session_id(&token);
+                client
+            })
     }
 }
