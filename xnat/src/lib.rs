@@ -1,9 +1,20 @@
-use oxinat_core::*;
-
+#[cfg(not(feature = "core"))]
+use oxinat_core::{
+    Version,
+    AdminUri,
+    AuthUri,
+    FullUri,
+    ServicesUri,
+    UsersUri
+};
 #[cfg(feature = "core")]
 pub extern crate oxinat_core;
+#[cfg(feature = "core")]
+pub use oxinat_core::*;
 #[cfg(feature = "derive")]
 pub extern crate oxinat_derive;
+#[cfg(feature = "derive")]
+pub use oxinat_derive::*;
 
 #[derive(Clone, Version, AdminUri, AuthUri, ServicesUri, UsersUri)]
 #[version(root_uri = "data", legacy = true)]
