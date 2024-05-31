@@ -1,12 +1,13 @@
-pub mod client;
-pub mod versions;
+use oxinat_core::*;
 
 #[cfg(feature = "core")]
 pub extern crate oxinat_core;
 #[cfg(feature = "derive")]
 pub extern crate oxinat_derive;
 
-pub use oxinat_core::BuildResult;
-
-pub use client::*;
-pub use versions::{V1, V2};
+#[derive(Clone, Version, AdminUri, AuthUri, ServicesUri, UsersUri)]
+#[version(root_uri = "data", legacy = true)]
+pub struct V1;
+#[derive(Clone, Version, FullUri)]
+#[version(root_uri = "xapi", data_uri = "data")]
+pub struct V2;

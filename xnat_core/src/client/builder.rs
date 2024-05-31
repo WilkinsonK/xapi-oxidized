@@ -1,7 +1,6 @@
 use async_trait::async_trait;
 
-use oxinat_core::*;
-
+use crate::Version;
 use super::timeouts::Timeouts;
 use super::clients::{ClientAuth, ClientCore, Xnat};
 

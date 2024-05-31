@@ -1,7 +1,15 @@
 mod common;
 
 use oxinat::*;
-use oxinat_core::Version;
+use oxinat_core::{
+    ClientBuilderAttrs,
+    ClientBuilderCore,
+    ClientBuilderToken,
+    ClientCore,
+    Version,
+    Xnat,
+    XnatBuilder
+};
 
 fn setup_builder<V: Version + Clone>(version: V) -> XnatBuilder<V> {
     common::init();

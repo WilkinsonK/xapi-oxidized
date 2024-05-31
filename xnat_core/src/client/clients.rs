@@ -1,8 +1,12 @@
 use async_trait::async_trait;
 use reqwest::{header::HeaderValue, redirect::Policy, Method};
 
-use oxinat_core::*;
-
+use crate::{
+    AuthUriLegacy,
+    BuildResult,
+    UriBuilder,
+    Version
+};
 use super::builder::{ClientBuilderCore, XnatBuilder};
 use super::error::ClientError;
 use super::timeouts::Timeouts;

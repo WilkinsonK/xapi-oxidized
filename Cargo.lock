@@ -678,11 +678,9 @@ dependencies = [
 name = "oxinat"
 version = "0.5.1"
 dependencies = [
- "async-trait",
  "dotenv",
  "oxinat_core",
  "oxinat_derive",
- "reqwest",
  "thiserror",
  "tokio",
 ]
@@ -692,8 +690,11 @@ name = "oxinat_core"
 version = "0.8.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "oxinat_derive",
+ "reqwest",
  "thiserror",
+ "tokio",
 ]
 
 [[package]]

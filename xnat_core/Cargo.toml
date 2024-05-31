@@ -14,5 +14,8 @@ crate-type = ["lib"]
 
 [dependencies]
 anyhow = "1.0.83"
+async-trait = "0.1.80"
 oxinat_derive = { path = "../xnat_derive", version = "0.7.0" }
+reqwest = { version = "0.12.4", features = ["cookies"] }
 thiserror = "1.0.60"
+tokio = { version = "1.38.0", features = ["full"] }

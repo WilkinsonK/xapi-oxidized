@@ -1,9 +1,20 @@
+pub mod client;
 pub mod uri;
 pub mod version;
 
 pub use anyhow;
 pub use oxinat_derive::*;
 
+pub use crate::client::{
+    ClientAuth,
+    ClientCore,
+    ClientToken,
+    ClientBuilderAttrs,
+    ClientBuilderCore,
+    ClientBuilderToken,
+    Xnat,
+    XnatBuilder,
+};
 pub use crate::uri::{UriBuilder, UriBuildError, BuildResult};
 pub use crate::uri::admin::{
     AdminUri,
