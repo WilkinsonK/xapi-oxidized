@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use async_trait::async_trait;
-use reqwest::{header::HeaderValue, redirect::Policy, Client, Method};
+use reqwest::{header::HeaderValue, redirect::Policy, Method};
 
 use oxinat_core::*;
 
