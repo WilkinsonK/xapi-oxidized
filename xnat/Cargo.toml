@@ -22,7 +22,7 @@ oxinat_core = { path = "../xnat_core", version = "0.8.0" }
 oxinat_derive = { path = "../xnat_derive", version = "0.7.0" }
 reqwest = { version = "0.12.4", features = ["cookies"] }
 thiserror = "1.0.61"
+tokio = { version = "1.38.0", features = ["full"] }
 
 [dev-dependencies]
 dotenv = "0.15.0"
-tokio = { version = "1.38.0", features = ["full"] }
