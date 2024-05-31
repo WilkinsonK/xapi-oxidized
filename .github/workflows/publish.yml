@@ -13,9 +13,9 @@ jobs:
     - uses: actions/checkout@v4
     - name: Run Tests
       run: cargo test --verbose
-    - name: Dry Publish Derive
-      run: cargo publish --dry-run --token ${{ secrets.CRATESIO_PUBLISH_TOKEN }} -p oxinat_derive
-    - name: Dry Publish Core
-      run: cargo publish --dry-run --token ${{ secrets.CRATESIO_PUBLISH_TOKEN }} -p oxinat_core
-    - name: Dry Publish
-      run: cargo publish --dry-run --token ${{ secrets.CRATESIO_PUBLISH_TOKEN }} -p oxinat
+    - name: Publish Derive
+      run: cargo publish --token ${{ secrets.CRATESIO_PUBLISH_TOKEN }} -p oxinat_derive
+    - name: Publish Core
+      run: cargo publish --token ${{ secrets.CRATESIO_PUBLISH_TOKEN }} -p oxinat_core
+    - name: Publish
+      run: cargo publish --token ${{ secrets.CRATESIO_PUBLISH_TOKEN }} -p oxinat
