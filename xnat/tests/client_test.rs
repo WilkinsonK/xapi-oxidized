@@ -3,6 +3,7 @@ mod common;
 use oxinat::*;
 
 #[test]
+#[ignore = "must have a .env file or variables set in env"]
 fn test_client_builder01() {
     common::init();
 
