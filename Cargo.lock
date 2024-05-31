@@ -681,7 +681,6 @@ dependencies = [
  "dotenv",
  "oxinat_core",
  "oxinat_derive",
- "thiserror",
  "tokio",
 ]
 
