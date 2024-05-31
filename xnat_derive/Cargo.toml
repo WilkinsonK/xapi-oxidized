@@ -16,5 +16,5 @@ anyhow = "1.0.83"
 attribute-derive = { version = "0.9.1", features = ["syn-full"] }
 proc-macro2 = "1.0.82"
 quote = "1.0.36"
-syn = { version = "2.0.64", features = ["full", "extra-traits"] }
+syn = { version = "2.0.65", features = ["full", "extra-traits"] }
 thiserror = "1.0.60"
