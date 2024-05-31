@@ -1,7 +1,7 @@
 # XAPI Oxidized #
 ![Crates.io Version](https://img.shields.io/crates/v/oxinat?style=for-the-badge)
 ![GitHub License](https://img.shields.io/github/license/WilkinsonK/xapi-oxidized?style=for-the-badge)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/WilkinsonK/xapi-oxidized/rust.yml?style=for-the-badge)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/WilkinsonK/xapi-oxidized/test.yml?style=for-the-badge)
 
 An encrusted interface for managing and maintaining an XNAT instance,
 via REST, mapping XNAT's API to a usable Rust client.
