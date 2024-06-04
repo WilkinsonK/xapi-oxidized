@@ -19,7 +19,7 @@ pub struct XnatBuilder<V: Version> {
 /// Internal usage only. Dictates how a URL should
 /// be constructed.
 enum UrlKind<'a> {
-    Base,
+    Basic,
     Credentialed(&'a str, Option<&'a str>),
 }
 
@@ -34,13 +34,20 @@ impl<V: Version + Clone> XnatBuilder<V> {
         }).unwrap();
 
         Ok(match kind {
-            UrlKind::Base => host,
+            UrlKind::Basic => host,
             UrlKind::Credentialed(u, p) => {
                 host.set_password(p).unwrap();
                 host.set_username(u).unwrap();
                 host
             }
         })
+    }
+
+    fn credentials(&self) -> UrlKind {
+        UrlKind::Credentialed(
+            self.username.as_deref().unwrap(),
+            self.password.as_deref()
+        )
     }
 
     fn version(&self) -> anyhow::Result<V> {
@@ -78,7 +85,7 @@ impl<V: Version + Clone> ClientBuilderCore for XnatBuilder<V> {
 
     fn build(&self) -> anyhow::Result<Self::Client> {
         Ok(Xnat::new(
-            &self.base_url(UrlKind::Base)?,
+            &self.base_url(UrlKind::Basic)?,
             &self.timeouts,
             self.use_secure,
             &self.version()?,
@@ -189,11 +196,7 @@ where
 {
     async fn acquire(&self) -> anyhow::Result<Self::Client> {
         let mut client = self.build()?;
-
-        let creds  = UrlKind::Credentialed(
-            &self.hostname,
-            self.password.as_deref());
-        let mut base_url = self.base_url(creds)?;
+        let mut base_url = self.base_url(self.credentials())?;
         base_url.set_path(&client.auth_uri()?);
 
         let res = client

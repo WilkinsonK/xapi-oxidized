@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use reqwest::{header::HeaderValue, redirect::Policy, Method};
 
@@ -68,9 +70,15 @@ impl<V: Version> Xnat<V> {
         self
     }
 
-    /// Pre-initialized base URL.
+    /// Returns a clone of the base URL to the
+    /// XNAT host.
     fn base_url(&self) -> reqwest::Url {
-        let url = self.base_url.clone();
+        self.base_url.clone()
+    }
+
+    /// Initializes a `Jar` for cookie storage.
+    fn cookie_jar(&self) -> Arc<reqwest::cookie::Jar> {
+        let url = self.base_url();
         let jar = reqwest::cookie::Jar::default();
 
         if self.session_id.is_some() {
@@ -79,7 +87,7 @@ impl<V: Version> Xnat<V> {
                 &url
             );
         }
-        url
+        jar.into()
     }
 
     /// Builds a blocking client needed for
@@ -87,10 +95,11 @@ impl<V: Version> Xnat<V> {
     fn new_client_builder(&self) -> reqwest::ClientBuilder {
         reqwest::ClientBuilder::new()
             .connect_timeout(self.timeouts.connect())
+            .cookie_provider(self.cookie_jar())
+            .danger_accept_invalid_certs(!self.use_secure)
+            .https_only(self.use_secure)
             .read_timeout(self.timeouts.read())
             .redirect(Policy::default())
-            .https_only(self.use_secure)
-            .danger_accept_invalid_certs(!self.use_secure)
             .user_agent(super::APP_USER_AGENT)
     }
 }
@@ -218,13 +227,20 @@ impl<V: Version + Clone> ClientREST for Xnat<V> {
             .options(uri)
             .await?
             .send()
-            .await?;
+            .await;
 
-        log::debug!("checking if `{uri}` supports {method}: {}", res.status());
+        log::debug!("checking if `{uri}` supports {method}");
         let is_supported = |a: &HeaderValue| {
             !a.is_empty() && a.to_str().unwrap().contains(method.as_str())
         };
-        Ok(res.headers().get("Allow").is_some_and(is_supported))
+        match res {
+            Ok(r) if r.status().is_client_error() => {
+                log::warn!("check if method `{method}` supported for {uri} failed: {}", r.status());
+                Ok(true)
+            },
+            Ok(r) => Ok(r.headers().get("Allow").is_some_and(is_supported)),
+            Err(_) => Ok(true)
+        }
     }
 
     async fn options<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
