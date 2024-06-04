@@ -1,7 +1,16 @@
 use std::sync::Once;
 
+use oxinat::{
+    ClientBuilderAttrs,
+    ClientBuilderToken,
+    ClientCore,
+    Xnat,
+    V2
+};
+
 #[allow(dead_code)]
 static INIT: Once = Once::new();
+
 #[allow(dead_code)]
 pub const ENV_OXINAT_TEST_HOSTNAME: &str = "OXINAT_TEST_HOSTNAME";
 #[allow(dead_code)]
@@ -25,8 +34,23 @@ pub fn env_password() -> String {
 }
 
 #[allow(dead_code)]
+pub async fn request_client() -> Xnat<V2> {
+    oxinat::Xnat::configure(&env_hostname())
+        .with_password(&env_password())
+        .with_username(&env_username())
+        .with_version(oxinat::V2)
+        .use_secure(true)
+        .acquire()
+        .await
+        .unwrap()
+}
+
+#[allow(dead_code)]
 pub fn init() {
     INIT.call_once(|| {
         dotenv::dotenv().ok();
+        flexi_logger::Logger::with(flexi_logger::LogSpecification::debug())
+            .start()
+            .unwrap();
     })
 }
