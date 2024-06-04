@@ -21,4 +21,17 @@ impl Timeouts {
     pub fn read(&self) -> Duration {
         self.read.unwrap_or(self.connect())
     }
+
+    /// Set the connection timeout limit in
+    /// seconds.
+    pub fn with_connect_secs(mut self, value: u64) -> Self {
+        self.connect.clone_from(&Some(Duration::from_secs(value)));
+        self
+    }
+
+    /// Set the read timeout limit in seconds.
+    pub fn with_read_secs(mut self, value: u64) -> Self {
+        self.read.clone_from(&Some(Duration::from_secs(value)));
+        self
+    }
 }

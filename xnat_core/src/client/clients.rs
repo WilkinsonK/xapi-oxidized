@@ -22,41 +22,6 @@ pub struct Xnat<V: Version> {
     version:    V,
 }
 
-impl<V: Version> Drop for Xnat<V> {
-    fn drop(&mut self) {
-
-        let mut url = self.base_url();
-        // Setting the path manually since there's
-        // no elegant way to implement ClientAuth
-        // at this level that does not over
-        // complicate this implementation.
-        url.set_path("data/JSESSIONID");
-        let client = self
-            .new_client_builder()
-            .build()
-            .expect("must build client");
-
-        // Need to either hijack the current
-        // running scheduler or create a new one
-        // to make the delete call.
-        let rt = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .unwrap();
-        rt.spawn(async move {
-            let res = client
-                .delete(url)
-                .send()
-                .await
-                .expect("must delete token");
-            tokrel_validator(res)
-                .await
-                .expect("token must be invalidated");
-        });
-        rt.shutdown_background();
-    }
-}
-
 impl<V: Version> Xnat<V> {
     /// Get the `JSESSIONID` cookie.
     pub fn get_session_id(&self) -> String {
