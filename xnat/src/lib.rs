@@ -8,6 +8,9 @@ pub use oxinat_core::{
     XnatBuilder,
     ClientCore,
     ClientAuth,
+    ClientREST,
+    ClientToken,
+    ClientBuilderAttrs,
     ClientBuilderCore,
     ClientBuilderToken,
 };

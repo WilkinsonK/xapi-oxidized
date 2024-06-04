@@ -8,6 +8,7 @@ pub use oxinat_derive::*;
 pub use crate::client::{
     ClientAuth,
     ClientCore,
+    ClientREST,
     ClientToken,
     ClientBuilderAttrs,
     ClientBuilderCore,

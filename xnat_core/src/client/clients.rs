@@ -2,10 +2,7 @@ use async_trait::async_trait;
 use reqwest::{header::HeaderValue, redirect::Policy, Method};
 
 use crate::{
-    AuthUriLegacy,
-    BuildResult,
-    UriBuilder,
-    Version
+    AuthUriLegacy, BuildResult, UriBuilder, Version
 };
 use super::builder::{ClientBuilderCore, XnatBuilder};
 use super::error::ClientError;
@@ -124,6 +121,8 @@ pub trait ClientCore {
     fn configure(hostname: &str) -> XnatBuilder<Self::Version>;
     /// Create a new instance of an XNAT client.
     fn new(base_url: &reqwest::Url, timeouts: &Option<Timeouts>, use_secure: bool, version: &Self::Version) -> Self;
+    /// Get the inner `Version` implementation.
+    fn version(&self) -> &Self::Version;
 }
 
 impl<V: Version + Clone> ClientCore for Xnat<V> {
@@ -145,6 +144,10 @@ impl<V: Version + Clone> ClientCore for Xnat<V> {
             use_secure,
             version: version.to_owned(),
         }
+    }
+
+    fn version(&self) -> &Self::Version {
+        &self.version
     }
 }
 
@@ -217,6 +220,7 @@ impl<V: Version + Clone> ClientREST for Xnat<V> {
             .send()
             .await?;
 
+        log::debug!("checking if `{uri}` supports {method}: {}", res.status());
         let is_supported = |a: &HeaderValue| {
             !a.is_empty() && a.to_str().unwrap().contains(method.as_str())
         };
@@ -327,6 +331,8 @@ where
 /// validate that the transaction was successful.
 pub async fn tokacq_validator(res: reqwest::Response) -> anyhow::Result<String> {
     let status = res.status();
+    log::debug!("request for auth token acquisition: {status}");
+
     if status.is_success() {
         Ok(res.text().await?)
     } else if status.is_client_error() {
@@ -340,6 +346,8 @@ pub async fn tokacq_validator(res: reqwest::Response) -> anyhow::Result<String> 
 /// validate that the transaction was successful.
 pub async fn tokrel_validator(res: reqwest::Response) -> anyhow::Result<()> {
     let status = res.status();
+    log::debug!("request for auth token relinquisment: {status}");
+
     if status.is_success() {
         Ok(())
     } else if status.is_client_error() {
