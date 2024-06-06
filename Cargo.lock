@@ -792,6 +792,7 @@ dependencies = [
  "log",
  "oxinat_core",
  "oxinat_derive",
+ "serde_json",
  "tokio",
 ]
 
@@ -804,6 +805,8 @@ dependencies = [
  "log",
  "oxinat_derive",
  "reqwest",
+ "serde",
+ "serde_json",
  "thiserror",
  "tokio",
 ]
