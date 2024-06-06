@@ -4,7 +4,19 @@
 //! from JSON to some Model.
 use std::marker::PhantomData;
 
-use serde::{de::Visitor, Deserialize};
+use serde::{de::Visitor, Deserialize, Serialize};
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ResultData<T> {
+    #[serde(flatten)]
+    results: Vec<T>
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ResultSet<T> {
+    #[serde(rename = "Result")]
+    result: ResultData<T>
+}
 
 #[derive(Default)]
 pub struct ModelPropertyVisitor<T>(PhantomData<T>);

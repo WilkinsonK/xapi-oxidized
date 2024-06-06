@@ -10,7 +10,7 @@ output.
 An example of how to acquire said JSON and parse
 into `siteconfig.rs`:
 ```bash
-$ wget -qO - --user=<USER> --password=<PASS> https://your.xnat.host/xapi/siteConfig
+$ wget -q --user=<USER> --password=<PASS> https://your.xnat.host/xapi/siteConfig
 $ helpers/gen_models.py ./siteConfig ./siteconfig.rs
 ```
 """
