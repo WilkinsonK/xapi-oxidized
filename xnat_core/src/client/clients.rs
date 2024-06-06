@@ -259,7 +259,7 @@ pub trait ClientToken: ClientCore {
     ///     .acquire().await?;
     /// ```
     async fn acquire(&mut self) -> anyhow::Result<()>;
-    /// Invalidates the auto token.
+    /// Invalidates the auth token.
     /// 
     /// ```no_compile
     /// use oxinat_core::*;
