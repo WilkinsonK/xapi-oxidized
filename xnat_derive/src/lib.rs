@@ -223,6 +223,47 @@ pub fn derive_usersuri(input: TokenStream) -> TokenStream {
     gen.into()
 }
 
+/// Implements `serde::Deserialize` with a custom
+/// implementation for model properties.
+/// 
+/// ## Panics ##
+/// This macro will panic if the deriving struct
+/// is not a unit struct.
+#[proc_macro_derive(ModelProperty)]
+pub fn derive_model_property(input: TokenStream) -> TokenStream {
+    derive_input_boilerplate!(generics, ident, data; from input);
+    let where_clause = &generics.where_clause;
+
+    let field = match data {
+        Data::Struct(d) => {
+            match d.fields {
+                Fields::Unnamed(f) => {
+                    f.unnamed.first().cloned().expect("at least one field")
+                },
+                _ => panic!("non-unit structs are not currently supported")
+            }
+        },
+        Data::Enum(_) => panic!("enums are not currently supported"),
+        Data::Union(_) => panic!("unions are not currently supported")
+    };
+
+    let crate_ident = get_crate_ident();
+    let visitor = quote! {
+        #crate_ident::models::common::ModelPropertyVisitor::<#field>
+    };
+
+    quote! {
+        impl<'de> serde::Deserialize<'de> for #ident #generics #where_clause {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>
+            {
+                Ok(Self(deserializer.deserialize_any(#visitor::default())?))
+            }
+        }
+    }.into()
+}
+
 /// Generates an alias for `UriBuilder` and other
 /// common traits required by subsequent
 /// implementations.
