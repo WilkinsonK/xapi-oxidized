@@ -9,13 +9,13 @@ use serde::{de::Visitor, Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ResultData<T> {
     #[serde(flatten)]
-    results: Vec<T>
+    pub results: Vec<T>
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ResultSet<T> {
     #[serde(rename = "Result")]
-    result: ResultData<T>
+    pub result: ResultData<T>
 }
 
 #[derive(Default)]
