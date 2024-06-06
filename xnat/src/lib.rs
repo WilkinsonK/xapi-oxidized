@@ -1,5 +1,7 @@
+#[cfg(not(feature = "core"))]
 pub use oxinat_core::{
     Version,
+    FullUri,
     AdminUri,
     AuthUri,
     ServicesUri,
@@ -14,8 +16,6 @@ pub use oxinat_core::{
     ClientBuilderCore,
     ClientBuilderToken,
 };
-#[cfg(not(feature = "core"))]
-use oxinat_core::FullUri;
 #[cfg(feature = "core")]
 pub extern crate oxinat_core;
 #[cfg(feature = "core")]
