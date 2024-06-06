@@ -7,6 +7,7 @@ use oxinat::{
     Xnat,
     V2
 };
+use oxinat_core::client::timeouts::Timeouts;
 
 #[allow(dead_code)]
 static INIT: Once = Once::new();
@@ -36,10 +37,11 @@ pub fn env_password() -> String {
 #[allow(dead_code)]
 pub async fn request_client() -> Xnat<V2> {
     oxinat::Xnat::configure(&env_hostname())
+        .use_secure(true)
         .with_password(&env_password())
         .with_username(&env_username())
+        .with_timeouts(&Timeouts::default().with_connect_secs(300))
         .with_version(oxinat::V2)
-        .use_secure(true)
         .acquire()
         .await
         .unwrap()
