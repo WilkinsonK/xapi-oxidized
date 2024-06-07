@@ -3,7 +3,7 @@ name = "oxinat_core"
 description = "oxinat xapi-oxidized core library"
 license = "BSD-3-Clause"
 repository = "https://github.com/WilkinsonK/xapi-oxidized"
-version = "0.9.1"
+version = "0.10.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -17,7 +17,7 @@ anyhow = "1.0.86"
 async-trait = "0.1.80"
 chrono = { version = "0.4.38", features = ["serde"] }
 log = "0.4.21"
-oxinat_derive = { path = "../xnat_derive", version = "0.7.2" }
+oxinat_derive = { path = "../xnat_derive", version = "0.8.0" }
 reqwest = { version = "0.12.4", features = ["cookies", "json"] }
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.117"

@@ -3,7 +3,7 @@ name = "oxinat_derive"
 description = "oxinat xapi-oxidized procedural macros"
 license = "BSD-3-Clause"
 repository = "https://github.com/WilkinsonK/xapi-oxidized"
-version = "0.7.2"
+version = "0.8.0"
 edition = "2021"
 
 [lib]
