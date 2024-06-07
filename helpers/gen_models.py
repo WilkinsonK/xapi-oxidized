@@ -99,23 +99,27 @@ def do_writes(fd: io.TextIOWrapper, data: dict[tuple[str, str], str]) -> None:
     # Include necessary assets.
     write_line(fd, "use serde::{Deserialize, Serialize};")
     write_line(fd)
-    write_line(fd, "use oxinat_derive::ModelProperty;")
-
-    # Define a property wrapper around property
-    # values.
-    name = shouting_camel(sys.argv[1].split("/")[-1].split(".")[0])
-    property_name = f"{name}Property"
-    write_line(fd, "#[derive(Debug, Deserialize, Serialize)]")
-    write_line(fd, f"pub struct {property_name}<T>(T);")
+    write_line(fd, "use oxinat_derive::ModelField;")
     write_line(fd)
 
+    name = shouting_camel(sys.argv[1].split("/")[-1].split(".")[0])
     # Define enum units for `SiteConfig`
     # preferences.
     for key in sorted(data.keys()):
         cameled, shouting_cameled = key
         kind = data[key]
 
-        write_line(fd, "#[derive(Debug, Serialize, ModelProperty)]")
+        derivatives = [
+            "Clone",
+            "Debug",
+            "Serialize",
+            "ModelField"
+        ]
+
+        if kind in ("u64", "bool"):
+            derivatives.insert(1, "Copy")
+
+        write_line(fd, f"#[derive({', '.join(derivatives)})]")
         write_line(fd, f"#[serde(rename = \"{cameled}\")]")
         write_line(fd, f"pub struct {shouting_cameled}({kind});")
         write_line(fd)
@@ -130,7 +134,7 @@ def do_writes(fd: io.TextIOWrapper, data: dict[tuple[str, str], str]) -> None:
 
         write_line(fd, f"    #[serde(rename = \"{cameled}\")]")
         write_line(fd, "     #[serde(skip_serializing_if = \"Option::is_none\")]")
-        write_line(fd, f"    pub {snaked}: Option<{property_name}<{shouting_cameled}>>,")
+        write_line(fd, f"    pub {snaked}: Option<{shouting_cameled}>,")
     write_line(fd, "}")
     write_line(fd)
 
