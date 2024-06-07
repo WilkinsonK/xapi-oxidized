@@ -11,6 +11,6 @@ pub enum ClientError {
     DeauthFailure(u16),
     #[error("error occured attempting a transaction with the host ({0})")]
     ServerFailure(u16),
-    #[error("`{0}` does not support method `{1}`")]
+    #[error("`{1}` does not support method `{0}`")]
     UnsupportedMethod(Method, String)
 }

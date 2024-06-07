@@ -1,4 +1,5 @@
 pub mod client;
+pub mod models;
 pub mod uri;
 pub mod version;
 
@@ -8,6 +9,7 @@ pub use oxinat_derive::*;
 pub use crate::client::{
     ClientAuth,
     ClientCore,
+    ClientREST,
     ClientToken,
     ClientBuilderAttrs,
     ClientBuilderCore,

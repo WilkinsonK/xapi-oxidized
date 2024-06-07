@@ -19,6 +19,7 @@ pub use builder::{
 pub use clients::{
     ClientAuth,
     ClientCore,
+    ClientREST,
     ClientToken,
     Xnat
 };

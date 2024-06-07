@@ -212,10 +212,9 @@ impl SiteConfigUriBuilder<String>
 
     /// Produce a siteConfig/values/{pref} URI
     /// endpoint.
-    pub fn values(&self, pref: &str) -> crate::BuildResult {
+    pub fn values(&self, pref: &str) -> ValuesUriBuilder {
         ValuesUriBuilder::from_parent(&Arc::new(self))
             .with_preferences(pref)
-            .build()
     }
 }
 

@@ -1,5 +1,6 @@
 extern crate proc_macro;
 mod uri;
+mod model;
 mod version;
 
 use proc_macro::TokenStream;
@@ -221,6 +222,17 @@ pub fn derive_usersuri(input: TokenStream) -> TokenStream {
     }
     gen.extend(empty_impl!(UsersUriLegacy; from input));
     gen.into()
+}
+
+/// Implements `serde::Deserialize` with a custom
+/// implementation for model properties.
+/// 
+/// ## Panics ##
+/// This macro will panic if the deriving struct
+/// is not a tuple struct.
+#[proc_macro_derive(ModelField)]
+pub fn derive_model_field(input: TokenStream) -> TokenStream {
+    model::build_property(input)
 }
 
 /// Generates an alias for `UriBuilder` and other
