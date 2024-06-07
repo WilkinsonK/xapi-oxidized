@@ -103,7 +103,18 @@ impl<V: Version + Clone> ClientCore for Xnat<V> {
     type Version = V;
 
     fn client(&self) -> anyhow::Result<reqwest::Client> {
-        Ok(self.new_client_builder().build()?)
+        Ok(self
+            .new_client_builder()
+            .build()
+            .map(|c| {
+                log::debug!("configured internal REST client");
+                c
+            })
+            .map_err(|c| {
+                log::error!("could not configure REST client");
+                c
+            })?
+        )
     }
 
     fn configure(hostname: &str) -> XnatBuilder<Self::Version> {
@@ -199,12 +210,24 @@ impl<V: Version + Clone> ClientREST for Xnat<V> {
             !a.is_empty() && a.to_str().unwrap().contains(method.as_str())
         };
         match res {
+            Ok(r) if r.status() == 401 => {
+                log::warn!("user not authorized to access `{uri}`: (401)");
+                Ok(false)
+            },
+            Ok(r) if r.status() == 404 => {
+                log::warn!("could not find `{uri}`: (404)");
+                Ok(false)
+            },
             Ok(r) if r.status().is_client_error() => {
-                log::warn!("check if method `{method}` supported for {uri} failed: {}", r.status());
-                Ok(true)
+                log::warn!("check if method `{method}` supported for `{uri}` failed: ({})", r.status());
+                Ok(false)
+            },
+            Ok(r) if r.status().is_server_error() => {
+                log::warn!("could not reach host at `{uri}`: ({})", r.status());
+                Ok(false)
             },
             Ok(r) => Ok(r.headers().get("Allow").is_some_and(is_supported)),
-            Err(_) => Ok(true)
+            Err(_) => Ok(false)
         }
     }
 
@@ -232,6 +255,7 @@ impl<V: Version + Clone> ClientREST for Xnat<V> {
 
     async fn request_if_supported<UB: UriBuilder>(&self, method: Method, uri: &UB) -> RequestBuilderResult {
         if self.method_is_supported(&method, uri).await? {
+            log::debug!("method `{method}` supported for `{uri}`");
             self.request(method, uri).await
         } else {
             Err(ClientError::UnsupportedMethod(method, uri.to_string()).into())
