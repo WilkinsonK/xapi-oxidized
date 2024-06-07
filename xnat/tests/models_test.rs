@@ -24,7 +24,7 @@ async fn test_models_siteconfig_get_raw() {
 #[tokio::test]
 #[ignore = "must have a .env file or variables set in env"]
 async fn test_models_siteconfig_preference01() {
-    use oxinat_core::models::siteconfig::AdminEmail;
+    use oxinat_core::models::admin::siteconfig::AdminEmail;
 
     common::init();
     let mut client = common::request_client().await;
@@ -47,7 +47,7 @@ async fn test_models_siteconfig_preference01() {
 #[tokio::test]
 #[ignore = "must have a .env file or variables set in env"]
 async fn test_models_siteconfig_preference02() {
-    use oxinat_core::models::siteconfig::UiDisplaySeriesDescription;
+    use oxinat_core::models::admin::siteconfig::UiDisplaySeriesDescription;
 
     common::init();
     let mut client = common::request_client().await;

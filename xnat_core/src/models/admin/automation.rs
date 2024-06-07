@@ -6,11 +6,9 @@
 
 use serde::{Deserialize, Serialize};
 
-use oxinat_derive::ModelProperty;
-#[derive(Debug, Deserialize, Serialize)]
-pub struct AutomationProperty<T>(T);
+use oxinat_derive::ModelField;
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "internalScriptingEnabled")]
 pub struct InternalScriptingEnabled(bool);
 
@@ -18,6 +16,6 @@ pub struct InternalScriptingEnabled(bool);
 pub struct Automation {
     #[serde(rename = "internalScriptingEnabled")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub internal_scripting_enabled: Option<AutomationProperty<InternalScriptingEnabled>>,
+    pub internal_scripting_enabled: Option<InternalScriptingEnabled>,
 }
 

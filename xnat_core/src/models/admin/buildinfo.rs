@@ -6,31 +6,29 @@
 
 use serde::{Deserialize, Serialize};
 
-use oxinat_derive::ModelProperty;
-#[derive(Debug, Deserialize, Serialize)]
-pub struct BuildInfoProperty<T>(T);
+use oxinat_derive::ModelField;
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "Application-Name")]
 pub struct ApplicationName(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "Manifest-Version")]
 pub struct ManifestVersion(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "buildDate")]
 pub struct BuildDate(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "buildNumber")]
 pub struct BuildNumber(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "commit")]
 pub struct Commit(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "version")]
 pub struct Version(String);
 
@@ -38,20 +36,21 @@ pub struct Version(String);
 pub struct BuildInfo {
     #[serde(rename = "Application-Name")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub _application_name: Option<BuildInfoProperty<ApplicationName>>,
+    pub _application_name: Option<ApplicationName>,
     #[serde(rename = "Manifest-Version")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub _manifest_version: Option<BuildInfoProperty<ManifestVersion>>,
+    pub _manifest_version: Option<ManifestVersion>,
     #[serde(rename = "buildDate")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub build_date: Option<BuildInfoProperty<BuildDate>>,
+    pub build_date: Option<BuildDate>,
     #[serde(rename = "buildNumber")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub build_number: Option<BuildInfoProperty<BuildNumber>>,
+    pub build_number: Option<BuildNumber>,
     #[serde(rename = "commit")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub commit: Option<BuildInfoProperty<Commit>>,
+    pub commit: Option<Commit>,
     #[serde(rename = "version")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub version: Option<BuildInfoProperty<Version>>,
+    pub version: Option<Version>,
 }
+

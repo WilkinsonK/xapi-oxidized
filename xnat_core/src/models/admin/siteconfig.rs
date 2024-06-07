@@ -6,875 +6,870 @@
 
 use serde::{Deserialize, Serialize};
 
-use oxinat_derive::ModelProperty;
-#[derive(Debug, Deserialize, Serialize)]
-pub struct SiteConfigProperty<T>(T);
+use oxinat_derive::ModelField;
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "adminEmail")]
 pub struct AdminEmail(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "aliasTokenTimeout")]
 pub struct AliasTokenTimeout(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "aliasTokenTimeoutSchedule")]
 pub struct AliasTokenTimeoutSchedule(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "allowDataAdmins")]
 pub struct AllowDataAdmins(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "allowHtmlResourceRendering")]
 pub struct AllowHtmlResourceRendering(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "allowNonAdminsToClaimUnassignedSessions")]
 pub struct AllowNonAdminsToClaimUnassignedSessions(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "archivePath")]
 pub struct ArchivePath(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "buildPath")]
 pub struct BuildPath(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "cachePath")]
 pub struct CachePath(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "canResetFailedLoginsWithForgotPassword")]
 pub struct CanResetFailedLoginsWithForgotPassword(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "checksums")]
 pub struct Checksums(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "concurrentMaxSessions")]
 pub struct ConcurrentMaxSessions(u64);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "csrfEmailAlert")]
 pub struct CsrfEmailAlert(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "dataPaths")]
 pub struct DataPaths(Vec<String>);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "emailVerification")]
 pub struct EmailVerification(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "emailVerificationMessage")]
 pub struct EmailVerificationMessage(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "enableCsrfToken")]
 pub struct EnableCsrfToken(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "enableDicomReceiver")]
 pub struct EnableDicomReceiver(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "enableDicomReceiverPropertyChangedListener")]
 pub struct EnableDicomReceiverPropertyChangedListener(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "enableProjectAppletScript")]
 pub struct EnableProjectAppletScript(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "enableSitewideAnonymizationScript")]
 pub struct EnableSitewideAnonymizationScript(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "enableSitewideSeriesImportFilter")]
 pub struct EnableSitewideSeriesImportFilter(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "failMergeOn")]
 pub struct FailMergeOn(Vec<String>);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "featureRepositoryService")]
 pub struct FeatureRepositoryService(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "featureService")]
 pub struct FeatureService(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "ftpPath")]
 pub struct FtpPath(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "imageSessionDisplayNamePlural")]
 pub struct ImageSessionDisplayNamePlural(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "imageSessionDisplayNameSingular")]
 pub struct ImageSessionDisplayNameSingular(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "inactivityBeforeLockout")]
 pub struct InactivityBeforeLockout(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "inactivityBeforeLockoutSchedule")]
 pub struct InactivityBeforeLockoutSchedule(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "inboxPath")]
 pub struct InboxPath(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "initialized")]
 pub struct Initialized(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "interactiveAgentIds")]
 pub struct InteractiveAgentIds(Vec<String>);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "ipsThatCanSendEmailsThroughRest")]
 pub struct IpsThatCanSendEmailsThroughRest(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "matchSecurityProtocol")]
 pub struct MatchSecurityProtocol(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "maxFailedLogins")]
 pub struct MaxFailedLogins(u64);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "maxFailedLoginsLockoutDuration")]
 pub struct MaxFailedLoginsLockoutDuration(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "par")]
 pub struct Par(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "passwordComplexity")]
 pub struct PasswordComplexity(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "passwordComplexityMessage")]
 pub struct PasswordComplexityMessage(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "passwordExpirationDate")]
 pub struct PasswordExpirationDate(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "passwordExpirationInterval")]
 pub struct PasswordExpirationInterval(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "passwordExpirationType")]
 pub struct PasswordExpirationType(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "passwordHistoryDuration")]
 pub struct PasswordHistoryDuration(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "passwordReuseRestriction")]
 pub struct PasswordReuseRestriction(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "pathErrorWarning")]
 pub struct PathErrorWarning(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "pipelinePath")]
 pub struct PipelinePath(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "prearchivePath")]
 pub struct PrearchivePath(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "primaryAdminUsername")]
 pub struct PrimaryAdminUsername(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "processingUrl")]
 pub struct ProcessingUrl(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "projectAllowAutoArchive")]
 pub struct ProjectAllowAutoArchive(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "receivedFileUser")]
 pub struct ReceivedFileUser(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "refreshGuestFrequency")]
 pub struct RefreshGuestFrequency(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "reloadPrearcDatabaseOnStartup")]
 pub struct ReloadPrearcDatabaseOnStartup(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "requireChangeJustification")]
 pub struct RequireChangeJustification(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "requireEventName")]
 pub struct RequireEventName(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "requireImageAssessorLabels")]
 pub struct RequireImageAssessorLabels(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "requireLogin")]
 pub struct RequireLogin(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "requireSaltedPasswords")]
 pub struct RequireSaltedPasswords(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "resetFailedLoginsSchedule")]
 pub struct ResetFailedLoginsSchedule(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "restrictUserListAccessToAdmins")]
 pub struct RestrictUserListAccessToAdmins(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "roleRepositoryService")]
 pub struct RoleRepositoryService(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "roleService")]
 pub struct RoleService(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "scanTypeMapping")]
 pub struct ScanTypeMapping(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "securityChannel")]
 pub struct SecurityChannel(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "sessionTimeout")]
 pub struct SessionTimeout(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "sessionTimeoutMessage")]
 pub struct SessionTimeoutMessage(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "sessionXmlRebuilderInterval")]
 pub struct SessionXmlRebuilderInterval(u64);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "sessionXmlRebuilderRepeat")]
 pub struct SessionXmlRebuilderRepeat(u64);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "showChangeJustification")]
 pub struct ShowChangeJustification(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteDescriptionPage")]
 pub struct SiteDescriptionPage(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteDescriptionText")]
 pub struct SiteDescriptionText(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteDescriptionType")]
 pub struct SiteDescriptionType(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteHome")]
 pub struct SiteHome(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteHomeLayout")]
 pub struct SiteHomeLayout(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteId")]
 pub struct SiteId(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteLandingLayout")]
 pub struct SiteLandingLayout(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteLoginLanding")]
 pub struct SiteLoginLanding(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteLogoPath")]
 pub struct SiteLogoPath(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteUrl")]
 pub struct SiteUrl(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteWideAlertMessage")]
 pub struct SiteWideAlertMessage(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "siteWideAlertStatus")]
 pub struct SiteWideAlertStatus(u64);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "siteWideAlertType")]
 pub struct SiteWideAlertType(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "sitewideAnonymizationScript")]
 pub struct SitewideAnonymizationScript(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "sitewidePetMr")]
 pub struct SitewidePetMr(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "sitewidePetTracers")]
 pub struct SitewidePetTracers(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "sitewideSeriesImportFilter")]
 pub struct SitewideSeriesImportFilter(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "sitewideSeriesImportFilterMode")]
 pub struct SitewideSeriesImportFilterMode(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "smtp_host")]
 pub struct SmtpHost(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-LifeSpanReportsCacheUpdate-node")]
 pub struct TaskLifeSpanReportsCacheUpdateNode(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-PcpStatusUpdate-node")]
 pub struct TaskPcpStatusUpdateNode(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-PcpStatusUpdate-resolver")]
 pub struct TaskPcpStatusUpdateResolver(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-PcpSubmitTask-node")]
 pub struct TaskPcpSubmitTaskNode(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-SessionXMLRebuilder-node")]
 pub struct TaskSessionXMLRebuilderNode(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-SessionXMLRebuilder-nodelist")]
 pub struct TaskSessionXMLRebuilderNodelist(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-SessionXMLRebuilder-resolver")]
 pub struct TaskSessionXMLRebuilderResolver(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-SessionXMLRebuilder-wait")]
 pub struct TaskSessionXMLRebuilderWait(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-SpawnerInitializer-node")]
 pub struct TaskSpawnerInitializerNode(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-SpawnerInitializer-resolver")]
 pub struct TaskSpawnerInitializerResolver(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-XsyncScheduledSync-node")]
 pub struct TaskXsyncScheduledSyncNode(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "task-XsyncScheduledSync-resolver")]
 pub struct TaskXsyncScheduledSyncResolver(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiAllowAdvancedSearch")]
 pub struct UiAllowAdvancedSearch(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiAllowBlockedSubjectAssessorView")]
 pub struct UiAllowBlockedSubjectAssessorView(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiAllowNewUserComments")]
 pub struct UiAllowNewUserComments(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiAllowNonAdminProjectCreation")]
 pub struct UiAllowNonAdminProjectCreation(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiAllowProjectDelete")]
 pub struct UiAllowProjectDelete(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiAllowQuarantine")]
 pub struct UiAllowQuarantine(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiAllowScanAddition")]
 pub struct UiAllowScanAddition(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiAllowScanTypeModification")]
 pub struct UiAllowScanTypeModification(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiAllowSubjectCreateFromExptEdit")]
 pub struct UiAllowSubjectCreateFromExptEdit(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiDebugExtensionPoints")]
 pub struct UiDebugExtensionPoints(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiDisplaySeriesDescription")]
 pub struct UiDisplaySeriesDescription(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "uiLoginFailureMessage")]
 pub struct UiLoginFailureMessage(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiShowLeftBar")]
 pub struct UiShowLeftBar(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "uiShowLeftBarAppletButton")]
 pub struct UiShowLeftBarAppletButton(String);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiShowLeftBarBrowse")]
 pub struct UiShowLeftBarBrowse(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiShowLeftBarFavorites")]
 pub struct UiShowLeftBarFavorites(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiShowLeftBarProjects")]
 pub struct UiShowLeftBarProjects(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiShowLeftBarSearch")]
 pub struct UiShowLeftBarSearch(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiShowManageFiles")]
 pub struct UiShowManageFiles(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "uiShowProjectManageFiles")]
 pub struct UiShowProjectManageFiles(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Copy, Debug, Serialize, ModelField)]
 #[serde(rename = "userRegistration")]
 pub struct UserRegistration(bool);
 
-#[derive(Debug, Serialize, ModelProperty)]
+#[derive(Clone, Debug, Serialize, ModelField)]
 #[serde(rename = "zipExtensions")]
 pub struct ZipExtensions(String);
 
-/// siteConfig, or site-wide configuration of,
-/// some XNAT host. Values are digested into a
-/// `metadata` field where then options can be
-/// accessed through subsequent property traits.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SiteConfig {
     #[serde(rename = "adminEmail")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub admin_email: Option<SiteConfigProperty<AdminEmail>>,
+    pub admin_email: Option<AdminEmail>,
     #[serde(rename = "aliasTokenTimeout")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub alias_token_timeout: Option<SiteConfigProperty<AliasTokenTimeout>>,
+    pub alias_token_timeout: Option<AliasTokenTimeout>,
     #[serde(rename = "aliasTokenTimeoutSchedule")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub alias_token_timeout_schedule: Option<SiteConfigProperty<AliasTokenTimeoutSchedule>>,
+    pub alias_token_timeout_schedule: Option<AliasTokenTimeoutSchedule>,
     #[serde(rename = "allowDataAdmins")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub allow_data_admins: Option<SiteConfigProperty<AllowDataAdmins>>,
+    pub allow_data_admins: Option<AllowDataAdmins>,
     #[serde(rename = "allowHtmlResourceRendering")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub allow_html_resource_rendering: Option<SiteConfigProperty<AllowHtmlResourceRendering>>,
+    pub allow_html_resource_rendering: Option<AllowHtmlResourceRendering>,
     #[serde(rename = "allowNonAdminsToClaimUnassignedSessions")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub allow_non_admins_to_claim_unassigned_sessions: Option<SiteConfigProperty<AllowNonAdminsToClaimUnassignedSessions>>,
+    pub allow_non_admins_to_claim_unassigned_sessions: Option<AllowNonAdminsToClaimUnassignedSessions>,
     #[serde(rename = "archivePath")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub archive_path: Option<SiteConfigProperty<ArchivePath>>,
+    pub archive_path: Option<ArchivePath>,
     #[serde(rename = "buildPath")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub build_path: Option<SiteConfigProperty<BuildPath>>,
+    pub build_path: Option<BuildPath>,
     #[serde(rename = "cachePath")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub cache_path: Option<SiteConfigProperty<CachePath>>,
+    pub cache_path: Option<CachePath>,
     #[serde(rename = "canResetFailedLoginsWithForgotPassword")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub can_reset_failed_logins_with_forgot_password: Option<SiteConfigProperty<CanResetFailedLoginsWithForgotPassword>>,
+    pub can_reset_failed_logins_with_forgot_password: Option<CanResetFailedLoginsWithForgotPassword>,
     #[serde(rename = "checksums")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub checksums: Option<SiteConfigProperty<Checksums>>,
+    pub checksums: Option<Checksums>,
     #[serde(rename = "concurrentMaxSessions")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub concurrent_max_sessions: Option<SiteConfigProperty<ConcurrentMaxSessions>>,
+    pub concurrent_max_sessions: Option<ConcurrentMaxSessions>,
     #[serde(rename = "csrfEmailAlert")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub csrf_email_alert: Option<SiteConfigProperty<CsrfEmailAlert>>,
+    pub csrf_email_alert: Option<CsrfEmailAlert>,
     #[serde(rename = "dataPaths")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub data_paths: Option<SiteConfigProperty<DataPaths>>,
+    pub data_paths: Option<DataPaths>,
     #[serde(rename = "emailVerification")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub email_verification: Option<SiteConfigProperty<EmailVerification>>,
+    pub email_verification: Option<EmailVerification>,
     #[serde(rename = "emailVerificationMessage")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub email_verification_message: Option<SiteConfigProperty<EmailVerificationMessage>>,
+    pub email_verification_message: Option<EmailVerificationMessage>,
     #[serde(rename = "enableCsrfToken")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub enable_csrf_token: Option<SiteConfigProperty<EnableCsrfToken>>,
+    pub enable_csrf_token: Option<EnableCsrfToken>,
     #[serde(rename = "enableDicomReceiver")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub enable_dicom_receiver: Option<SiteConfigProperty<EnableDicomReceiver>>,
+    pub enable_dicom_receiver: Option<EnableDicomReceiver>,
     #[serde(rename = "enableDicomReceiverPropertyChangedListener")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub enable_dicom_receiver_property_changed_listener: Option<SiteConfigProperty<EnableDicomReceiverPropertyChangedListener>>,
+    pub enable_dicom_receiver_property_changed_listener: Option<EnableDicomReceiverPropertyChangedListener>,
     #[serde(rename = "enableProjectAppletScript")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub enable_project_applet_script: Option<SiteConfigProperty<EnableProjectAppletScript>>,
+    pub enable_project_applet_script: Option<EnableProjectAppletScript>,
     #[serde(rename = "enableSitewideAnonymizationScript")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub enable_sitewide_anonymization_script: Option<SiteConfigProperty<EnableSitewideAnonymizationScript>>,
+    pub enable_sitewide_anonymization_script: Option<EnableSitewideAnonymizationScript>,
     #[serde(rename = "enableSitewideSeriesImportFilter")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub enable_sitewide_series_import_filter: Option<SiteConfigProperty<EnableSitewideSeriesImportFilter>>,
+    pub enable_sitewide_series_import_filter: Option<EnableSitewideSeriesImportFilter>,
     #[serde(rename = "failMergeOn")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub fail_merge_on: Option<SiteConfigProperty<FailMergeOn>>,
+    pub fail_merge_on: Option<FailMergeOn>,
     #[serde(rename = "featureRepositoryService")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub feature_repository_service: Option<SiteConfigProperty<FeatureRepositoryService>>,
+    pub feature_repository_service: Option<FeatureRepositoryService>,
     #[serde(rename = "featureService")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub feature_service: Option<SiteConfigProperty<FeatureService>>,
+    pub feature_service: Option<FeatureService>,
     #[serde(rename = "ftpPath")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ftp_path: Option<SiteConfigProperty<FtpPath>>,
+    pub ftp_path: Option<FtpPath>,
     #[serde(rename = "imageSessionDisplayNamePlural")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub image_session_display_name_plural: Option<SiteConfigProperty<ImageSessionDisplayNamePlural>>,
+    pub image_session_display_name_plural: Option<ImageSessionDisplayNamePlural>,
     #[serde(rename = "imageSessionDisplayNameSingular")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub image_session_display_name_singular: Option<SiteConfigProperty<ImageSessionDisplayNameSingular>>,
+    pub image_session_display_name_singular: Option<ImageSessionDisplayNameSingular>,
     #[serde(rename = "inactivityBeforeLockout")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub inactivity_before_lockout: Option<SiteConfigProperty<InactivityBeforeLockout>>,
+    pub inactivity_before_lockout: Option<InactivityBeforeLockout>,
     #[serde(rename = "inactivityBeforeLockoutSchedule")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub inactivity_before_lockout_schedule: Option<SiteConfigProperty<InactivityBeforeLockoutSchedule>>,
+    pub inactivity_before_lockout_schedule: Option<InactivityBeforeLockoutSchedule>,
     #[serde(rename = "inboxPath")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub inbox_path: Option<SiteConfigProperty<InboxPath>>,
+    pub inbox_path: Option<InboxPath>,
     #[serde(rename = "initialized")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub initialized: Option<SiteConfigProperty<Initialized>>,
+    pub initialized: Option<Initialized>,
     #[serde(rename = "interactiveAgentIds")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub interactive_agent_ids: Option<SiteConfigProperty<InteractiveAgentIds>>,
+    pub interactive_agent_ids: Option<InteractiveAgentIds>,
     #[serde(rename = "ipsThatCanSendEmailsThroughRest")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ips_that_can_send_emails_through_rest: Option<SiteConfigProperty<IpsThatCanSendEmailsThroughRest>>,
+    pub ips_that_can_send_emails_through_rest: Option<IpsThatCanSendEmailsThroughRest>,
     #[serde(rename = "matchSecurityProtocol")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub match_security_protocol: Option<SiteConfigProperty<MatchSecurityProtocol>>,
+    pub match_security_protocol: Option<MatchSecurityProtocol>,
     #[serde(rename = "maxFailedLogins")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub max_failed_logins: Option<SiteConfigProperty<MaxFailedLogins>>,
+    pub max_failed_logins: Option<MaxFailedLogins>,
     #[serde(rename = "maxFailedLoginsLockoutDuration")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub max_failed_logins_lockout_duration: Option<SiteConfigProperty<MaxFailedLoginsLockoutDuration>>,
+    pub max_failed_logins_lockout_duration: Option<MaxFailedLoginsLockoutDuration>,
     #[serde(rename = "par")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub par: Option<SiteConfigProperty<Par>>,
+    pub par: Option<Par>,
     #[serde(rename = "passwordComplexity")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub password_complexity: Option<SiteConfigProperty<PasswordComplexity>>,
+    pub password_complexity: Option<PasswordComplexity>,
     #[serde(rename = "passwordComplexityMessage")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub password_complexity_message: Option<SiteConfigProperty<PasswordComplexityMessage>>,
+    pub password_complexity_message: Option<PasswordComplexityMessage>,
     #[serde(rename = "passwordExpirationDate")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub password_expiration_date: Option<SiteConfigProperty<PasswordExpirationDate>>,
+    pub password_expiration_date: Option<PasswordExpirationDate>,
     #[serde(rename = "passwordExpirationInterval")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub password_expiration_interval: Option<SiteConfigProperty<PasswordExpirationInterval>>,
+    pub password_expiration_interval: Option<PasswordExpirationInterval>,
     #[serde(rename = "passwordExpirationType")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub password_expiration_type: Option<SiteConfigProperty<PasswordExpirationType>>,
+    pub password_expiration_type: Option<PasswordExpirationType>,
     #[serde(rename = "passwordHistoryDuration")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub password_history_duration: Option<SiteConfigProperty<PasswordHistoryDuration>>,
+    pub password_history_duration: Option<PasswordHistoryDuration>,
     #[serde(rename = "passwordReuseRestriction")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub password_reuse_restriction: Option<SiteConfigProperty<PasswordReuseRestriction>>,
+    pub password_reuse_restriction: Option<PasswordReuseRestriction>,
     #[serde(rename = "pathErrorWarning")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub path_error_warning: Option<SiteConfigProperty<PathErrorWarning>>,
+    pub path_error_warning: Option<PathErrorWarning>,
     #[serde(rename = "pipelinePath")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub pipeline_path: Option<SiteConfigProperty<PipelinePath>>,
+    pub pipeline_path: Option<PipelinePath>,
     #[serde(rename = "prearchivePath")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub prearchive_path: Option<SiteConfigProperty<PrearchivePath>>,
+    pub prearchive_path: Option<PrearchivePath>,
     #[serde(rename = "primaryAdminUsername")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub primary_admin_username: Option<SiteConfigProperty<PrimaryAdminUsername>>,
+    pub primary_admin_username: Option<PrimaryAdminUsername>,
     #[serde(rename = "processingUrl")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub processing_url: Option<SiteConfigProperty<ProcessingUrl>>,
+    pub processing_url: Option<ProcessingUrl>,
     #[serde(rename = "projectAllowAutoArchive")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub project_allow_auto_archive: Option<SiteConfigProperty<ProjectAllowAutoArchive>>,
+    pub project_allow_auto_archive: Option<ProjectAllowAutoArchive>,
     #[serde(rename = "receivedFileUser")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub received_file_user: Option<SiteConfigProperty<ReceivedFileUser>>,
+    pub received_file_user: Option<ReceivedFileUser>,
     #[serde(rename = "refreshGuestFrequency")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub refresh_guest_frequency: Option<SiteConfigProperty<RefreshGuestFrequency>>,
+    pub refresh_guest_frequency: Option<RefreshGuestFrequency>,
     #[serde(rename = "reloadPrearcDatabaseOnStartup")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub reload_prearc_database_on_startup: Option<SiteConfigProperty<ReloadPrearcDatabaseOnStartup>>,
+    pub reload_prearc_database_on_startup: Option<ReloadPrearcDatabaseOnStartup>,
     #[serde(rename = "requireChangeJustification")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub require_change_justification: Option<SiteConfigProperty<RequireChangeJustification>>,
+    pub require_change_justification: Option<RequireChangeJustification>,
     #[serde(rename = "requireEventName")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub require_event_name: Option<SiteConfigProperty<RequireEventName>>,
+    pub require_event_name: Option<RequireEventName>,
     #[serde(rename = "requireImageAssessorLabels")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub require_image_assessor_labels: Option<SiteConfigProperty<RequireImageAssessorLabels>>,
+    pub require_image_assessor_labels: Option<RequireImageAssessorLabels>,
     #[serde(rename = "requireLogin")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub require_login: Option<SiteConfigProperty<RequireLogin>>,
+    pub require_login: Option<RequireLogin>,
     #[serde(rename = "requireSaltedPasswords")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub require_salted_passwords: Option<SiteConfigProperty<RequireSaltedPasswords>>,
+    pub require_salted_passwords: Option<RequireSaltedPasswords>,
     #[serde(rename = "resetFailedLoginsSchedule")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub reset_failed_logins_schedule: Option<SiteConfigProperty<ResetFailedLoginsSchedule>>,
+    pub reset_failed_logins_schedule: Option<ResetFailedLoginsSchedule>,
     #[serde(rename = "restrictUserListAccessToAdmins")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub restrict_user_list_access_to_admins: Option<SiteConfigProperty<RestrictUserListAccessToAdmins>>,
+    pub restrict_user_list_access_to_admins: Option<RestrictUserListAccessToAdmins>,
     #[serde(rename = "roleRepositoryService")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub role_repository_service: Option<SiteConfigProperty<RoleRepositoryService>>,
+    pub role_repository_service: Option<RoleRepositoryService>,
     #[serde(rename = "roleService")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub role_service: Option<SiteConfigProperty<RoleService>>,
+    pub role_service: Option<RoleService>,
     #[serde(rename = "scanTypeMapping")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub scan_type_mapping: Option<SiteConfigProperty<ScanTypeMapping>>,
+    pub scan_type_mapping: Option<ScanTypeMapping>,
     #[serde(rename = "securityChannel")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub security_channel: Option<SiteConfigProperty<SecurityChannel>>,
+    pub security_channel: Option<SecurityChannel>,
     #[serde(rename = "sessionTimeout")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub session_timeout: Option<SiteConfigProperty<SessionTimeout>>,
+    pub session_timeout: Option<SessionTimeout>,
     #[serde(rename = "sessionTimeoutMessage")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub session_timeout_message: Option<SiteConfigProperty<SessionTimeoutMessage>>,
+    pub session_timeout_message: Option<SessionTimeoutMessage>,
     #[serde(rename = "sessionXmlRebuilderInterval")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub session_xml_rebuilder_interval: Option<SiteConfigProperty<SessionXmlRebuilderInterval>>,
+    pub session_xml_rebuilder_interval: Option<SessionXmlRebuilderInterval>,
     #[serde(rename = "sessionXmlRebuilderRepeat")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub session_xml_rebuilder_repeat: Option<SiteConfigProperty<SessionXmlRebuilderRepeat>>,
+    pub session_xml_rebuilder_repeat: Option<SessionXmlRebuilderRepeat>,
     #[serde(rename = "showChangeJustification")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub show_change_justification: Option<SiteConfigProperty<ShowChangeJustification>>,
+    pub show_change_justification: Option<ShowChangeJustification>,
     #[serde(rename = "siteDescriptionPage")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_description_page: Option<SiteConfigProperty<SiteDescriptionPage>>,
+    pub site_description_page: Option<SiteDescriptionPage>,
     #[serde(rename = "siteDescriptionText")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_description_text: Option<SiteConfigProperty<SiteDescriptionText>>,
+    pub site_description_text: Option<SiteDescriptionText>,
     #[serde(rename = "siteDescriptionType")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_description_type: Option<SiteConfigProperty<SiteDescriptionType>>,
+    pub site_description_type: Option<SiteDescriptionType>,
     #[serde(rename = "siteHome")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_home: Option<SiteConfigProperty<SiteHome>>,
+    pub site_home: Option<SiteHome>,
     #[serde(rename = "siteHomeLayout")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_home_layout: Option<SiteConfigProperty<SiteHomeLayout>>,
+    pub site_home_layout: Option<SiteHomeLayout>,
     #[serde(rename = "siteId")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_id: Option<SiteConfigProperty<SiteId>>,
+    pub site_id: Option<SiteId>,
     #[serde(rename = "siteLandingLayout")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_landing_layout: Option<SiteConfigProperty<SiteLandingLayout>>,
+    pub site_landing_layout: Option<SiteLandingLayout>,
     #[serde(rename = "siteLoginLanding")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_login_landing: Option<SiteConfigProperty<SiteLoginLanding>>,
+    pub site_login_landing: Option<SiteLoginLanding>,
     #[serde(rename = "siteLogoPath")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_logo_path: Option<SiteConfigProperty<SiteLogoPath>>,
+    pub site_logo_path: Option<SiteLogoPath>,
     #[serde(rename = "siteUrl")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_url: Option<SiteConfigProperty<SiteUrl>>,
+    pub site_url: Option<SiteUrl>,
     #[serde(rename = "siteWideAlertMessage")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_wide_alert_message: Option<SiteConfigProperty<SiteWideAlertMessage>>,
+    pub site_wide_alert_message: Option<SiteWideAlertMessage>,
     #[serde(rename = "siteWideAlertStatus")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_wide_alert_status: Option<SiteConfigProperty<SiteWideAlertStatus>>,
+    pub site_wide_alert_status: Option<SiteWideAlertStatus>,
     #[serde(rename = "siteWideAlertType")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub site_wide_alert_type: Option<SiteConfigProperty<SiteWideAlertType>>,
+    pub site_wide_alert_type: Option<SiteWideAlertType>,
     #[serde(rename = "sitewideAnonymizationScript")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub sitewide_anonymization_script: Option<SiteConfigProperty<SitewideAnonymizationScript>>,
+    pub sitewide_anonymization_script: Option<SitewideAnonymizationScript>,
     #[serde(rename = "sitewidePetMr")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub sitewide_pet_mr: Option<SiteConfigProperty<SitewidePetMr>>,
+    pub sitewide_pet_mr: Option<SitewidePetMr>,
     #[serde(rename = "sitewidePetTracers")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub sitewide_pet_tracers: Option<SiteConfigProperty<SitewidePetTracers>>,
+    pub sitewide_pet_tracers: Option<SitewidePetTracers>,
     #[serde(rename = "sitewideSeriesImportFilter")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub sitewide_series_import_filter: Option<SiteConfigProperty<SitewideSeriesImportFilter>>,
+    pub sitewide_series_import_filter: Option<SitewideSeriesImportFilter>,
     #[serde(rename = "sitewideSeriesImportFilterMode")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub sitewide_series_import_filter_mode: Option<SiteConfigProperty<SitewideSeriesImportFilterMode>>,
+    pub sitewide_series_import_filter_mode: Option<SitewideSeriesImportFilterMode>,
     #[serde(rename = "smtp_host")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub smtp_host: Option<SiteConfigProperty<SmtpHost>>,
+    pub smtp_host: Option<SmtpHost>,
     #[serde(rename = "task-LifeSpanReportsCacheUpdate-node")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_life_span_reports_cache_updatenode: Option<SiteConfigProperty<TaskLifeSpanReportsCacheUpdateNode>>,
+    pub task_life_span_reports_cache_updatenode: Option<TaskLifeSpanReportsCacheUpdateNode>,
     #[serde(rename = "task-PcpStatusUpdate-node")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_pcp_status_updatenode: Option<SiteConfigProperty<TaskPcpStatusUpdateNode>>,
+    pub task_pcp_status_updatenode: Option<TaskPcpStatusUpdateNode>,
     #[serde(rename = "task-PcpStatusUpdate-resolver")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_pcp_status_updateresolver: Option<SiteConfigProperty<TaskPcpStatusUpdateResolver>>,
+    pub task_pcp_status_updateresolver: Option<TaskPcpStatusUpdateResolver>,
     #[serde(rename = "task-PcpSubmitTask-node")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_pcp_submit_tasknode: Option<SiteConfigProperty<TaskPcpSubmitTaskNode>>,
+    pub task_pcp_submit_tasknode: Option<TaskPcpSubmitTaskNode>,
     #[serde(rename = "task-SessionXMLRebuilder-node")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_session_x_m_l_rebuildernode: Option<SiteConfigProperty<TaskSessionXMLRebuilderNode>>,
+    pub task_session_x_m_l_rebuildernode: Option<TaskSessionXMLRebuilderNode>,
     #[serde(rename = "task-SessionXMLRebuilder-nodelist")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_session_x_m_l_rebuildernodelist: Option<SiteConfigProperty<TaskSessionXMLRebuilderNodelist>>,
+    pub task_session_x_m_l_rebuildernodelist: Option<TaskSessionXMLRebuilderNodelist>,
     #[serde(rename = "task-SessionXMLRebuilder-resolver")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_session_x_m_l_rebuilderresolver: Option<SiteConfigProperty<TaskSessionXMLRebuilderResolver>>,
+    pub task_session_x_m_l_rebuilderresolver: Option<TaskSessionXMLRebuilderResolver>,
     #[serde(rename = "task-SessionXMLRebuilder-wait")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_session_x_m_l_rebuilderwait: Option<SiteConfigProperty<TaskSessionXMLRebuilderWait>>,
+    pub task_session_x_m_l_rebuilderwait: Option<TaskSessionXMLRebuilderWait>,
     #[serde(rename = "task-SpawnerInitializer-node")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_spawner_initializernode: Option<SiteConfigProperty<TaskSpawnerInitializerNode>>,
+    pub task_spawner_initializernode: Option<TaskSpawnerInitializerNode>,
     #[serde(rename = "task-SpawnerInitializer-resolver")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_spawner_initializerresolver: Option<SiteConfigProperty<TaskSpawnerInitializerResolver>>,
+    pub task_spawner_initializerresolver: Option<TaskSpawnerInitializerResolver>,
     #[serde(rename = "task-XsyncScheduledSync-node")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_xsync_scheduled_syncnode: Option<SiteConfigProperty<TaskXsyncScheduledSyncNode>>,
+    pub task_xsync_scheduled_syncnode: Option<TaskXsyncScheduledSyncNode>,
     #[serde(rename = "task-XsyncScheduledSync-resolver")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub task_xsync_scheduled_syncresolver: Option<SiteConfigProperty<TaskXsyncScheduledSyncResolver>>,
+    pub task_xsync_scheduled_syncresolver: Option<TaskXsyncScheduledSyncResolver>,
     #[serde(rename = "uiAllowAdvancedSearch")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_allow_advanced_search: Option<SiteConfigProperty<UiAllowAdvancedSearch>>,
+    pub ui_allow_advanced_search: Option<UiAllowAdvancedSearch>,
     #[serde(rename = "uiAllowBlockedSubjectAssessorView")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_allow_blocked_subject_assessor_view: Option<SiteConfigProperty<UiAllowBlockedSubjectAssessorView>>,
+    pub ui_allow_blocked_subject_assessor_view: Option<UiAllowBlockedSubjectAssessorView>,
     #[serde(rename = "uiAllowNewUserComments")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_allow_new_user_comments: Option<SiteConfigProperty<UiAllowNewUserComments>>,
+    pub ui_allow_new_user_comments: Option<UiAllowNewUserComments>,
     #[serde(rename = "uiAllowNonAdminProjectCreation")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_allow_non_admin_project_creation: Option<SiteConfigProperty<UiAllowNonAdminProjectCreation>>,
+    pub ui_allow_non_admin_project_creation: Option<UiAllowNonAdminProjectCreation>,
     #[serde(rename = "uiAllowProjectDelete")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_allow_project_delete: Option<SiteConfigProperty<UiAllowProjectDelete>>,
+    pub ui_allow_project_delete: Option<UiAllowProjectDelete>,
     #[serde(rename = "uiAllowQuarantine")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_allow_quarantine: Option<SiteConfigProperty<UiAllowQuarantine>>,
+    pub ui_allow_quarantine: Option<UiAllowQuarantine>,
     #[serde(rename = "uiAllowScanAddition")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_allow_scan_addition: Option<SiteConfigProperty<UiAllowScanAddition>>,
+    pub ui_allow_scan_addition: Option<UiAllowScanAddition>,
     #[serde(rename = "uiAllowScanTypeModification")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_allow_scan_type_modification: Option<SiteConfigProperty<UiAllowScanTypeModification>>,
+    pub ui_allow_scan_type_modification: Option<UiAllowScanTypeModification>,
     #[serde(rename = "uiAllowSubjectCreateFromExptEdit")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_allow_subject_create_from_expt_edit: Option<SiteConfigProperty<UiAllowSubjectCreateFromExptEdit>>,
+    pub ui_allow_subject_create_from_expt_edit: Option<UiAllowSubjectCreateFromExptEdit>,
     #[serde(rename = "uiDebugExtensionPoints")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_debug_extension_points: Option<SiteConfigProperty<UiDebugExtensionPoints>>,
+    pub ui_debug_extension_points: Option<UiDebugExtensionPoints>,
     #[serde(rename = "uiDisplaySeriesDescription")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_display_series_description: Option<SiteConfigProperty<UiDisplaySeriesDescription>>,
+    pub ui_display_series_description: Option<UiDisplaySeriesDescription>,
     #[serde(rename = "uiLoginFailureMessage")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_login_failure_message: Option<SiteConfigProperty<UiLoginFailureMessage>>,
+    pub ui_login_failure_message: Option<UiLoginFailureMessage>,
     #[serde(rename = "uiShowLeftBar")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_show_left_bar: Option<SiteConfigProperty<UiShowLeftBar>>,
+    pub ui_show_left_bar: Option<UiShowLeftBar>,
     #[serde(rename = "uiShowLeftBarAppletButton")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_show_left_bar_applet_button: Option<SiteConfigProperty<UiShowLeftBarAppletButton>>,
+    pub ui_show_left_bar_applet_button: Option<UiShowLeftBarAppletButton>,
     #[serde(rename = "uiShowLeftBarBrowse")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_show_left_bar_browse: Option<SiteConfigProperty<UiShowLeftBarBrowse>>,
+    pub ui_show_left_bar_browse: Option<UiShowLeftBarBrowse>,
     #[serde(rename = "uiShowLeftBarFavorites")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_show_left_bar_favorites: Option<SiteConfigProperty<UiShowLeftBarFavorites>>,
+    pub ui_show_left_bar_favorites: Option<UiShowLeftBarFavorites>,
     #[serde(rename = "uiShowLeftBarProjects")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_show_left_bar_projects: Option<SiteConfigProperty<UiShowLeftBarProjects>>,
+    pub ui_show_left_bar_projects: Option<UiShowLeftBarProjects>,
     #[serde(rename = "uiShowLeftBarSearch")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_show_left_bar_search: Option<SiteConfigProperty<UiShowLeftBarSearch>>,
+    pub ui_show_left_bar_search: Option<UiShowLeftBarSearch>,
     #[serde(rename = "uiShowManageFiles")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_show_manage_files: Option<SiteConfigProperty<UiShowManageFiles>>,
+    pub ui_show_manage_files: Option<UiShowManageFiles>,
     #[serde(rename = "uiShowProjectManageFiles")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub ui_show_project_manage_files: Option<SiteConfigProperty<UiShowProjectManageFiles>>,
+    pub ui_show_project_manage_files: Option<UiShowProjectManageFiles>,
     #[serde(rename = "userRegistration")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_registration: Option<SiteConfigProperty<UserRegistration>>,
+    pub user_registration: Option<UserRegistration>,
     #[serde(rename = "zipExtensions")]
      #[serde(skip_serializing_if = "Option::is_none")]
-    pub zip_extensions: Option<SiteConfigProperty<ZipExtensions>>,
+    pub zip_extensions: Option<ZipExtensions>,
 }
+

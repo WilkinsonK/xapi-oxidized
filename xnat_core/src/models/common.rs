@@ -2,22 +2,28 @@
 //! among models within this sub-crate. Allows for
 //! specific behavior when processing data to and
 //! from JSON to some Model.
-use std::marker::PhantomData;
+use std::{collections::HashMap, marker::PhantomData};
 
 use serde::{de::Visitor, Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ResultData<T> {
-    #[serde(flatten)]
-    pub results: Vec<T>
-}
-
-#[derive(Debug, Deserialize, Serialize)]
 pub struct ResultSet<T> {
     #[serde(rename = "Result")]
-    pub result: ResultData<T>
+    #[serde(flatten)]
+    pub results: Vec<T>,
+    #[serde(rename = "Columns")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub columns: Option<HashMap<String, String>>,
+    #[serde(rename = "title")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(rename = "totalRecords")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub total_records: Option<u64>,
 }
 
+/// Custom `serde::de::Visitor` for
+/// `ModelProperty` types.
 #[derive(Default)]
 pub struct ModelPropertyVisitor<T>(PhantomData<T>);
 
@@ -47,7 +53,7 @@ impl<'de> Visitor<'de> for ModelPropertyVisitor<String> {
     type Value = String;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        formatter.write_str("a valid string value")
+        formatter.write_str("a valid String value")
     }
 
     fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
@@ -104,4 +110,11 @@ impl<'de, T: Deserialize<'de>> Visitor<'de> for ModelPropertyVisitor<Vec<T>> {
         }
         Ok(ret)
     }
+}
+
+/// Trait for exposing the internal property value
+/// of the implementing type.
+pub trait ModelField<T> {
+    /// Get the contained value of this property.
+    fn property(&self) -> &T;
 }
