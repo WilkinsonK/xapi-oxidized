@@ -24,6 +24,7 @@ pub struct Project {
     pub uri: Option<String>,
 
     // Extra query specifiers
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub format: Option<FormatSpecifier>,
 
     // Additional data that can be utilized at
