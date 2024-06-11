@@ -2,8 +2,9 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
 
 use super::scan::Scan;
+use crate::{get_from_datafields, models::common::{FormatSpecifier, Item}};
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Experiment {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub visit_id: Option<String>,
@@ -39,6 +40,8 @@ pub struct Experiment {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub xsi_type: Option<String>,
 
+    // Read-only fields not meant for only for the
+    // host to modify.
     #[serde(skip_serializing_if = "Option::is_none")]
     last_modified: Option<NaiveDateTime>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -46,6 +49,11 @@ pub struct Experiment {
     #[serde(skip_serializing_if = "Option::is_none")]
     insert_user: Option<String>,
 
+    // Extra query specifiers
+    pub format: Option<FormatSpecifier>,
+
+    // Additional data that can be utilized at
+    // runtime.
     #[serde(flatten)]
     #[serde(skip_serializing)]
     pub scans: Vec<Scan>,
@@ -65,5 +73,75 @@ impl Experiment {
     /// Get READ-ONLY insert-user name.
     pub fn insert_user(&self) -> &Option<String> {
         &self.insert_user
+    }
+}
+
+impl Item<Experiment> {
+    pub fn visit_id(&self) -> &Option<String> {
+        get_from_datafields!(self, visit_id)
+    }
+
+    pub fn data(&self) -> &Option<NaiveDate> {
+        get_from_datafields!(self, date)
+    }
+
+    pub fn id(&self) -> &Option<String> {
+        get_from_datafields!(self, id)
+    }
+
+    pub fn project(&self) -> &Option<String> {
+        get_from_datafields!(self, project)
+    }
+
+    pub fn label(&self) -> &Option<String> {
+        get_from_datafields!(self, label)
+    }
+
+    pub fn time(&self) -> &Option<NaiveTime> {
+        get_from_datafields!(self, time)
+    }
+
+    pub fn note(&self) -> &Option<String> {
+        get_from_datafields!(self, note)
+    }
+
+    pub fn pi_firstname(&self) -> &Option<String> {
+        get_from_datafields!(self, pi_firstname)
+    }
+
+    pub fn pi_lastname(&self) -> &Option<String> {
+        get_from_datafields!(self, pi_lastname)
+    }
+
+    pub fn uri(&self) -> &Option<String> {
+        get_from_datafields!(self, uri)
+    }
+
+    pub fn validation_method(&self) -> &Option<String> {
+        get_from_datafields!(self, validation_method)
+    }
+
+    pub fn validation_status(&self) -> &Option<String> {
+        get_from_datafields!(self, validation_status)
+    }
+
+    pub fn validation_date(&self) -> &Option<NaiveDateTime> {
+        get_from_datafields!(self, validation_date)
+    }
+
+    pub fn validation_notes(&self) -> &Option<String> {
+        get_from_datafields!(self, validation_notes)
+    }
+
+    pub fn last_modified(&self) -> Option<NaiveDateTime> {
+        self.data_fields.last_modified
+    }
+
+    pub fn insert_date(&self) -> Option<NaiveDateTime> {
+        self.data_fields.insert_date
+    }
+
+    pub fn insert_user(&self) -> Option<String> {
+        self.data_fields.insert_user.clone()
     }
 }

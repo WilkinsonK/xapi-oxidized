@@ -2,8 +2,9 @@ use chrono::{NaiveDate, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 
 use super::experiment::Experiment;
+use crate::{get_from_datafields, models::common::{FormatSpecifier, Item}};
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Subject {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub age: Option<f32>,
@@ -53,6 +54,8 @@ pub struct Subject {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub year_of_birth: Option<u64>,
 
+    // Read-only fields not meant for only for the
+    // host to modify.
     #[serde(skip_serializing_if = "Option::is_none")]
     insert_date: Option<NaiveDateTime>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -60,6 +63,11 @@ pub struct Subject {
     #[serde(skip_serializing_if = "Option::is_none")]
     last_modified: Option<NaiveDateTime>,
 
+    // Extra query specifiers
+    pub format: Option<FormatSpecifier>,
+
+    // Additional data that can be utilized at
+    // runtime.
     #[serde(flatten)]
     #[serde(skip_serializing)]
     pub sessions: Vec<Experiment>,
@@ -79,5 +87,104 @@ impl Subject {
     /// Get READ-ONLY insert-user name.
     pub fn insert_user(&self) -> &Option<String> {
         &self.insert_user
+    }
+}
+
+impl Item<Subject> {
+    pub fn age(&self) -> &Option<f32> {
+        get_from_datafields!(self, age)
+    }
+
+    pub fn birth_weight(&self) -> &Option<f32> {
+        get_from_datafields!(self, birth_weight)
+    }
+
+    pub fn date_of_birth(&self) -> &Option<NaiveDate> {
+        get_from_datafields!(self, date_of_birth)
+    }
+
+    pub fn education(&self) -> &Option<String> {
+        get_from_datafields!(self, education)
+    }
+
+    pub fn education_description(&self) -> &Option<String> {
+        get_from_datafields!(self, education_description)
+    }
+
+    pub fn ethnicity(&self) -> &Option<String> {
+        get_from_datafields!(self, ethnicity)
+    }
+
+    pub fn gender(&self) -> &Option<String> {
+        get_from_datafields!(self, gender)
+    }
+
+    pub fn gestational_age(&self) -> &Option<f32> {
+        get_from_datafields!(self, gestational_age)
+    }
+
+    pub fn group(&self) -> &Option<String> {
+        get_from_datafields!(self, group)
+    }
+
+    pub fn handedness(&self) -> &Option<char> {
+        get_from_datafields!(self, handedness)
+    }
+
+    pub fn height(&self) -> &Option<String> {
+        get_from_datafields!(self, height)
+    }
+
+    pub fn id(&self) -> &Option<u64> {
+        get_from_datafields!(self, id)
+    }
+
+    pub fn pi_firstname(&self) -> &Option<String> {
+        get_from_datafields!(self, pi_firstname)
+    }
+
+
+    pub fn pi_lastname(&self) -> &Option<String> {
+        get_from_datafields!(self, pi_lastname)
+    }
+
+    pub fn post_menstrual_age(&self) -> &Option<f32> {
+        get_from_datafields!(self, post_menstrual_age)
+    }
+
+    pub fn race(&self) -> &Option<String> {
+        get_from_datafields!(self, race)
+    }
+
+    pub fn ses(&self) -> &Option<String> {
+        get_from_datafields!(self, ses)
+    }
+
+    pub fn src(&self) -> &Option<String> {
+        get_from_datafields!(self, src)
+    }
+
+    pub fn uri(&self) -> &Option<String> {
+        get_from_datafields!(self, uri)
+    }
+
+    pub fn weight(&self) -> &Option<f32> {
+        get_from_datafields!(self, weight)
+    }
+
+    pub fn year_of_birth(&self) -> &Option<u64> {
+        get_from_datafields!(self, year_of_birth)
+    }
+
+    pub fn insert_date(&self) -> Option<NaiveDateTime> {
+        self.data_fields.insert_date
+    }
+
+    pub fn insert_user(&self) -> Option<String> {
+        self.data_fields.insert_user.clone()
+    }
+
+    pub fn last_modified(&self) -> Option<NaiveDateTime> {
+        self.data_fields.last_modified
     }
 }
