@@ -1,11 +1,25 @@
 mod common;
 
-use oxinat::{models::Subject, ClientCore, ClientToken};
+use oxinat::{ClientCore, ClientToken};
 use oxinat_core::{
-    models::{Items, Project, ResultSet, SiteConfig},
+    models::{Experiment, Items, Project, ResultSet, SiteConfig, Subject},
     AdminUri,
     ClientREST
 };
+
+#[test]
+fn test_models_experiment01() {
+    common::init();
+
+    let data = r#"{
+        "xsiType": "",
+        "xnat:subjectassessordata/id": "",
+        "project": "",
+        "URI": ""
+    }"#;
+    let parsed = serde_json::from_str::<Experiment>(data);
+    assert!(parsed.is_ok(), "must be able to deserialize from JSON: {parsed:?}");
+}
 
 #[test]
 fn test_models_items01() {

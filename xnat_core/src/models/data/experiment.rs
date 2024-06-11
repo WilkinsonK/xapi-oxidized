@@ -1,4 +1,3 @@
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
 
 use super::scan::Scan;
@@ -9,7 +8,7 @@ pub struct Experiment {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub visit_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub date: Option<NaiveDate>,
+    pub date: Option<String>,
     #[serde(rename = "ID")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -18,13 +17,20 @@ pub struct Experiment {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub time: Option<NaiveTime>,
+    pub time: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pi_firstname: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pi_lastname: Option<String>,
+    #[serde(rename = "subject_ID")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subject_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subject_label: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subject_project: Option<String>,
     #[serde(rename = "URI")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub uri: Option<String>,
@@ -33,7 +39,7 @@ pub struct Experiment {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub validation_status: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub validation_date: Option<NaiveDateTime>,
+    pub validation_date: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub validation_notes: Option<String>,
     #[serde(rename = "xsiType")]
@@ -43,9 +49,9 @@ pub struct Experiment {
     // Read-only fields not meant for only for the
     // host to modify.
     #[serde(skip_serializing_if = "Option::is_none")]
-    last_modified: Option<NaiveDateTime>,
+    last_modified: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    insert_date: Option<NaiveDateTime>,
+    insert_date: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     insert_user: Option<String>,
 
@@ -61,12 +67,12 @@ pub struct Experiment {
 
 impl Experiment {
     /// Get READ-ONLY last-modified datetime.
-    pub fn last_modified(&self) -> &Option<NaiveDateTime> {
+    pub fn last_modified(&self) -> &Option<String> {
         &self.last_modified
     }
 
     /// Get READ-ONLY insert-date datetime.
-    pub fn insert_date(&self) -> &Option<NaiveDateTime> {
+    pub fn insert_date(&self) -> &Option<String> {
         &self.insert_date
     }
 
@@ -81,7 +87,7 @@ impl Item<Experiment> {
         get_from_datafields!(self, visit_id)
     }
 
-    pub fn data(&self) -> &Option<NaiveDate> {
+    pub fn data(&self) -> &Option<String> {
         get_from_datafields!(self, date)
     }
 
@@ -97,7 +103,7 @@ impl Item<Experiment> {
         get_from_datafields!(self, label)
     }
 
-    pub fn time(&self) -> &Option<NaiveTime> {
+    pub fn time(&self) -> &Option<String> {
         get_from_datafields!(self, time)
     }
 
@@ -125,7 +131,7 @@ impl Item<Experiment> {
         get_from_datafields!(self, validation_status)
     }
 
-    pub fn validation_date(&self) -> &Option<NaiveDateTime> {
+    pub fn validation_date(&self) -> &Option<String> {
         get_from_datafields!(self, validation_date)
     }
 
@@ -133,12 +139,12 @@ impl Item<Experiment> {
         get_from_datafields!(self, validation_notes)
     }
 
-    pub fn last_modified(&self) -> Option<NaiveDateTime> {
-        self.data_fields.last_modified
+    pub fn last_modified(&self) -> Option<String> {
+        self.data_fields.last_modified.clone()
     }
 
-    pub fn insert_date(&self) -> Option<NaiveDateTime> {
-        self.data_fields.insert_date
+    pub fn insert_date(&self) -> Option<String> {
+        self.data_fields.insert_date.clone()
     }
 
     pub fn insert_user(&self) -> Option<String> {
