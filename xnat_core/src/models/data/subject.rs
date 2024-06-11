@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, NaiveDateTime};
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
 use super::experiment::Experiment;
@@ -32,13 +32,17 @@ pub struct Subject {
     pub height: Option<String>,
     #[serde(rename = "ID")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<u64>,
+    pub id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pi_firstname: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pi_lastname: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub post_menstrual_age: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub project: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub race: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -57,30 +61,30 @@ pub struct Subject {
     // Read-only fields not meant for only for the
     // host to modify.
     #[serde(skip_serializing_if = "Option::is_none")]
-    insert_date: Option<NaiveDateTime>,
+    insert_date: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     insert_user: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    last_modified: Option<NaiveDateTime>,
+    last_modified: Option<String>,
 
     // Extra query specifiers
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub format: Option<FormatSpecifier>,
 
     // Additional data that can be utilized at
     // runtime.
-    #[serde(flatten)]
     #[serde(skip_serializing)]
-    pub sessions: Vec<Experiment>,
+    pub sessions: Option<Vec<Experiment>>,
 }
 
 impl Subject {
     /// Get READ-ONLY last-modified datetime.
-    pub fn last_modified(&self) -> &Option<NaiveDateTime> {
+    pub fn last_modified(&self) -> &Option<String> {
         &self.last_modified
     }
 
     /// Get READ-ONLY insert-date datetime.
-    pub fn insert_date(&self) -> &Option<NaiveDateTime> {
+    pub fn insert_date(&self) -> &Option<String> {
         &self.insert_date
     }
 
@@ -135,8 +139,12 @@ impl Item<Subject> {
         get_from_datafields!(self, height)
     }
 
-    pub fn id(&self) -> &Option<u64> {
+    pub fn id(&self) -> &Option<String> {
         get_from_datafields!(self, id)
+    }
+
+    pub fn label(&self) -> &Option<String> {
+        get_from_datafields!(self, label)
     }
 
     pub fn pi_firstname(&self) -> &Option<String> {
@@ -176,15 +184,15 @@ impl Item<Subject> {
         get_from_datafields!(self, year_of_birth)
     }
 
-    pub fn insert_date(&self) -> Option<NaiveDateTime> {
-        self.data_fields.insert_date
+    pub fn insert_date(&self) -> Option<String> {
+        self.data_fields.insert_date.clone()
     }
 
     pub fn insert_user(&self) -> Option<String> {
         self.data_fields.insert_user.clone()
     }
 
-    pub fn last_modified(&self) -> Option<NaiveDateTime> {
-        self.data_fields.last_modified
+    pub fn last_modified(&self) -> Option<String> {
+        self.data_fields.last_modified.clone()
     }
 }
