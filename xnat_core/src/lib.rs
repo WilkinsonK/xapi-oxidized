@@ -1,4 +1,4 @@
-mod api;
+pub mod protocols;
 pub mod client;
 pub mod models;
 pub mod uri;
