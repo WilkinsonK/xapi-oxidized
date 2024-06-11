@@ -26,6 +26,7 @@ pub struct Scan {
     pub xsi_type: Option<String>,
 
     // Extra query specifiers
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub format: Option<FormatSpecifier>,
 }
 
