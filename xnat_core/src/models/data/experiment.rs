@@ -49,14 +49,14 @@ pub struct Experiment {
     #[serde(skip_serializing_if = "Option::is_none")]
     insert_user: Option<String>,
 
-    // Extra query specifiers
+    // Extra query specifiers.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub format: Option<FormatSpecifier>,
 
     // Additional data that can be utilized at
     // runtime.
-    #[serde(flatten)]
     #[serde(skip_serializing)]
-    pub scans: Vec<Scan>,
+    pub scans: Option<Vec<Scan>>,
 }
 
 impl Experiment {
