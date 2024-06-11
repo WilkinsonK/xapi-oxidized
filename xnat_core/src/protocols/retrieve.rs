@@ -9,13 +9,11 @@ use crate::uri::data::{
 use crate::models::{
     Experiment,
     FormatSpecifier,
-    Items,
     Project,
-    ResultSet,
     Subject,
 };
 use crate::version::Version;
-use super::crud::{Retrieve, try_retrieve};
+use super::crud::Retrieve;
 
 #[async_trait(?Send)]
 impl<V> Retrieve<Project> for Xnat<V>
@@ -28,35 +26,23 @@ where
         let mut model_clone = model.clone();
 
         model_clone.format = Some(FormatSpecifier::Json);
-        if model_clone.id.is_some() {
-            uri = uri.with_id(model.id.as_ref().unwrap());
-            model_clone.id = None;
-        }
-
-        let res = self
-            .get(&uri)
-            .await?
-            .query(&model_clone)
-            .send()
-            .await?;
-
-        try_retrieve(res, |r| async {
-            match &model.id {
-                Some(_) => r
-                    .json::<Items<Project>>()
-                    .await
-                    .expect("item set parsed")
+        Ok(match &model.id {
+            Some(i) => {
+                uri = uri.with_id(i);
+                model_clone.id = None;
+                self
+                    .get_any_items_from(&uri, &model_clone)
+                    .await?
                     .iter()
                     .map(|i| i.unwrap())
-                    .collect::<Vec<_>>(),
-                None => r
-                    .json::<ResultSet<Project>>()
-                    .await
-                    .expect("result set parsed")
-                    .results()
-                    .to_vec(),
-            }
-        }).await
+                    .collect::<Vec<_>>()
+            },
+            None => self
+                .get_any_result_from(&uri, &model_clone)
+                .await?
+                .results()
+                .to_vec()
+        })
     }
 }
 
@@ -69,37 +55,47 @@ where
     async fn get_any_from(&self, model: &Subject) -> anyhow::Result<Vec<Subject>> {
         let mut uri = self.version().subject_data();
         let mut model_clone = model.clone();
-
+        // Ask the host to return a JSON response.
         model_clone.format = Some(FormatSpecifier::Json);
-        if model_clone.id.is_some() {
-            uri = uri.with_subject(model.id.as_ref().unwrap().to_string());
-            model_clone.id = None;
-        }
+        // Identify the parameters to pass into
+        // the URI.
+        // We assume first that we will want to
+        // get models as an `Items` collection.
+        let mut get_as_item = true;
+        match model_clone {
+            Subject { label: Some(_), ..} => {
+                uri = uri.with_subject(model_clone.label.take().unwrap());
+                model_clone.id.clone_from(&None);
+            },
+            Subject { id: Some(_), ..} => {
+                uri = uri.with_subject(model_clone.id.take().unwrap().to_string());
+                model_clone.label.clone_from(&None);
+            },
+            _ => { get_as_item = false; }
+        };
 
-        let res = self
-            .get(&uri)
-            .await?
-            .query(&model_clone)
-            .send()
-            .await?;
-
-        try_retrieve(res, |r| async {
-            match model.id {
-                Some(_) => r
-                    .json::<Items<Subject>>()
-                    .await
-                    .expect("item set parsed")
-                    .iter()
-                    .map(|i| i.unwrap())
-                    .collect::<Vec<_>>(),
-                None => r
-                    .json::<ResultSet<Subject>>()
-                    .await
-                    .expect("result set parsed")
-                    .results()
-                    .to_vec()
-            }
-        }).await
+        let data = if let Subject { project: Some(p), .. } = &model_clone {
+            let uri = uri.by_project(p);
+            self
+                .get_any_result_from(&uri, &model_clone)
+                .await?
+                .results()
+                .to_vec()
+        } else if get_as_item {
+            self
+                .get_any_items_from(&uri, &model_clone)
+                .await?
+                .iter()
+                .map(|i| i.unwrap())
+                .collect::<Vec<_>>()
+        } else {
+            self
+                .get_any_result_from(&uri, &model_clone)
+                .await?
+                .results()
+                .to_vec()
+        };
+        Ok(data)
     }
 }
 
@@ -114,34 +110,21 @@ where
         let mut model_clone = model.clone();
 
         model_clone.format = Some(FormatSpecifier::Json);
-        if model_clone.id.is_some() {
-            uri = uri.with_experiment(model.id.as_ref().unwrap());
-            model_clone.id = None;
-        }
-
-        let res = self
-            .get(&uri)
-            .await?
-            .query(&model_clone)
-            .send()
-            .await?;
-
-        try_retrieve(res, |r| async {
-            match model.id {
-                Some(_) => r
-                    .json::<Items<Experiment>>()
-                    .await
-                    .expect("item set parsed")
+        Ok(match &model.id {
+            Some(_) => {
+                uri = uri.with_experiment(model_clone.id.take().unwrap());
+                self
+                    .get_any_items_from(&uri, &model_clone)
+                    .await?
                     .iter()
                     .map(|i| i.unwrap())
-                    .collect::<Vec<_>>(),
-                None => r
-                    .json::<ResultSet<Experiment>>()
-                    .await
-                    .expect("result set parsed")
-                    .results()
-                    .to_vec()
-            }
-        }).await
+                    .collect::<Vec<_>>()
+            },
+            None => self
+                .get_any_result_from(&uri, &model_clone)
+                .await?
+                .results()
+                .to_vec()
+        })
     }
 }

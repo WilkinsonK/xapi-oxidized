@@ -5,6 +5,8 @@ use reqwest::{Response, StatusCode};
 use serde::{de::DeserializeOwned, Serialize};
 use thiserror::Error;
 
+use crate::{models::{Items, ResultSet}, ClientREST, UriBuilder};
+
 /// Complex type representing a pinned future with
 /// a specified output.
 type PinnedFuture<'f, O> = Pin<Box<dyn Future<Output = anyhow::Result<O>> + 'f>>;
@@ -71,6 +73,58 @@ where
     /// using another model as the query
     /// parameters for the request.
     async fn get_any_from(&self, model: &M) -> anyhow::Result<Vec<M>>;
+    /// Get all instances of a particular model
+    /// using another model as the query
+    /// parameters for the request.
+    /// 
+    /// This specific method returns the results
+    /// as an `Items` object containing a series
+    /// of model `M` and any additional metadata
+    /// for each item.
+    /// 
+    /// It is meant to be used to customize the
+    /// behavior of `get_any_from` where the user
+    /// can expect the result to return an `Items`
+    /// model.
+    #[inline(never)]
+    async fn get_any_items_from<UB>(&self, uri: &UB, model: &M) -> anyhow::Result<Items<M>>
+    where
+        Self: ClientREST,
+        M: Serialize,
+        UB: UriBuilder,
+    {
+        let res = try_retrieve(
+            self.get(uri).await?.query(model).send().await?,
+            |r| async { r }
+        ).await?;
+        Ok(res.json::<Items<M>>().await?)
+    }
+    /// Get all instances of a particular model
+    /// using another model as the query
+    /// parameters for the request.
+    /// 
+    /// This specific method returns the results
+    /// as a `ResultSet` object containing a
+    /// series of model `M`.
+    /// 
+    /// It is meant to be used to customize the
+    /// behavior of `get_any_from` where the user
+    /// can expect the result to return an
+    /// `ResultSet` model.
+    #[allow(unused_variables)]
+    #[inline(never)]
+    async fn get_any_result_from<UB>(&self, uri: &UB, model: &M) -> anyhow::Result<ResultSet<M>>
+    where
+        Self: ClientREST,
+        M: Serialize,
+        UB: UriBuilder,
+    {
+        let res = try_retrieve(
+            self.get(uri).await?.query(model).send().await?,
+            |r| async { r }
+        ).await?;
+        Ok(res.json::<ResultSet<M>>().await?)
+    }
     /// Get one instance of a particular model
     /// using another model as the query
     /// parameters for the request.
