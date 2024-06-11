@@ -1,6 +1,6 @@
 mod common;
 
-use oxinat::{ClientCore, ClientToken};
+use oxinat::{models::Subject, ClientCore, ClientToken};
 use oxinat_core::{
     models::{Items, Project, ResultSet, SiteConfig},
     AdminUri,
@@ -40,7 +40,6 @@ fn test_models_items01() {
 
     let from_parsed = from_parsed
         .clone()
-        .unwrap()
         .name
         .unwrap();
     assert_eq!(from_parsed, "BBH_STARFISH");
@@ -102,6 +101,20 @@ fn test_models_resultset02() {
         }
     }"#;
     let parsed = serde_json::from_str::<ResultSet<Project>>(data);
+    assert!(parsed.is_ok(), "must be able to deserialize from JSON: {parsed:?}");
+}
+
+#[test]
+fn test_models_subject01() {
+    let data = r#"{
+        "project": "BBH_STARFISH",
+        "insert_date": "2017-10-95 06:09:14.933",
+        "ID": "BBH_01",
+        "label": "BBH_01_01",
+        "insert_user": "ggilliam",
+        "URI": "/data/subjects/BBH_01_01"
+    }"#;
+    let parsed = serde_json::from_str::<Subject>(data);
     assert!(parsed.is_ok(), "must be able to deserialize from JSON: {parsed:?}");
 }
 
