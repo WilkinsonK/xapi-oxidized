@@ -10,7 +10,8 @@ use crate::models::{
     Experiment,
     FormatSpecifier,
     Project,
-    Subject,
+    Scan,
+    Subject
 };
 use crate::version::Version;
 use super::crud::Retrieve;
@@ -209,6 +210,126 @@ where
                     let uri = self
                         .version()
                         .experiment_data();
+                    retrieve_rst_vec!(self, uri, model_clone)
+                },
+            }
+        };
+        Ok(data)
+    }
+}
+
+#[async_trait(?Send)]
+impl<V> Retrieve<Scan> for Xnat<V>
+where
+    Self: ClientCore<Version = V> + ClientREST,
+    V: Version + ProjectUriLegacy + SubjectUriLegacy + ExperimentUri,
+{
+    async fn get_any_from(&self, model: &Scan) -> anyhow::Result<Vec<Scan>> {
+        let mut model_clone = model.clone();
+
+        // Filter over model values that are only
+        // useful as URI params.
+        let scan = &model_clone.id.clone();
+        let experiment = &model_clone
+            .experiment
+            .clone()
+            .expect("an experiment id or label");
+        let subject = &model_clone.subject.clone();
+        let project = &model_clone.project.clone();
+
+        // Clear out identifiers to avoid
+        // polluting query params.
+        model_clone.id = None;
+
+        // Set returning format to JSON.
+        model_clone.format = Some(FormatSpecifier::Json);
+
+        // When specifying the experiment, we are
+        // expecting an item response.
+        let data = if scan.is_some() {
+            let scan = scan.unwrap();
+            match [subject, project] {
+                [Some(s), Some(p)] => {
+                    let uri = self
+                        .version()
+                        .project_data()
+                        .with_id(p)
+                        .subjects()
+                        .with_subject(s)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.scans().with_scan(scan);
+                    retreive_its_vec!(self, uri, model_clone)
+                },
+                [None, Some(p)] => {
+                    let uri = self
+                        .version()
+                        .project_data()
+                        .with_id(p)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.scans().with_scan(scan);
+                    retreive_its_vec!(self, uri, model_clone)
+                },
+                [Some(s), None] => {
+                    let uri = self
+                        .version()
+                        .subject_data()
+                        .with_subject(s)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.scans().with_scan(scan);
+                    retreive_its_vec!(self, uri, model_clone)
+                },
+                [None, None] => {
+                    let uri = self
+                        .version()
+                        .experiment_data()
+                        .with_experiment(experiment);
+                    let uri = uri.scans().with_scan(scan);
+                    retreive_its_vec!(self, uri, model_clone)
+                },
+            }
+        } else {
+            match [subject, project] {
+                [Some(s), Some(p)] => {
+                    let uri = self
+                        .version()
+                        .project_data()
+                        .with_id(p)
+                        .subjects()
+                        .with_subject(s)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.scans();
+                    retrieve_rst_vec!(self, uri, model_clone)
+                },
+                [None, Some(p)] => {
+                    let uri = self
+                        .version()
+                        .project_data()
+                        .with_id(p)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.scans();
+                    retrieve_rst_vec!(self, uri, model_clone)
+                },
+                [Some(s), None] => {
+                    let uri = self
+                        .version()
+                        .subject_data()
+                        .with_subject(s)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.scans();
+                    retrieve_rst_vec!(self, uri, model_clone)
+                },
+                [None, None] => {
+                    let uri = self
+                        .version()
+                        .experiment_data()
+                        .with_experiment(experiment);
+                    let uri = uri.scans();
                     retrieve_rst_vec!(self, uri, model_clone)
                 },
             }

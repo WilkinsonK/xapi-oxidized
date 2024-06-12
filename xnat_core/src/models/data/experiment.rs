@@ -123,20 +123,20 @@ impl Item<Experiment> {
         get_from_datafields!(self, uri)
     }
 
-    pub fn validation_method(&self) -> &Option<String> {
-        get_from_datafields!(self, validation_method)
-    }
-
-    pub fn validation_status(&self) -> &Option<String> {
-        get_from_datafields!(self, validation_status)
-    }
-
     pub fn validation_date(&self) -> &Option<String> {
         get_from_datafields!(self, validation_date)
     }
 
+    pub fn validation_method(&self) -> &Option<String> {
+        get_from_datafields!(self, validation_method)
+    }
+
     pub fn validation_notes(&self) -> &Option<String> {
         get_from_datafields!(self, validation_notes)
+    }
+
+    pub fn validation_status(&self) -> &Option<String> {
+        get_from_datafields!(self, validation_status)
     }
 
     pub fn last_modified(&self) -> Option<String> {
