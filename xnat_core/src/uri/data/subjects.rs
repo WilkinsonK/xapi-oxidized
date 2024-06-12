@@ -5,8 +5,8 @@ use oxinat_derive::uri_builder_alias;
 use crate::{UriBuilder, Version};
 
 use super::{
-    experiments::ExperimentUriLegacyBuilder,
-    projects::ProjectUriLegacyBuilder,
+    experiments::{ExperimentDataUriBuilder, ExperimentUriLegacyBuilder},
+    projects::{ProjectDataUriBuilder, ProjectUriLegacyBuilder},
     resources::ResourcesUriBuilder,
     shared::SharedProjectUriBuilder,
 };
@@ -14,8 +14,13 @@ use super::{
 uri_builder_alias!(SubjectDataUriBuilder);
 ImplSubjectDataUriBuilder! {
     (String),
-    (ProjectUriLegacyBuilder<String>)
+    (ExperimentUriLegacyBuilder<String>),
 }
+
+impl<Parent> SubjectDataUriBuilder for ProjectUriLegacyBuilder<Parent>
+where
+    Parent: ProjectDataUriBuilder
+{}
 
 #[derive(Clone, Debug, Default, UriBuilder)]
 #[match_path(path = "{parent}/subjects")]
@@ -32,10 +37,30 @@ where
     parent: Option<Arc<Parent>>
 }
 
-impl SubjectUriLegacyBuilder<String> {
+impl<UB> SubjectUriLegacyBuilder<UB>
+where
+    UB: SubjectDataUriBuilder + Default,
+{
+    /// Continue the builder into a
+    /// `ResourceUriBuilder`.
+    pub fn resources(&self) -> ResourcesUriBuilder<'_, Self> {
+        ResourcesUriBuilder::from_parent(&Arc::new(self))
+    }
+
+    /// Continue the builder into a
+    /// `SharedProjectUriBuilder`.
+    pub fn shared(&self) -> SharedProjectUriBuilder<'_, Self> {
+        SharedProjectUriBuilder::from_parent(self)
+    }
+}
+
+impl<UB> SubjectUriLegacyBuilder<UB>
+where
+    UB: SubjectDataUriBuilder + ProjectDataUriBuilder + Default,
+{
     /// Reconstruct this builder to allow search
     /// by project.
-    pub fn by_project(&self, project: &str) -> SubjectUriLegacyBuilder<ProjectUriLegacyBuilder<String>> {
+    pub fn by_project(&self, project: &str) -> SubjectUriLegacyBuilder<ProjectUriLegacyBuilder<UB>> {
         let parent = self.parent.as_ref().unwrap().clone();
         let mut b = ProjectUriLegacyBuilder::from_parent(parent)
             .with_id(project)
@@ -51,7 +76,12 @@ impl SubjectUriLegacyBuilder<String> {
         };
         b
     }
+}
 
+impl<UB> SubjectUriLegacyBuilder<UB>
+where
+    UB: SubjectDataUriBuilder + ExperimentDataUriBuilder + Default,
+{
     /// Continue the builder into a
     /// `ExperimentUriLegacyBuilder`.
     pub fn experiments(&self) -> ExperimentUriLegacyBuilder<Self> {
@@ -60,18 +90,6 @@ impl SubjectUriLegacyBuilder<String> {
             Some(exp) => b.with_experiment(exp),
             _ => b
         }
-    }
-
-    /// Continue the builder into a
-    /// `ResourceUriBuilder`.
-    pub fn resources(&self) -> ResourcesUriBuilder<'_, Self> {
-        ResourcesUriBuilder::from_parent(&Arc::new(self))
-    }
-
-    /// Continue the builder into a
-    /// `SharedProjectUriBuilder`.
-    pub fn shared(&self) -> SharedProjectUriBuilder<'_, Self> {
-        SharedProjectUriBuilder::from_parent(self)
     }
 }
 
