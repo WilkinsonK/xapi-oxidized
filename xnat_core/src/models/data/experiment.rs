@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use super::scan::Scan;
-use crate::{get_from_datafields, models::common::{FormatSpecifier, Item}};
+use super::{Assessor, Resource, Scan};
+use crate::models::common::FormatSpecifier;
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Experiment {
@@ -82,72 +82,36 @@ impl Experiment {
     }
 }
 
-impl Item<Experiment> {
-    pub fn visit_id(&self) -> &Option<String> {
-        get_from_datafields!(self, visit_id)
-    }
+impl From<Assessor> for Experiment {
+    fn from(value: Assessor) -> Self {
+        let mut inst = Self::default();
+        inst.id.clone_from(&value.session_id);
+        inst.label.clone_from(&value.session_label);
+        inst.project.clone_from(&value.project);
+        inst.subject_label.clone_from(&value.subject);
 
-    pub fn data(&self) -> &Option<String> {
-        get_from_datafields!(self, date)
+        inst
     }
+}
 
-    pub fn id(&self) -> &Option<String> {
-        get_from_datafields!(self, id)
+impl From<Resource> for Experiment {
+    fn from(value: Resource) -> Self {
+        let mut inst = Self::default();
+        inst.label.clone_from(&value.experiment);
+        inst.project.clone_from(&value.project);
+        inst.subject_label.clone_from(&value.subject);
+
+        inst
     }
+}
 
-    pub fn project(&self) -> &Option<String> {
-        get_from_datafields!(self, project)
-    }
+impl From<Scan> for Experiment {
+    fn from(value: Scan) -> Self {
+        let mut inst = Self::default();
+        inst.label.clone_from(&value.experiment);
+        inst.project.clone_from(&value.project);
+        inst.subject_label.clone_from(&value.subject);
 
-    pub fn label(&self) -> &Option<String> {
-        get_from_datafields!(self, label)
-    }
-
-    pub fn time(&self) -> &Option<String> {
-        get_from_datafields!(self, time)
-    }
-
-    pub fn note(&self) -> &Option<String> {
-        get_from_datafields!(self, note)
-    }
-
-    pub fn pi_firstname(&self) -> &Option<String> {
-        get_from_datafields!(self, pi_firstname)
-    }
-
-    pub fn pi_lastname(&self) -> &Option<String> {
-        get_from_datafields!(self, pi_lastname)
-    }
-
-    pub fn uri(&self) -> &Option<String> {
-        get_from_datafields!(self, uri)
-    }
-
-    pub fn validation_date(&self) -> &Option<String> {
-        get_from_datafields!(self, validation_date)
-    }
-
-    pub fn validation_method(&self) -> &Option<String> {
-        get_from_datafields!(self, validation_method)
-    }
-
-    pub fn validation_notes(&self) -> &Option<String> {
-        get_from_datafields!(self, validation_notes)
-    }
-
-    pub fn validation_status(&self) -> &Option<String> {
-        get_from_datafields!(self, validation_status)
-    }
-
-    pub fn last_modified(&self) -> Option<String> {
-        self.data_fields.last_modified.clone()
-    }
-
-    pub fn insert_date(&self) -> Option<String> {
-        self.data_fields.insert_date.clone()
-    }
-
-    pub fn insert_user(&self) -> Option<String> {
-        self.data_fields.insert_user.clone()
+        inst
     }
 }

@@ -16,6 +16,8 @@ type PinnedFuture<'f, O> = Pin<Box<dyn Future<Output = anyhow::Result<O>> + 'f>>
 /// protocol transactions.
 #[derive(Debug, Error)]
 pub enum CrudError {
+    #[error("CRUD operation requires `{0}`")]
+    IdentifierRequired(String),
     #[error("host XNAT experienced an internal error ({0})")]
     HostError(StatusCode),
     #[error("resource is not available ({0})")]
@@ -33,15 +35,16 @@ pub enum CrudError {
 /// `Ok(Self::Model)` response if the request is
 /// successful.
 #[async_trait(?Send)]
-pub trait Create {
-    type Model: Clone + Serialize;
-
+pub trait Create<M>
+where
+    M: Clone + Serialize,
+{
     /// Attempt to send a CREATE request to the
     /// XNAT server for **multiple** models.
     #[inline(never)]
-    fn create_many<M>(&self, models: M) -> Vec<PinnedFuture<'_, Self::Model>>
+    fn create_many(&self, models: M) -> Vec<PinnedFuture<'_, M>>
     where
-        M: IntoIterator<Item = Self::Model, IntoIter = IntoIter<Self::Model>>,
+        M: IntoIterator<Item = M, IntoIter = IntoIter<M>>,
     {
         models
             .into_iter()
@@ -50,7 +53,7 @@ pub trait Create {
     }
     /// Attempt to send a CREATE request to the
     /// XNAT server for **one** model.
-    async fn create_once(&self, model: Self::Model) -> anyhow::Result<Self::Model>;
+    async fn create_once(&self, model: M) -> anyhow::Result<M>;
 }
 
 /// Type is able to implement RETRIEVE requests
@@ -141,15 +144,17 @@ where
 /// Type is able to implement UPDATE or UPSERT
 /// requests for a particular model.
 #[async_trait(?Send)]
-pub trait Update {
-    type Model: Clone + DeserializeOwned;
+pub trait Update<M>
+where
+    M: Clone + Serialize,
+{
 
     /// Attempt to send **multiple** UPDATE
     /// requests to the XNAT host.
     #[inline(never)]
-    fn update_many<M>(&self, models: M) -> Vec<PinnedFuture<'_, Self::Model>>
+    fn update_many(&self, models: M) -> Vec<PinnedFuture<'_, M>>
     where
-        M: IntoIterator<Item = Self::Model, IntoIter = IntoIter<Self::Model>>,
+        M: IntoIterator<Item = M, IntoIter = IntoIter<M>>,
     {
         models
             .into_iter()
@@ -158,21 +163,22 @@ pub trait Update {
     }
     /// Attempt to send **one** UPDATE request to
     /// the XNAT host.
-    async fn update_once(&self, model: Self::Model) -> anyhow::Result<Self::Model>;
+    async fn update_once(&self, model: M) -> anyhow::Result<M>;
 }
 
 /// Type is able to implement DELETE requests for
 /// a particular model.
 #[async_trait(?Send)]
-pub trait Delete {
-    type Model: DeserializeOwned;
-
+pub trait Delete<M>
+where
+    M: Clone + Serialize
+{
     /// Attempt to send **multiple** DELETE
     /// requests to the XNAT host.
     #[inline(never)]
-    fn delete_many<M>(&self, models: M) -> Vec<PinnedFuture<'_, Self::Model>>
+    fn delete_many(&self, models: M) -> Vec<PinnedFuture<'_, M>>
     where
-        M: IntoIterator<Item = Self::Model, IntoIter = IntoIter<Self::Model>>,
+        M: IntoIterator<Item = M, IntoIter = IntoIter<M>>,
     {
         models
             .into_iter()
@@ -181,7 +187,7 @@ pub trait Delete {
     }
     /// Attempt to send **one** DELETE request to
     /// the XNAT host.
-    async fn delete_once(&self, model: Self::Model) -> anyhow::Result<Self::Model>;
+    async fn delete_once(&self, model: M) -> anyhow::Result<M>;
 }
 
 /// Utility function to shortcut the handling of

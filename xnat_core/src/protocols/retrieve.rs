@@ -7,6 +7,7 @@ use crate::uri::data::{
     SubjectUriLegacy,
 };
 use crate::models::{
+    Assessor,
     Experiment,
     FormatSpecifier,
     Project,
@@ -15,6 +16,7 @@ use crate::models::{
 };
 use crate::version::Version;
 use super::crud::Retrieve;
+use super::CrudError;
 
 macro_rules! retrieve_rst_vec {
     ($client:ident, $uri:ident, $model:ident) => {
@@ -229,11 +231,12 @@ where
 
         // Filter over model values that are only
         // useful as URI params.
+        let experiment = if let Some(e) = &model_clone.experiment {
+            e
+        } else {
+            return Err(CrudError::IdentifierRequired("experiment id or label".into()).into())
+        };
         let scan = &model_clone.id.clone();
-        let experiment = &model_clone
-            .experiment
-            .clone()
-            .expect("an experiment id or label");
         let subject = &model_clone.subject.clone();
         let project = &model_clone.project.clone();
 
@@ -330,6 +333,144 @@ where
                         .experiment_data()
                         .with_experiment(experiment);
                     let uri = uri.scans();
+                    retrieve_rst_vec!(self, uri, model_clone)
+                },
+            }
+        };
+        Ok(data)
+    }
+}
+
+#[async_trait(?Send)]
+impl<V> Retrieve<Assessor> for Xnat<V>
+where
+    Self: ClientCore<Version = V> + ClientREST,
+    V: Version + ProjectUriLegacy + SubjectUriLegacy + ExperimentUri,
+{
+    async fn get_any_from(&self, model: &Assessor) -> anyhow::Result<Vec<Assessor>> {
+        let model_experiment = Experiment::from(model.clone());
+        let mut model_clone = model.clone();
+
+        // Filter over model values that are only
+        // useful as URI params.
+        // Filter over model values that are only
+        // useful as URI params.
+        let assessor = &model_clone.id.clone();
+
+        let experiment = &model_experiment
+            .id
+            .clone()
+            .or(model_experiment.label);
+
+        let subject = &model_experiment
+            .subject_id
+            .clone()
+            .or(model_experiment.subject_label);
+
+        let project = &model_experiment
+            .project
+            .clone()
+            .or(model_experiment.subject_project);
+
+        let experiment = if let Some(e) = experiment {
+            e
+        } else {
+            return Err(CrudError::IdentifierRequired("experiment id or label".into()).into())
+        };
+
+        // Clear out identifiers to avoid
+        // polluting query params.
+        model_clone.id = None;
+
+        // Set returning format to JSON.
+        model_clone.format = Some(FormatSpecifier::Json);
+
+        // When specifying the experiment, we are
+        // expecting an item response.
+        let data = if assessor.is_some() {
+            let assessor = assessor.as_ref().unwrap();
+            match [subject, project] {
+                [Some(s), Some(p)] => {
+                    let uri = self
+                        .version()
+                        .project_data()
+                        .with_id(p)
+                        .subjects()
+                        .with_subject(s)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.assessors().with_assessor(assessor);
+                    retreive_its_vec!(self, uri, model_clone)
+                },
+                [None, Some(p)] => {
+                    let uri = self
+                        .version()
+                        .project_data()
+                        .with_id(p)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.assessors().with_assessor(assessor);
+                    retreive_its_vec!(self, uri, model_clone)
+                },
+                [Some(s), None] => {
+                    let uri = self
+                        .version()
+                        .subject_data()
+                        .with_subject(s)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.assessors().with_assessor(assessor);
+                    retreive_its_vec!(self, uri, model_clone)
+                },
+                [None, None] => {
+                    let uri = self
+                        .version()
+                        .experiment_data()
+                        .with_experiment(experiment);
+                    let uri = uri.assessors().with_assessor(assessor);
+                    retreive_its_vec!(self, uri, model_clone)
+                },
+            }
+        } else {
+            match [subject, project] {
+                [Some(s), Some(p)] => {
+                    let uri = self
+                        .version()
+                        .project_data()
+                        .with_id(p)
+                        .subjects()
+                        .with_subject(s)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.assessors();
+                    retrieve_rst_vec!(self, uri, model_clone)
+                },
+                [None, Some(p)] => {
+                    let uri = self
+                        .version()
+                        .project_data()
+                        .with_id(p)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.assessors();
+                    retrieve_rst_vec!(self, uri, model_clone)
+                },
+                [Some(s), None] => {
+                    let uri = self
+                        .version()
+                        .subject_data()
+                        .with_subject(s)
+                        .experiments()
+                        .with_experiment(experiment);
+                    let uri = uri.assessors();
+                    retrieve_rst_vec!(self, uri, model_clone)
+                },
+                [None, None] => {
+                    let uri = self
+                        .version()
+                        .experiment_data()
+                        .with_experiment(experiment);
+                    let uri = uri.assessors();
                     retrieve_rst_vec!(self, uri, model_clone)
                 },
             }

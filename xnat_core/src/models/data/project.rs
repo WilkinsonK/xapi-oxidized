@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::subject::Subject;
-use crate::{get_from_datafields, models::common::{FormatSpecifier, Item}};
+use crate::models::common::FormatSpecifier;
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Project {
@@ -31,30 +31,4 @@ pub struct Project {
     // runtime.
     #[serde(skip_serializing)]
     pub subjects: Option<Vec<Subject>>,
-}
-
-impl Item<Project> {
-    pub fn description(&self) -> &Option<String> {
-        get_from_datafields!(self, description)
-    }
-
-    pub fn id(&self) -> &Option<String> {
-        get_from_datafields!(self, id)
-    }
-
-    pub fn name(&self) -> &Option<String> {
-        get_from_datafields!(self, name)
-    }
-
-    pub fn pi_firstname(&self) -> &Option<String> {
-        get_from_datafields!(self, pi_firstname)
-    }
-
-    pub fn pi_lastname(&self) -> &Option<String> {
-        get_from_datafields!(self, pi_lastname)
-    }
-
-    pub fn secondary_id(&self) -> &Option<String> {
-        get_from_datafields!(self, secondary_id)
-    }
 }

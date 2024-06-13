@@ -27,4 +27,13 @@ pub struct Resource {
     pub label: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<String>,
+
+    // Additional data that can be utilized at
+    // runtime.
+    #[serde(skip_serializing)]
+    pub experiment: Option<String>,
+    #[serde(skip_serializing)]
+    pub project: Option<String>,
+    #[serde(skip_serializing)]
+    pub subject: Option<String>,
 }
