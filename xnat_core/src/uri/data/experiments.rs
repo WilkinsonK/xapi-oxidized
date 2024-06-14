@@ -62,7 +62,7 @@ where
     experiment: Option<String>,
 
     #[param]
-    scan: Option<u64>,
+    scan: Option<String>,
     #[parent]
     parent: Option<&'a Parent>
 }

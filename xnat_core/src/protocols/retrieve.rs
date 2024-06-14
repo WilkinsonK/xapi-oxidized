@@ -438,7 +438,7 @@ where
                     .with_subject(sbj)
                     .experiments()
                     .with_experiment(exp);
-                let uri = uri.scans().with_scan(*scn);
+                let uri = uri.scans().with_scan(scn);
                 let uri = set_resources!(uri, model);
                 retrieve_vec!(self, uri, model_clone, take_as_items)
             },
@@ -485,7 +485,7 @@ where
                     .with_id(pjt)
                     .experiments()
                     .with_experiment(exp);
-                let uri = uri.scans().with_scan(*scn);
+                let uri = uri.scans().with_scan(scn);
                 let uri = set_resources!(uri, model);
                 retrieve_vec!(self, uri, model_clone, take_as_items)
             },
@@ -511,7 +511,7 @@ where
             },
             Resource { experiment: Some(exp), scan: Some(scn), .. } => {
                 let uri = self.version().experiment_data().with_experiment(exp);
-                let uri = uri.scans().with_scan(*scn);
+                let uri = uri.scans().with_scan(scn);
                 let uri = set_resources!(uri, model);
                 retrieve_vec!(self, uri, model_clone, take_as_items)
             },
@@ -556,7 +556,7 @@ where
         // When specifying the experiment, we are
         // expecting an item response.
         let data = if scan.is_some() {
-            let scan = scan.unwrap();
+            let scan = scan.as_ref().unwrap();
             match [subject, project] {
                 [Some(s), Some(p)] => {
                     let uri = self

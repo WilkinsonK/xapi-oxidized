@@ -2,12 +2,58 @@
 //! among models within this sub-crate. Allows for
 //! specific behavior when processing data to and
 //! from JSON to some Model.
+use std::num::NonZeroU64;
 use std::ops::Index;
 use std::{collections::HashMap, slice::Iter};
 use std::marker::PhantomData;
 
 use serde::de::DeserializeOwned;
 use serde::{de::Visitor, Deserialize, Serialize};
+
+/// Custom type required to flexibly parse
+/// non-zero `u64` integers either from a string
+/// or an integer value.
+#[derive(Clone, Copy, Debug, Serialize)]
+#[serde(transparent)]
+pub struct FlexU64(NonZeroU64);
+
+struct FlexU64Visitor;
+
+impl<'de> Visitor<'de> for FlexU64Visitor {
+    type Value = FlexU64;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("integer or string")
+    }
+
+    fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+        where
+            E: serde::de::Error,
+    {
+        NonZeroU64::new(v)
+            .ok_or(E::custom("invalid integer value"))
+            .map(FlexU64)
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+        where
+            E: serde::de::Error,
+    {
+        match v.parse::<u64>() {
+            Ok(val) => self.visit_u64(val),
+            Err(_) => Err(E::custom("failed to parse integer"))
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for FlexU64 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: serde::Deserializer<'de>
+    {
+        deserializer.deserialize_any(FlexU64Visitor)
+    }
+}
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]

@@ -20,6 +20,8 @@ pub const ENV_OXINAT_TEST_USERNAME: &str = "OXINAT_TEST_USERNAME";
 pub const ENV_OXINAT_TEST_PASSWORD: &str = "OXINAT_TEST_PASSWORD";
 #[allow(dead_code)]
 pub const ENV_OXINAT_TEST_PROJECTID: &str = "OXINAT_TEST_PROJECTID";
+#[allow(dead_code)]
+pub const ENV_OXINAT_TEST_SESSIONID: &str = "OXINAT_TEST_SESSIONID";
 
 #[allow(dead_code)]
 pub fn env_hostname() -> String {
@@ -39,6 +41,11 @@ pub fn env_password() -> String {
 #[allow(dead_code)]
 pub fn env_project_id() -> String {
     std::env::var(ENV_OXINAT_TEST_PROJECTID).unwrap()
+}
+
+#[allow(dead_code)]
+pub fn env_session_id() -> String {
+    std::env::var(ENV_OXINAT_TEST_SESSIONID).unwrap()
 }
 
 #[allow(dead_code)]

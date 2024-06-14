@@ -1,18 +1,18 @@
 use serde::{Deserialize, Serialize};
 
-use crate::models::common::FormatSpecifier;
+use crate::models::common::{FlexU64, FormatSpecifier};
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Scan {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub condition: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub frames: Option<u64>,
+    pub frames: Option<FlexU64>,
     #[serde(rename = "ID")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<u64>,
+    pub id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub modality: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -21,7 +21,7 @@ pub struct Scan {
     pub quality: Option<String>,
     #[serde(rename = "type")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub scan_type: Option<u8>,
+    pub scan_type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub scanner: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -41,7 +41,7 @@ pub struct Scan {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub validation_status: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub xnat_imagescandata_id: Option<u64>,
+    pub xnat_imagescandata_id: Option<FlexU64>,
     #[serde(rename = "xsiType")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub xsi_type: Option<String>,
