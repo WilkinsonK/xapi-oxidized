@@ -1,15 +1,17 @@
 use async_trait::async_trait;
 
 use crate::client::{Xnat, ClientCore, ClientREST};
+use crate::models::common::ModelField;
 use crate::uri::data::{
     ExperimentUri,
     ProjectUriLegacy,
     SubjectUriLegacy,
 };
 use crate::models::{
-    Assessor, Experiment, FormatSpecifier, Project, Resource, Scan, Subject
+    Assessor, Experiment, FormatSpecifier, Plugin, Project, Resource, Scan, Subject
 };
 use crate::version::Version;
+use crate::PluginUri;
 use super::crud::Retrieve;
 use super::CrudError;
 
@@ -375,6 +377,26 @@ where
             }
         };
         Ok(data)
+    }
+}
+
+#[async_trait(?Send)]
+impl<V> Retrieve<Plugin> for Xnat<V>
+where
+    Self: ClientCore<Version = V> + ClientREST,
+    V: Version + PluginUri,
+{
+    async fn get_any_from(&self, model: &Plugin) -> anyhow::Result<Vec<Plugin>> {
+        let uri = self.version().plugins();
+        let mut model_clone = model.clone();
+        model_clone.name.take();
+
+        Ok(if let Some(n) = &model.name {
+            let uri = uri.with_plugin(n.property());
+            retrieve_its_vec!(self, uri, model_clone)
+        } else {
+            retrieve_rst_vec!(self, uri, model_clone)
+        })
     }
 }
 
