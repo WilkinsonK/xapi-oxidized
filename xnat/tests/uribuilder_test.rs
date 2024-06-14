@@ -192,7 +192,7 @@ fn test_version_v2_impls_session_data03() {
         .by_project("some_project")
         .with_experiment("some_session")
         .scans()
-        .with_scan(45u64)
+        .with_scan("45")
         .build();
     assert_uri_eq!(uri, "data/projects/some_project/experiments/some_session/scans/45");
 }
