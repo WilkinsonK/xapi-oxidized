@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::{Assessor, Resource, Scan};
+use super::{Assessor, Project, Resource, Scan, Subject};
 use crate::models::common::FormatSpecifier;
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
@@ -94,6 +94,14 @@ impl From<Assessor> for Experiment {
     }
 }
 
+impl From<Project> for Experiment {
+    fn from(value: Project) -> Self {
+        let mut inst = Self::default();
+        inst.project.clone_from(&value.id);
+        inst
+    }
+}
+
 impl From<Resource> for Experiment {
     fn from(value: Resource) -> Self {
         let mut inst = Self::default();
@@ -112,6 +120,15 @@ impl From<Scan> for Experiment {
         inst.project.clone_from(&value.project);
         inst.subject_label.clone_from(&value.subject);
 
+        inst
+    }
+}
+
+impl From<Subject> for Experiment {
+    fn from(value: Subject) -> Self {
+        let mut inst = Self::default();
+        inst.project.clone_from(&value.project);
+        inst.subject_id.clone_from(&value.id);
         inst
     }
 }

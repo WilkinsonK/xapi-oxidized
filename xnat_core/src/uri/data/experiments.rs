@@ -67,6 +67,17 @@ where
     parent: Option<&'a Parent>
 }
 
+impl<Parent> ExperimentScanUriBuilder<'_, Parent>
+where
+    Parent: ExperimentDataUriBuilder + Default,
+{
+    /// Continue the builder into a
+    /// `ResourceUriBuilder`.
+    pub fn resources(&self) -> ResourcesUriBuilder<'_, Self> {
+        ResourcesUriBuilder::from_parent(&Arc::new(self))
+    }
+}
+
 #[derive(Clone, Debug, Default, UriBuilder)]
 #[match_path(path = "{parent}/assessors", requires = "parent_has_experiment!()")]
 #[match_path(path = "{parent}/assessors/{assessor}", requires = "parent_has_experiment!()")]
