@@ -1,5 +1,7 @@
 #[cfg(not(feature = "core"))]
 pub use oxinat_core::{
+    models,
+    protocols,
     Version,
     FullUri,
     AdminUri,
@@ -17,11 +19,7 @@ pub use oxinat_core::{
     ClientBuilderToken,
 };
 #[cfg(feature = "core")]
-pub extern crate oxinat_core;
-#[cfg(feature = "core")]
 pub use oxinat_core::*;
-#[cfg(feature = "derive")]
-pub extern crate oxinat_derive;
 #[cfg(feature = "derive")]
 pub use oxinat_derive::*;
 

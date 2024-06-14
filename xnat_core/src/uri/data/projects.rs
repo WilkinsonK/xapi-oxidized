@@ -1,14 +1,16 @@
-use std::{fmt::Debug, path::PathBuf, sync::Arc};
+use std::{fmt::{Debug, Display}, path::PathBuf, sync::Arc};
 
 use oxinat_derive::uri_builder_alias;
 
 use crate::{UriBuildError, UriBuilder, Version};
 
-use super::{experiments::ExperimentUriLegacyBuilder, resources::ResourcesUriBuilder, subjects::SubjectUriLegacyBuilder};
+use super::{experiments::{ExperimentDataUriBuilder, ExperimentUriLegacyBuilder}, resources::ResourcesUriBuilder, subjects::{SubjectDataUriBuilder, SubjectUriLegacyBuilder}};
 
 uri_builder_alias!(ProjectDataUriBuilder);
 ImplProjectDataUriBuilder! {
     (String),
+    (ExperimentUriLegacyBuilder<String>),
+    (SubjectUriLegacyBuilder<String>),
 }
 
 /// URI endpoint paths for project data
@@ -41,12 +43,6 @@ impl ProjectUriBuilder<String> {
     pub fn investigators(&self) -> InvestigatorsUriBuilder {
         InvestigatorsUriBuilder::from_parent(self)
     }
-}
-
-macro_rules! parent_has_id {
-    () => {
-        |this: &Self| this.parent.is_some_and(|p| p.id.is_some())
-    };
 }
 
 /// Legacy URI endpoint paths for project data
@@ -82,7 +78,6 @@ macro_rules! has_project_attr {
     ($type:ident) => {
         (|this: &Self|
             this.attribute_type == ProjectAttributeType::$type
-            && this.parent.is_some_and(|p| p.id.is_some())
         )
     };
 }
@@ -96,36 +91,42 @@ macro_rules! has_project_attr {
 #[match_path(path = "{parent}/quarantine_code", requires = "has_project_attr!(Quarantine)")]
 #[match_path(path = "{parent}/quarantine_code/{code}", requires = "has_project_attr!(Quarantine)")]
 #[match_path(path = "{parent}/scan_types", requires = "has_project_attr!(ScanTypes)")]
-pub struct AttributesUriBuilder<'a> {
+pub struct AttributesUriBuilder<'a, Parent>
+where
+    Parent: Debug + Display
+{
     attribute_type: ProjectAttributeType,
     #[param]
     code: Option<String>,
     #[param]
     status: Option<String>,
     #[parent]
-    parent: Option<&'a ProjectUriLegacyBuilder<String>>,
+    parent: Option<&'a Parent>,
 }
 
 /// Represents the URI paths available for
 /// managing users related to some XNAT project.
 #[derive(Clone, Debug, Default, UriBuilder)]
-#[match_path(path = "{parent}/users", requires = "parent_has_id!()")]
-#[match_path(path = "{parent}/users/{group_name}/{username}", requires = "parent_has_id!()")]
-pub struct UsersUriBuilder<'a> {
+#[match_path(path = "{parent}/users")]
+#[match_path(path = "{parent}/users/{group_name}/{username}")]
+pub struct UsersUriBuilder<'a, Parent>
+where
+    Parent: Debug + Display,
+{
     #[param]
     group_name: Option<String>,
     #[param]
     username: Option<String>,
     #[parent]
-    parent: Option<&'a ProjectUriLegacyBuilder<String>>,
+    parent: Option<&'a Parent>,
 }
 
 /// Represents the URI paths available to manage
 /// project configurations.
 #[derive(Clone, Debug, Default, UriBuilder)]
-#[match_path(path = "{parent}/config", requires = "parent_has_id!()")]
-#[match_path(path = "{parent}/config/{tool_id}", requires = "parent_has_id!()")]
-#[match_path(path = "{parent}/config/{tool_id}/file_path", requires = "parent_has_id!()")]
+#[match_path(path = "{parent}/config")]
+#[match_path(path = "{parent}/config/{tool_id}")]
+#[match_path(path = "{parent}/config/{tool_id}/file_path")]
 pub struct ConfigUriBuilder<'a> {
     #[param(map_from = "|pb: &PathBuf| pb.to_str().unwrap().to_string()")]
     file_path: Option<PathBuf>,
@@ -136,8 +137,8 @@ pub struct ConfigUriBuilder<'a> {
 }
 
 #[derive(Clone, Debug, Default, UriBuilder)]
-#[match_path(path = "{parent}/pipelines", requires = "parent_has_id!()")]
-#[match_path(path = "{parent}/pipelines/{step}/experiments/{experiment}", requires = "parent_has_id!()")]
+#[match_path(path = "{parent}/pipelines")]
+#[match_path(path = "{parent}/pipelines/{step}/experiments/{experiment}")]
 pub struct Pipelines<'a> {
     #[param]
     step: Option<String>,
@@ -147,10 +148,13 @@ pub struct Pipelines<'a> {
     parent: Option<&'a ProjectUriLegacyBuilder<String>>,
 }
 
-impl ProjectUriLegacyBuilder<String> {
+impl<UB> ProjectUriLegacyBuilder<UB>
+where
+    UB: ProjectDataUriBuilder + Default,
+{
     /// Continue the builder into a
     /// `AttributesUriBuilder`
-    pub fn attributes(&self) -> AttributesUriBuilder {
+    pub fn attributes(&self) -> AttributesUriBuilder<'_, Self> {
         AttributesUriBuilder::from_parent(&Arc::new(self))
     }
 
@@ -165,21 +169,22 @@ impl ProjectUriLegacyBuilder<String> {
     }
 
     /// Continue the builder into a
-    /// `ExperimentUriLegacyBuilder`.
-    pub fn experiments(&self) -> ExperimentUriLegacyBuilder<Self> {
-        let b = ExperimentUriLegacyBuilder::from_parent(Arc::new(self.to_owned()));
-        match self.experiment.as_ref() {
-            Some(exp) => b.with_experiment(exp),
-            _ => b
-        }
-    }
-
-    /// Continue the builder into a
     /// `ResourceUriBuilder`.
     pub fn resources(&self) -> ResourcesUriBuilder<'_, Self> {
         ResourcesUriBuilder::from_parent(&Arc::new(self))
     }
 
+    /// Continue the builder into a
+    /// `UsersUriBuilder`.
+    pub fn users(&self) -> UsersUriBuilder<'_, Self> {
+        UsersUriBuilder::from_parent(&Arc::new(self))
+    }
+}
+
+impl<UB> ProjectUriLegacyBuilder<UB>
+where
+    UB: ProjectDataUriBuilder + SubjectDataUriBuilder + Default,
+{
     /// Continue the builder into a
     /// `SubjectUriLegacyBuilder`.
     pub fn subjects(&self) -> SubjectUriLegacyBuilder<Self> {
@@ -189,11 +194,20 @@ impl ProjectUriLegacyBuilder<String> {
             _ => b
         }
     }
+}
 
+impl<UB> ProjectUriLegacyBuilder<UB>
+where
+    UB: ProjectDataUriBuilder + ExperimentDataUriBuilder + Default,
+{
     /// Continue the builder into a
-    /// `UsersUriBuilder`.
-    pub fn users(&self) -> UsersUriBuilder {
-        UsersUriBuilder::from_parent(&Arc::new(self))
+    /// `ExperimentUriLegacyBuilder`.
+    pub fn experiments(&self) -> ExperimentUriLegacyBuilder<Self> {
+        let b = ExperimentUriLegacyBuilder::from_parent(Arc::new(self.to_owned()));
+        match self.experiment.as_ref() {
+            Some(exp) => b.with_experiment(exp),
+            _ => b
+        }
     }
 }
 
