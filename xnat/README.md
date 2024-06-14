@@ -139,3 +139,104 @@ let client = Xnat::configure("your.target.host")
 
 Where now, we are setting the desired version, with the **URI**
 builders we want, we can expect to have a proper `Xnat` client.
+
+### Protocols ###
+An effort is being made to predefine some common operations you may
+wish to perform. We are defining them as `protocols` where a protocol
+is related to come **CRUD** operation against a resource XNAT makes
+available to an authorized user.
+
+For clients which implement `ClientCore` and `ClientREST` traits,
+as we continue development, these additional traits will be available:
+
+```rust
+/// Type is able to implement CREATE requests for
+/// a particular model. Upon creation, these
+/// methods are expected to then return the
+/// individual results, and then a
+/// `Ok(Self::Model)` response if the request is
+/// successful.
+trait Create<M> {
+    /// Attempt to send a CREATE request to the
+    /// XNAT server for **multiple** models.
+    fn create_many(&self, models: M) -> Vec<PinnedFuture<'_, M>>;
+    /// Attempt to send a CREATE request to the
+    /// XNAT server for **one** model.
+    fn create_once(&self, model: M) -> anyhow::Result<M>;
+}
+
+/// Type is able to implement RETRIEVE requests
+/// for a particular model.
+trait Retrieve<M> {
+    /// Get all instances of a particular model
+    /// available to the user via the XNAT host.
+    async fn get_all(&self) -> anyhow::Result<Vec<M>>;
+    /// Get all instances of a particular model
+    /// using another model as the query
+    /// parameters for the request.
+    async fn get_any_from(&self, model: &M) -> anyhow::Result<Vec<M>>;
+    /// Get one instance of a particular model
+    /// using another model as the query
+    /// parameters for the request.
+    async fn get_one_from(&self, model: &M) -> anyhow::Result<M>;
+}
+
+/// Type is able to implement UPDATE or UPSERT
+/// requests for a particular model.
+trait Update<M> {
+    /// Attempt to send **multiple** UPDATE
+    /// requests to the XNAT host.
+    fn update_many(&self, models: M) -> Vec<PinnedFuture<'_, M>>;
+    /// Attempt to send **one** UPDATE request to
+    /// the XNAT host.
+    async fn update_once(&self, model: M) -> anyhow::Result<M>;
+}
+
+/// Type is able to implement DELETE requests for
+/// a particular model.
+trait Delete<M> {
+    /// Attempt to send **multiple** DELETE
+    /// requests to the XNAT host.
+    fn delete_many(&self, models: M) -> Vec<PinnedFuture<'_, M>>;
+    /// Attempt to send **one** DELETE request to
+    /// the XNAT host.
+    async fn delete_once(&self, model: M) -> anyhow::Result<M>;
+}
+```
+
+#### Retrieve ####
+The `Retrieve` trait has already be implemented on a generic **Xnat**
+client for certain models.
+
+- `Project`
+- `Subject`
+- `Experiment`
+- `Scan`
+- `Assessor`
+- `Resource`
+- `Plugin`
+
+The `Retrieve` trait itself is meant to allow you to **GET** resources
+from your target XNAT instance.
+
+```rust
+use oxinat::{ClientCore, ClientToken, Xnat}
+use oxinat::models::Project;
+use oxinat::protocols::Retrieve;
+
+use crate::{MyVersion, client};
+
+// Should retrieve all project records from your
+// XNAT instance.
+let found: Vec<Project> = client.get_all().await.unwrap();
+
+// Should retrieve one project which matches the
+// project ID.
+let mut project = Project::default();
+project.id.clone_from(&Some("SOME_PROJECT_ID".into()));
+let found = client.get_one_from(&project).await.unwrap();
+```
+
+The predefined getters, when performing a query, tries to construct
+the request path by first extracting relevant identifiers and
+consuming the remaining populated fields as query parameters.

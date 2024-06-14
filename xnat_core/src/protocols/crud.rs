@@ -148,7 +148,6 @@ pub trait Update<M>
 where
     M: Clone + Serialize,
 {
-
     /// Attempt to send **multiple** UPDATE
     /// requests to the XNAT host.
     #[inline(never)]
