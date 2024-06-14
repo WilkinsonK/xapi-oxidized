@@ -6,16 +6,30 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  publish:
+  test_build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     - name: Run Tests
       run: cargo test --verbose
+
+  publish_derive:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
     - name: Publish Derive
       run: cargo publish --token ${{ secrets.CRATESIO_PUBLISH_TOKEN }} -p oxinat_derive
+
+  publish_core:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
     - name: Publish Core
       run: cargo publish --token ${{ secrets.CRATESIO_PUBLISH_TOKEN }} -p oxinat_core
+
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
     - name: Publish
       run: cargo publish --token ${{ secrets.CRATESIO_PUBLISH_TOKEN }} -p oxinat
