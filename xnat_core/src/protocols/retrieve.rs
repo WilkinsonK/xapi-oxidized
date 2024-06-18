@@ -2,6 +2,7 @@ use async_trait::async_trait;
 
 use crate::client::{Xnat, ClientCore, ClientREST};
 use crate::models::common::ModelField;
+use crate::uri::admin::PluginUri;
 use crate::uri::data::{
     ExperimentUri,
     ProjectUriLegacy,
@@ -11,9 +12,7 @@ use crate::models::{
     Assessor, Experiment, FormatSpecifier, Plugin, Project, Resource, Scan, Subject
 };
 use crate::version::Version;
-use crate::PluginUri;
-use super::crud::Retrieve;
-use super::CrudError;
+use super::crud::{CrudError, Retrieve};
 
 macro_rules! retrieve_rst_vec {
     ($client:ident, $uri:ident, $model:ident) => {
