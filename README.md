@@ -31,7 +31,7 @@ useful to a wider audience.
 - [x] Expose portions of the core and derivitive sub-crates to allow
       for users to implement access to REST calls outside of the XNAT
       standard interface.
-- [ ] Optional support for logging specific parts of our interface for
+- [x] Optional support for logging specific parts of our interface for
       better debugging.
 - [ ] Optional support for building this project as a `Python` module.
 
