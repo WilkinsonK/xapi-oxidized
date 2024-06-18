@@ -36,11 +36,10 @@ useful to a wider audience.
 - [ ] Optional support for building this project as a `Python` module.
 
 ## Current status ##
-An initial XNAT client has been defined with the rudimentary
-functionality to validate a session ID as a `token`. This includes
-acquisition and relinquishment of said `token` at the user's
-discretion, but client `tokens` are automatically invalidated when the
-client object is dropped.
+`oxinat` is to a point of being relatively complete for the purposes
+of being useful in other projects. Moving forward, progress will be
+tracked using the [XAPI Oxidized](https://github.com/users/WilkinsonK/projects/3)
+project board to track issues and development.
 
 ## Using this Project ##
 While this project is still in alpha, there is a lot to be desired
