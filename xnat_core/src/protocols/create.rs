@@ -1,13 +1,15 @@
 use async_trait::async_trait;
 
 use crate::client::{Xnat, ClientCore, ClientREST};
-use crate::models::{Experiment, Project, Scan, Subject};
+use crate::models::{Experiment, Project, Resource, Scan, Subject};
+use crate::uri::data::resources::ResourcesUriBuilder;
 use crate::uri::data::{
     ExperimentUri,
     ProjectUriLegacy,
     SubjectUriLegacy,
 };
 use crate::version::Version;
+use crate::UriBuilder;
 use super::crud::{CrudError, Create};
 
 /// Takes the `Option` value for the specified
@@ -127,6 +129,94 @@ where
             .experiments()
             .with_experiment(session);
         self.put(&uri.scans().with_scan(scan))
+            .await?
+            .json(&model_clone)
+            .send()
+            .await?;
+        Ok(model)
+    }
+}
+
+#[async_trait(?Send)]
+impl<V> Create<Resource> for Xnat<V>
+where
+    Self: ClientCore<Version = V> + ClientREST,
+    V: Version + ExperimentUri + ProjectUriLegacy + SubjectUriLegacy,
+{
+    async fn create_once(&self, model: Resource) -> anyhow::Result<Resource> {
+        let mut model_clone = model.clone();
+        model_clone.project.take();
+        model_clone.subject.take();
+        model_clone.experiment.take();
+        model_clone.scan.take();
+        model_clone.id.take();
+        model_clone.collection.take();
+        model_clone.name.take();
+
+        let uri = match &model {
+            Resource {
+                project: Some(pjt),
+                subject: Some(sbj),
+                experiment: Some(exp),
+                scan: Some(scn),
+                ..
+            } => {
+                self.version()
+                    .project_data()
+                    .with_id(pjt)
+                    .subjects()
+                    .with_subject(sbj)
+                    .experiments()
+                    .with_experiment(exp)
+                    .scans()
+                    .with_scan(scn)
+                    .build()
+            },
+            Resource {
+                project: Some(pjt),
+                subject: Some(sbj),
+                experiment: Some(exp),
+                ..
+            } => {
+                self.version()
+                    .project_data()
+                    .with_id(pjt)
+                    .subjects()
+                    .with_subject(sbj)
+                    .experiments()
+                    .with_experiment(exp)
+                    .build()
+            },
+            Resource {
+                project: Some(pjt),
+                subject: Some(sbj),
+                ..
+            } => {
+                self.version()
+                    .project_data()
+                    .with_id(pjt)
+                    .subjects()
+                    .with_subject(sbj)
+                    .build()
+            },
+            Resource {
+                project: Some(pjt),
+                ..
+            } => self.version().project_data().with_id(pjt).build(),
+            _ => return Err(CrudError::IdentifierRequired("any identifiers".into()).into())
+        }?;
+        let uri = ResourcesUriBuilder::default().with_parent(&uri);
+        let uri = match &model {
+            Resource { collection: Some(c), name: Some(n), .. } => {
+                uri.with_resource(c).with_file(n)
+            },
+            Resource { collection: Some(c), .. } => {
+                uri.with_resource(c)
+            },
+            _ => uri
+        };
+
+        self.put(&uri)
             .await?
             .json(&model_clone)
             .send()
