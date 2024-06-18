@@ -36,14 +36,17 @@ pub trait UriBuilder: Display {
     }
 }
 
-impl UriBuilder for String {
+impl UriBuilder for str {
     fn build(&self) -> crate::BuildResult {
-        Ok(self.to_owned())
+        Ok(self.to_string())
     }
 }
 
-impl UriBuilder for &str {
-    fn build(&self) -> crate::BuildResult {
-        Ok(self.to_string())
+impl<T> UriBuilder for T
+where
+    T: Display + AsRef<str>
+{
+    fn build(&self) -> BuildResult {
+        Ok(self.as_ref().to_owned())
     }
 }

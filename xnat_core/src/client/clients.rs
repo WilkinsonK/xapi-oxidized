@@ -158,47 +158,47 @@ pub trait ClientREST: ClientCore {
     /// Initialize a `DELETE` request. Is
     /// successful if the given URI endpoint
     /// supports `DELETE`.
-    async fn delete<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult;
+    async fn delete<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult;
     /// Initialize a `GET` request. Is successful
     /// if the given URI endpoint supports `GET`.
-    async fn get<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult;
+    async fn get<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult;
     /// Initialize a `HEAD` request. Is successful
     /// if the given URI endpoint supports `HEAD`.
-    async fn head<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult;
+    async fn head<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult;
     /// URI endpoint supports the REST method.
-    async fn method_is_supported<UB: UriBuilder>(&self, method: &Method, uri: &UB) -> anyhow::Result<bool>;
+    async fn method_is_supported<UB: UriBuilder + ?Sized>(&self, method: &Method, uri: &UB) -> anyhow::Result<bool>;
     /// Initialize a `OPTION` request.
-    async fn options<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult;
+    async fn options<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult;
     /// Initialize a `POST` request. Is successful
     /// if the given URI endpoint supports `POST`.
-    async fn post<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult;
+    async fn post<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult;
     /// Initialize a `PUT` request. Is successful
     /// if the given URI endpoint supports `PUT`.
-    async fn put<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult;
+    async fn put<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult;
     /// Pre-initializes a `RequestBuilder` for
     /// further configuration and sends to the
     /// host.
-    async fn request<UB: UriBuilder>(&self, method: Method, uri: &UB) -> RequestBuilderResult;
+    async fn request<UB: UriBuilder + ?Sized>(&self, method: Method, uri: &UB) -> RequestBuilderResult;
     /// Makes a request for some URI endpoint if
     /// the method is supported.
-    async fn request_if_supported<UB: UriBuilder>(&self, method: Method, uri: &UB) -> RequestBuilderResult;
+    async fn request_if_supported<UB: UriBuilder + ?Sized>(&self, method: Method, uri: &UB) -> RequestBuilderResult;
 }
 
 #[async_trait(?Send)]
 impl<V: Version + Clone> ClientREST for Xnat<V> {
-    async fn delete<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+    async fn delete<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult {
         self.request_if_supported(Method::DELETE, uri).await
     }
 
-    async fn get<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+    async fn get<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult {
         self.request_if_supported(Method::GET, uri).await
     }
 
-    async fn head<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+    async fn head<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult {
         self.request_if_supported(Method::HEAD, uri).await
     }
 
-    async fn method_is_supported<UB: UriBuilder>(&self, method: &Method, uri: &UB) -> anyhow::Result<bool> {
+    async fn method_is_supported<UB: UriBuilder + ?Sized>(&self, method: &Method, uri: &UB) -> anyhow::Result<bool> {
         let res = self
             .options(uri)
             .await?
@@ -231,19 +231,19 @@ impl<V: Version + Clone> ClientREST for Xnat<V> {
         }
     }
 
-    async fn options<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+    async fn options<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult {
         self.request(Method::OPTIONS, uri).await
     }
 
-    async fn post<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+    async fn post<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult {
         self.request_if_supported(Method::POST, uri).await
     }
 
-    async fn put<UB: UriBuilder>(&self, uri: &UB) -> RequestBuilderResult {
+    async fn put<UB: UriBuilder + ?Sized>(&self, uri: &UB) -> RequestBuilderResult {
         self.request_if_supported(Method::PUT, uri).await
     }
 
-    async fn request<UB: UriBuilder>(&self, method: Method, uri: &UB) -> RequestBuilderResult {
+    async fn request<UB: UriBuilder + ?Sized>(&self, method: Method, uri: &UB) -> RequestBuilderResult {
         let mut url = self.base_url();
         url.set_path(&uri.build()?);
 
@@ -253,7 +253,7 @@ impl<V: Version + Clone> ClientREST for Xnat<V> {
         Ok(builder)
     }
 
-    async fn request_if_supported<UB: UriBuilder>(&self, method: Method, uri: &UB) -> RequestBuilderResult {
+    async fn request_if_supported<UB: UriBuilder + ?Sized>(&self, method: Method, uri: &UB) -> RequestBuilderResult {
         if self.method_is_supported(&method, uri).await? {
             log::debug!("method `{method}` supported for `{uri}`");
             self.request(method, uri).await
