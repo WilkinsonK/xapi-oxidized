@@ -816,7 +816,7 @@ dependencies = [
 
 [[package]]
 name = "oxinat"
-version = "0.9.1"
+version = "0.9.2"
 dependencies = [
  "dotenv",
  "flexi_logger",
@@ -829,7 +829,7 @@ dependencies = [
 
 [[package]]
 name = "oxinat_core"
-version = "0.14.0"
+version = "0.14.1"
 dependencies = [
  "anyhow",
  "async-trait",
