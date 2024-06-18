@@ -204,6 +204,43 @@ trait Delete<M> {
 }
 ```
 
+#### Create ####
+The `Create` trait has been implemented on a generic **Xnat** client
+for certain models. These models are available then to be passed to
+the methods defined by this trait to ***create*** instances of the
+below on, or against, your target XNAT host:
+
+- `Project`
+- `Subject`
+- `Experiment`
+- `Scan`
+- `Resource`
+
+Depending on the depth at which each model requires, you will need to
+supply any or all identifiers required for your target XNAT host to
+know where/how the model should be created.
+
+For example, in the case of a `Scan` model, you will need to supply,
+`project` as the project ID, `subject` as the subject label or ID,
+`experiment` as the experiment label or ID and the ID of the specified
+scan as `id`.
+
+```rust
+use oxinat::{ClientCore, ClientToken, Xnat};
+use oxinat::models::Scan;
+use oxinat::protocols::Create;
+
+use crate::{MyVersion, client};
+
+let mut scan = Scan::default();
+scan.id = Some(14u64);
+scan.experiment = Some("EXPERIMENT_LABEL".into());
+scan.subject    = Some("SUBJECT_LABEL".into());
+scan.project    = Some("PROJECT_ID".into());
+
+scan = client.create_once(scan).await.expect("scan must be created");
+```
+
 #### Retrieve ####
 The `Retrieve` trait has already be implemented on a generic **Xnat**
 client for certain models.
@@ -240,3 +277,20 @@ let found = client.get_one_from(&project).await.unwrap();
 The predefined getters, when performing a query, tries to construct
 the request path by first extracting relevant identifiers and
 consuming the remaining populated fields as query parameters.
+
+#### Delete ####
+The `Delete` trait has been implemented for a number of models already
+also. This allows these models to be used for requesting a `DELETE`
+call on exisitng data within your target XNAT host.
+
+- `Project`
+- `Subject`
+- `Experiment`
+- `Scan`
+- `Resource`
+
+Similar to the `Create` trait, in order for `delete` calls to be
+successful, you must provide all necessary identifiers in order to
+has a valid `DELETE` call made. Without them, your XNAT instance will
+not know which resources to remove, and as a guard-rail, `oxinat`
+does not allow this operation by default.
