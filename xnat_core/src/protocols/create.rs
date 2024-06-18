@@ -215,7 +215,6 @@ where
             },
             _ => uri
         };
-
         self.put(&uri)
             .await?
             .json(&model_clone)
